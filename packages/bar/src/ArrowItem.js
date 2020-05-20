@@ -116,7 +116,6 @@ ArrowItem.propTypes = {
     color: PropTypes.string.isRequired,
     borderRadius: PropTypes.number.isRequired,
     borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.string.isRequired,
 
     label: PropTypes.node.isRequired,
     shouldRenderLabel: PropTypes.bool.isRequired,

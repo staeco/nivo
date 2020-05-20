@@ -261,7 +261,7 @@ const Bar = props => {
                         key: bar.key,
                         ...commonProps,
                         ...bar,
-                        labelColor: getLabelTextColor(bar, theme),
+                        labelColor: '#000',
                         borderColor: getBorderColor(bar),
                         shouldRenderLabel: true,
                         color: '#fff',
