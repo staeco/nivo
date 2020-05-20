@@ -76,6 +76,7 @@ const Bar = props => {
 
         layers,
         barComponent,
+        arrowComponent,
 
         enableLabel,
         getLabel,
@@ -104,6 +105,7 @@ const Bar = props => {
         onMouseLeave,
 
         legends,
+        arrowIndicators,
 
         animate,
         motionStiffness,
@@ -154,6 +156,7 @@ const Bar = props => {
         dataKey: 'data',
         targetKey: 'data.fill',
     })
+
 
     return (
         <Container
@@ -236,6 +239,26 @@ const Bar = props => {
                     )
                 }
 
+                const arrows = result.bars.map((bar, index) => {
+                    const next = result.bars[index + 1]
+                    if (!next) return null
+                    const diff = bar.data.value - next.data.value
+                    const num = Math.round(((diff / bar.data.value) * -100).toFixed(2))
+                    const sign = num < 0 ? '' : '+'
+                    const label = `${sign}${num}%`
+                    return React.createElement(arrowComponent, {
+                        key: bar.key,
+                        ...commonProps,
+                        ...bar,
+                        labelColor: getLabelTextColor(bar, theme),
+                        borderColor: getBorderColor(bar),
+                        shouldRenderLabel: true,
+                        color: '#fff',
+                        next,
+                        label,
+                    })
+                })
+
                 const layerById = {
                     grid: (
                         <Grid
@@ -306,6 +329,10 @@ const Bar = props => {
                             {...motionProps}
                         />
                     ),
+                }
+
+                if (arrowIndicators && keys.length === 1) {
+                    layerById.arrows = arrows
                 }
 
                 return (

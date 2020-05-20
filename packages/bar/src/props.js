@@ -16,6 +16,7 @@ import {
 import { axisPropType } from '@nivo/axes'
 import { LegendPropShape } from '@nivo/legends'
 import BarItem from './BarItem'
+import ArrowItem from './ArrowItem'
 
 export const BarPropTypes = {
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -24,7 +25,7 @@ export const BarPropTypes = {
     keys: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])).isRequired,
     layers: PropTypes.arrayOf(
         PropTypes.oneOfType([
-            PropTypes.oneOf(['grid', 'axes', 'bars', 'markers', 'legends', 'annotations']),
+            PropTypes.oneOf(['grid', 'axes', 'bars', 'markers', 'legends', 'annotations', 'arrows']),
             PropTypes.func,
         ])
     ).isRequired,
@@ -54,6 +55,7 @@ export const BarPropTypes = {
     ]),
 
     barComponent: PropTypes.func.isRequired,
+    arrowComponent: PropTypes.func.isRequired,
 
     enableLabel: PropTypes.bool.isRequired,
     label: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
@@ -97,7 +99,7 @@ export const BarPropTypes = {
 export const BarDefaultProps = {
     indexBy: 'id',
     keys: ['value'],
-    layers: ['grid', 'axes', 'bars', 'markers', 'legends', 'annotations'],
+    layers: ['grid', 'axes', 'bars', 'markers', 'legends', 'annotations', 'arrows'],
 
     groupMode: 'stacked',
     layout: 'vertical',
@@ -114,6 +116,7 @@ export const BarDefaultProps = {
     enableGridY: true,
 
     barComponent: BarItem,
+    arrowComponent: ArrowItem,
 
     enableLabel: true,
     label: 'value',
