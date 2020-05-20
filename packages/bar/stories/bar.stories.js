@@ -44,6 +44,20 @@ stories.add('grouped horizontal', () => (
     />
 ))
 
+stories.add('percent change', () => (
+    <Bar
+        {...commonProps}
+        data={generateCountriesData([ 'apple' ], { size: 5 })}
+        keys={[ 'apple' ]}
+        arrowIndicators
+        padding={0.5}
+        groupMode="grouped"
+        layout="vertical"
+        enableGridY
+        enableGridX
+    />
+))
+
 stories.add('with marker', () => (
     <Bar
         {...commonProps}
