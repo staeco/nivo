@@ -47,6 +47,7 @@ stories.add('percent change', () => (
         data={generateCountriesData([ 'apple' ], { size: 5 })}
         keys={[ 'apple' ]}
         arrowIndicators
+        valueBy="value"
         padding={0.5}
         groupMode="grouped"
         layout="vertical"
