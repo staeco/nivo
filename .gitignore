@@ -9,6 +9,6 @@ package-lock.json
 
 build
 
-/packages/*/dist
+# /packages/*/dist
 
 *.lerna_backup
