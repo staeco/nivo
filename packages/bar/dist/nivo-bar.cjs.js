@@ -610,7 +610,6 @@ ArrowItem.propTypes = {
   color: PropTypes.string.isRequired,
   borderRadius: PropTypes.number.isRequired,
   borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
   label: PropTypes.node.isRequired,
   shouldRenderLabel: PropTypes.bool.isRequired,
   labelColor: PropTypes.string.isRequired,
@@ -1073,7 +1072,7 @@ var Bar = function Bar(props) {
       return React__default.createElement(arrowComponent, _objectSpread$3({
         key: bar.key
       }, commonProps, bar, {
-        labelColor: getLabelTextColor(bar, theme),
+        labelColor: '#000',
         borderColor: getBorderColor(bar),
         shouldRenderLabel: true,
         color: '#fff',
