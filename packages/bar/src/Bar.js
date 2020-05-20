@@ -332,7 +332,7 @@ const Bar = props => {
                     ),
                 }
 
-                if (arrowIndicators && keys.length === 1) {
+                if (arrowIndicators && keys.length === 1 && data.length < 11) {
                     layerById.arrows = arrows
                 }
 
