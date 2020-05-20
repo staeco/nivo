@@ -1131,7 +1131,7 @@ var Bar = function Bar(props) {
         annotations: annotations
       }, motionProps))
     };
-    if (arrowIndicators && keys.length === 1) {
+    if (arrowIndicators && keys.length === 1 && data.length < 11) {
       layerById.arrows = arrows;
     }
     return React.createElement(SvgWrapper, {
