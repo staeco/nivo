@@ -902,6 +902,7 @@
           outerHeight = props.outerHeight,
           padding = props.padding,
           innerPadding = props.innerPadding,
+          valueBy = props.valueBy,
           axisTop = props.axisTop,
           axisRight = props.axisRight,
           axisBottom = props.axisBottom,
@@ -1055,8 +1056,8 @@
         var arrows = result.bars.map(function (bar, index) {
           var next = result.bars[index + 1];
           if (!next) return null;
-          var diff = bar.data.value - next.data.value;
-          var num = Math.round((diff / bar.data.value * -100).toFixed(2));
+          var diff = bar.data[valueBy] - next.data[valueBy];
+          var num = Math.round((diff / bar.data[valueBy] * -100).toFixed(2));
           var sign = num < 0 ? '' : '+';
           var label = "".concat(sign).concat(num, "%");
           return React__default.createElement(arrowComponent, _objectSpread$3({
