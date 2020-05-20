@@ -67,6 +67,7 @@ const Bar = props => {
         outerHeight,
         padding,
         innerPadding,
+        valueBy,
 
         axisTop,
         axisRight,
@@ -252,8 +253,8 @@ const Bar = props => {
                 const arrows = result.bars.map((bar, index) => {
                     const next = result.bars[index + 1]
                     if (!next) return null
-                    const diff = bar.data.value - next.data.value
-                    const num = Math.round(((diff / bar.data.value) * -100).toFixed(2))
+                    const diff = bar.data[valueBy] - next.data[valueBy]
+                    const num = Math.round(((diff / bar.data[valueBy]) * -100).toFixed(2))
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
                     return React.createElement(arrowComponent, {
