@@ -542,7 +542,7 @@ var ArrowItem = function ArrowItem(_ref) {
     hideTooltip(e);
   };
   var ya = 200;
-  var arrowHeight = 30;
+  var arrowHeight = 20;
   var arrowOffset = 40;
   return React.createElement("g", {
     transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
@@ -553,7 +553,7 @@ var ArrowItem = function ArrowItem(_ref) {
     ry: borderRadius,
     fill: "#555",
     stroke: "#555",
-    strokeWidth: "5",
+    strokeWidth: "2",
     onMouseEnter: handleMouseEnter,
     onMouseMove: handleTooltip,
     onMouseLeave: handleMouseLeave,
@@ -562,7 +562,7 @@ var ArrowItem = function ArrowItem(_ref) {
     points: "0, ".concat(arrowHeight * -.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * .8, ", ").concat(arrowHeight * .5),
     transform: "translate(".concat(width, ")"),
     stroke: "#555",
-    strokeWidth: "5",
+    strokeWidth: "2",
     fill: "#555"
   }), React.createElement("rect", {
     width: width,
@@ -579,7 +579,7 @@ var ArrowItem = function ArrowItem(_ref) {
     transform: "translate(".concat(width, ")"),
     fill: color
   }), shouldRenderLabel && React.createElement("text", {
-    x: arrowOffset,
+    x: width / 2,
     y: arrowHeight / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
