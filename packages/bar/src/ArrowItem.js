@@ -91,7 +91,7 @@ const ArrowItem = ({
                     style={{
                         ...theme.labels.text,
                         pointerEvents: 'none',
-                        fill: labelColor,
+                        fill: '#000',
                     }}
                 >
                     {label}
