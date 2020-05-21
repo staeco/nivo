@@ -45,7 +45,7 @@ const ArrowItem = ({
     }
 
     const ya = 200 // y < 40 ? 0 : y - 20
-    const arrowHeight = 30
+    const arrowHeight = 20
     const arrowOffset = 40
     return (
         <g transform={`translate(${x+arrowOffset}, ${ya})`}>
@@ -56,7 +56,7 @@ const ArrowItem = ({
                 rx={borderRadius}
                 ry={borderRadius}
                 fill="#555"
-                stroke="#555" strokeWidth="5"
+                stroke="#555" strokeWidth="2"
                 onMouseEnter={handleMouseEnter}
                 onMouseMove={handleTooltip}
                 onMouseLeave={handleMouseLeave}
@@ -65,7 +65,7 @@ const ArrowItem = ({
             <polygon
                 points={`0, ${arrowHeight * - .4} 0, ${arrowHeight * 1.4} ${arrowHeight * .8}, ${arrowHeight * .5}`}
                 transform={`translate(${width})`}
-                stroke="#555" strokeWidth="5"
+                stroke="#555" strokeWidth="2"
                 fill="#555" />
             <rect
                 width={width}
@@ -84,7 +84,7 @@ const ArrowItem = ({
                 fill={color} />
             {shouldRenderLabel && (
                 <text
-                    x={arrowOffset}
+                    x={width / 2}
                     y={arrowHeight / 2}
                     textAnchor="middle"
                     dominantBaseline="central"
