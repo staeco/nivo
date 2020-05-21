@@ -522,7 +522,6 @@ var ArrowItem = function ArrowItem(_ref) {
       color = _ref.color,
       label = _ref.label,
       shouldRenderLabel = _ref.shouldRenderLabel,
-      labelColor = _ref.labelColor,
       showTooltip = _ref.showTooltip,
       hideTooltip = _ref.hideTooltip,
       onClick = _ref.onClick,
@@ -543,7 +542,7 @@ var ArrowItem = function ArrowItem(_ref) {
   };
   var ya = 200;
   var arrowHeight = 20;
-  var arrowOffset = 40;
+  var arrowOffset = width / 2;
   return React.createElement("g", {
     transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
   }, React.createElement("rect", {
@@ -579,7 +578,7 @@ var ArrowItem = function ArrowItem(_ref) {
     transform: "translate(".concat(width, ")"),
     fill: color
   }), shouldRenderLabel && React.createElement("text", {
-    x: width / 2,
+    x: arrowOffset,
     y: arrowHeight / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
@@ -605,7 +604,6 @@ ArrowItem.propTypes = {
   borderWidth: PropTypes.number.isRequired,
   label: PropTypes.node.isRequired,
   shouldRenderLabel: PropTypes.bool.isRequired,
-  labelColor: PropTypes.string.isRequired,
   showTooltip: PropTypes.func.isRequired,
   hideTooltip: PropTypes.func.isRequired,
   getTooltipLabel: PropTypes.func.isRequired,
