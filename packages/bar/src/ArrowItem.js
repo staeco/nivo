@@ -23,7 +23,6 @@ const ArrowItem = ({
 
     label,
     shouldRenderLabel,
-    labelColor,
 
     showTooltip,
     hideTooltip,
@@ -46,7 +45,7 @@ const ArrowItem = ({
 
     const ya = 200 // y < 40 ? 0 : y - 20
     const arrowHeight = 20
-    const arrowOffset = 40
+    const arrowOffset = width / 2
     return (
         <g transform={`translate(${x+arrowOffset}, ${ya})`}>
             {/* "shadow" arrow */}
@@ -84,7 +83,7 @@ const ArrowItem = ({
                 fill={color} />
             {shouldRenderLabel && (
                 <text
-                    x={width / 2}
+                    x={arrowOffset}
                     y={arrowHeight / 2}
                     textAnchor="middle"
                     dominantBaseline="central"
@@ -119,7 +118,6 @@ ArrowItem.propTypes = {
 
     label: PropTypes.node.isRequired,
     shouldRenderLabel: PropTypes.bool.isRequired,
-    labelColor: PropTypes.string.isRequired,
 
     showTooltip: PropTypes.func.isRequired,
     hideTooltip: PropTypes.func.isRequired,
