@@ -582,7 +582,7 @@
         dominantBaseline: "central",
         style: _objectSpread$1({}, theme.labels.text, {
           pointerEvents: 'none',
-          fill: labelColor
+          fill: '#000'
         })
       }, label));
     };
