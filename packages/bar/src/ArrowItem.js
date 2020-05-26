@@ -28,7 +28,7 @@ const ArrowItem = ({
     theme,
 }) => {
     const ya = height * .75 // y < 40 ? 0 : y - 20
-    const xa = 40
+    const xa = 35
     const arrowHeight = 20
     const arrowOffset = width / 2
     return (
@@ -62,7 +62,7 @@ const ArrowItem = ({
                 fill={color} />
             {shouldRenderLabel && (
                 <text
-                    x={xa / 1.5}
+                    x={xa / 1.4}
                     y={arrowHeight / 2}
                     textAnchor="middle"
                     dominantBaseline="central"
