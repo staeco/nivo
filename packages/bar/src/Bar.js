@@ -261,6 +261,7 @@ const Bar = props => {
                         key: bar.key,
                         ...commonProps,
                         ...bar,
+                        height,
                         labelColor: '#000',
                         borderColor: getBorderColor(bar),
                         shouldRenderLabel: true,
@@ -342,7 +343,7 @@ const Bar = props => {
                     ),
                 }
 
-                if (arrowIndicators && keys.length === 1 && data.length < 11) {
+                if (arrowIndicators && keys.length === 1) {
                     layerById.arrows = arrows
                 }
 

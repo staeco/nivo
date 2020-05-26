@@ -14,76 +14,55 @@ import pure from 'recompose/pure'
 import { BasicTooltip } from '@nivo/tooltip'
 
 const ArrowItem = ({
-    data,
-
     x,
     width,
+    height,
     borderRadius,
     color,
 
     label,
     shouldRenderLabel,
 
-    showTooltip,
-    hideTooltip,
     onClick,
-    onMouseEnter,
-    onMouseLeave,
-    tooltip,
 
     theme,
 }) => {
-    const handleTooltip = e => showTooltip(tooltip, e)
-    const handleMouseEnter = e => {
-        onMouseEnter(data, e)
-        showTooltip(tooltip, e)
-    }
-    const handleMouseLeave = e => {
-        onMouseLeave(data, e)
-        hideTooltip(e)
-    }
-
-    const ya = 200 // y < 40 ? 0 : y - 20
+    const ya = height * .75 // y < 40 ? 0 : y - 20
+    const xa = 40
     const arrowHeight = 20
     const arrowOffset = width / 2
     return (
         <g transform={`translate(${x+arrowOffset}, ${ya})`}>
             {/* "shadow" arrow */}
             <rect
-                width={width}
+                width={xa}
                 height={arrowHeight}
                 rx={borderRadius}
                 ry={borderRadius}
                 fill="#555"
                 stroke="#555" strokeWidth="2"
-                onMouseEnter={handleMouseEnter}
-                onMouseMove={handleTooltip}
-                onMouseLeave={handleMouseLeave}
                 onClick={onClick}
             />
             <polygon
                 points={`0, ${arrowHeight * - .4} 0, ${arrowHeight * 1.4} ${arrowHeight * .8}, ${arrowHeight * .5}`}
-                transform={`translate(${width})`}
+                transform={`translate(${xa})`}
                 stroke="#555" strokeWidth="2"
                 fill="#555" />
             <rect
-                width={width}
+                width={xa}
                 height={arrowHeight}
                 rx={borderRadius}
                 ry={borderRadius}
                 fill={color}
-                onMouseEnter={handleMouseEnter}
-                onMouseMove={handleTooltip}
-                onMouseLeave={handleMouseLeave}
                 onClick={onClick}
             />
             <polygon
                 points={`0, ${arrowHeight * - .4} 0, ${arrowHeight * 1.4} ${arrowHeight * .8}, ${arrowHeight * .5}`}
-                transform={`translate(${width})`}
+                transform={`translate(${xa})`}
                 fill={color} />
             {shouldRenderLabel && (
                 <text
-                    x={arrowOffset}
+                    x={xa / 1.5}
                     y={arrowHeight / 2}
                     textAnchor="middle"
                     dominantBaseline="central"
