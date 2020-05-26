@@ -543,7 +543,7 @@
         strokeWidth: "2",
         fill: "#555"
       }), React__default.createElement("rect", {
-        width: xa,
+        width: xa + 1,
         height: arrowHeight,
         rx: borderRadius,
         ry: borderRadius,
