@@ -522,7 +522,7 @@
           onClick = _ref.onClick,
           theme = _ref.theme;
       var ya = height * .75;
-      var xa = 40;
+      var xa = 35;
       var arrowHeight = 20;
       var arrowOffset = width / 2;
       return React__default.createElement("g", {
@@ -554,7 +554,7 @@
         transform: "translate(".concat(xa, ")"),
         fill: color
       }), shouldRenderLabel && React__default.createElement("text", {
-        x: xa / 1.5,
+        x: xa / 1.4,
         y: arrowHeight / 2,
         textAnchor: "middle",
         dominantBaseline: "central",

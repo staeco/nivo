@@ -525,7 +525,7 @@ var ArrowItem = function ArrowItem(_ref) {
       onClick = _ref.onClick,
       theme = _ref.theme;
   var ya = height * .75;
-  var xa = 40;
+  var xa = 35;
   var arrowHeight = 20;
   var arrowOffset = width / 2;
   return React.createElement("g", {
@@ -557,7 +557,7 @@ var ArrowItem = function ArrowItem(_ref) {
     transform: "translate(".concat(xa, ")"),
     fill: color
   }), shouldRenderLabel && React.createElement("text", {
-    x: xa / 1.5,
+    x: xa / 1.4,
     y: arrowHeight / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
