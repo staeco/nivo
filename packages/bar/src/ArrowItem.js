@@ -49,7 +49,7 @@ const ArrowItem = ({
                 stroke="#555" strokeWidth="2"
                 fill="#555" />
             <rect
-                width={xa}
+                width={xa+1}
                 height={arrowHeight}
                 rx={borderRadius}
                 ry={borderRadius}
