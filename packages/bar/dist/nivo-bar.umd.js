@@ -512,70 +512,49 @@
     function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
     function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
     var ArrowItem = function ArrowItem(_ref) {
-      var data = _ref.data,
-          x = _ref.x,
+      var x = _ref.x,
           width = _ref.width,
+          height = _ref.height,
           borderRadius = _ref.borderRadius,
           color = _ref.color,
           label = _ref.label,
           shouldRenderLabel = _ref.shouldRenderLabel,
-          showTooltip = _ref.showTooltip,
-          hideTooltip = _ref.hideTooltip,
           onClick = _ref.onClick,
-          onMouseEnter = _ref.onMouseEnter,
-          onMouseLeave = _ref.onMouseLeave,
-          tooltip = _ref.tooltip,
           theme = _ref.theme;
-      var handleTooltip = function handleTooltip(e) {
-        return showTooltip(tooltip, e);
-      };
-      var handleMouseEnter = function handleMouseEnter(e) {
-        onMouseEnter(data, e);
-        showTooltip(tooltip, e);
-      };
-      var handleMouseLeave = function handleMouseLeave(e) {
-        onMouseLeave(data, e);
-        hideTooltip(e);
-      };
-      var ya = 200;
+      var ya = height * .75;
+      var xa = 40;
       var arrowHeight = 20;
       var arrowOffset = width / 2;
       return React__default.createElement("g", {
         transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
       }, React__default.createElement("rect", {
-        width: width,
+        width: xa,
         height: arrowHeight,
         rx: borderRadius,
         ry: borderRadius,
         fill: "#555",
         stroke: "#555",
         strokeWidth: "2",
-        onMouseEnter: handleMouseEnter,
-        onMouseMove: handleTooltip,
-        onMouseLeave: handleMouseLeave,
         onClick: onClick
       }), React__default.createElement("polygon", {
         points: "0, ".concat(arrowHeight * -.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * .8, ", ").concat(arrowHeight * .5),
-        transform: "translate(".concat(width, ")"),
+        transform: "translate(".concat(xa, ")"),
         stroke: "#555",
         strokeWidth: "2",
         fill: "#555"
       }), React__default.createElement("rect", {
-        width: width,
+        width: xa,
         height: arrowHeight,
         rx: borderRadius,
         ry: borderRadius,
         fill: color,
-        onMouseEnter: handleMouseEnter,
-        onMouseMove: handleTooltip,
-        onMouseLeave: handleMouseLeave,
         onClick: onClick
       }), React__default.createElement("polygon", {
         points: "0, ".concat(arrowHeight * -.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * .8, ", ").concat(arrowHeight * .5),
-        transform: "translate(".concat(width, ")"),
+        transform: "translate(".concat(xa, ")"),
         fill: color
       }), shouldRenderLabel && React__default.createElement("text", {
-        x: arrowOffset,
+        x: xa / 1.5,
         y: arrowHeight / 2,
         textAnchor: "middle",
         dominantBaseline: "central",
@@ -1060,6 +1039,7 @@
           return React__default.createElement(arrowComponent, _objectSpread$3({
             key: bar.key
           }, commonProps, bar, {
+            height: height,
             labelColor: '#000',
             borderColor: getBorderColor(bar),
             shouldRenderLabel: true,
@@ -1126,7 +1106,7 @@
             annotations: annotations
           }, motionProps))
         };
-        if (arrowIndicators && keys.length === 1 && data.length < 11) {
+        if (arrowIndicators && keys.length === 1) {
           layerById.arrows = arrows;
         }
         return React__default.createElement(core.SvgWrapper, {
