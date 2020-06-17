@@ -28,7 +28,7 @@ const ArrowItem = ({
     theme,
 }) => {
     const ya = height * .75 // y < 40 ? 0 : y - 20
-    const xa = 35
+    const xa = 55
     const arrowHeight = 20
     const arrowOffset = width / 2
     return (

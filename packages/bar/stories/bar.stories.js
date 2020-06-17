@@ -44,10 +44,32 @@ stories.add('grouped horizontal', () => (
     />
 ))
 
+const data = [
+    {
+        country: 'A',
+        apple: 12
+    },
+    {
+        country: 'B',
+        apple: 0
+    },
+    {
+        country: 'C',
+        apple: 20
+    },
+    {
+        country: 'D',
+        apple: 100
+    },
+    {
+        country: 'E',
+        apple: 50
+    },
+]
 stories.add('percent change', () => (
     <Bar
         {...commonProps}
-        data={generateCountriesData([ 'apple' ], { size: 5 })}
+        data={data}
         keys={[ 'apple' ]}
         arrowIndicators
         valueBy="value"
