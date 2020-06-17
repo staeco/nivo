@@ -85,35 +85,35 @@ export const generateVerticalGroupedBars = ({
     }
 
     const bars = []
-    if (barWidth > 0) {
-        keys.forEach((key, i) => {
-            range(xScale.domain().length).forEach(index => {
-                const x = xScale(getIndex(data[index])) + barWidth * i + innerPadding * i
-                const y = getY(data[index][key])
-                const barHeight = getHeight(data[index][key], y)
 
-                if (barWidth > 0 && barHeight > 0) {
-                    const barData = {
-                        id: key,
-                        value: data[index][key],
-                        index,
-                        indexValue: getIndex(data[index]),
-                        data: data[index],
-                    }
+    keys.forEach((key, i) => {
+        range(xScale.domain().length).forEach(index => {
+            const x = xScale(getIndex(data[index])) + barWidth * i + innerPadding * i
+            const y = getY(data[index][key])
+            const barHeight = getHeight(data[index][key], y)
 
-                    bars.push({
-                        key: `${key}.${barData.indexValue}`,
-                        data: barData,
-                        x,
-                        y,
-                        width: barWidth,
-                        height: barHeight,
-                        color: getColor(barData),
-                    })
+            if (barWidth >= 0 && barHeight >= 0) {
+                const barData = {
+                    id: key,
+                    value: data[index][key],
+                    index,
+                    indexValue: getIndex(data[index]),
+                    data: data[index],
                 }
-            })
+
+                bars.push({
+                    key: `${key}.${barData.indexValue}`,
+                    data: barData,
+                    x,
+                    y,
+                    width: barWidth,
+                    height: barHeight,
+                    color: getColor(barData),
+                })
+            }
         })
-    }
+    })
+
 
     return { xScale, yScale, bars }
 }

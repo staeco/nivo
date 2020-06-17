@@ -45,6 +45,16 @@ const barWillLeaveVertical = springConfig => ({ style }) => ({
     height: spring(0, springConfig),
 })
 
+const percentChange = (a, b) => {
+    if (b !== 0) {
+        if (a !== 0) {
+            return Math.floor((a - b) / b * 100)
+        }
+        return -100
+    }
+    return Math.floor(a * 100)
+}
+
 const Bar = props => {
     const {
         data,
@@ -243,8 +253,8 @@ const Bar = props => {
                 const arrows = result.bars.map((bar, index) => {
                     const next = result.bars[index + 1]
                     if (!next) return null
-                    const diff = bar.data[valueBy] - next.data[valueBy]
-                    const num = Math.round(((diff / bar.data[valueBy]) * -100).toFixed(2))
+
+                    const num = percentChange(next.data[valueBy], bar.data[valueBy])
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
                     return React.createElement(arrowComponent, {
