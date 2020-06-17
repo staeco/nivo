@@ -86,33 +86,31 @@ var generateVerticalGroupedBars = function generateVerticalGroupedBars(_ref) {
     };
   }
   var bars = [];
-  if (barWidth > 0) {
-    keys.forEach(function (key, i) {
-      range(xScale.domain().length).forEach(function (index) {
-        var x = xScale(getIndex(data[index])) + barWidth * i + innerPadding * i;
-        var y = getY(data[index][key]);
-        var barHeight = getHeight(data[index][key], y);
-        if (barWidth > 0 && barHeight > 0) {
-          var barData = {
-            id: key,
-            value: data[index][key],
-            index: index,
-            indexValue: getIndex(data[index]),
-            data: data[index]
-          };
-          bars.push({
-            key: "".concat(key, ".").concat(barData.indexValue),
-            data: barData,
-            x: x,
-            y: y,
-            width: barWidth,
-            height: barHeight,
-            color: getColor(barData)
-          });
-        }
-      });
+  keys.forEach(function (key, i) {
+    range(xScale.domain().length).forEach(function (index) {
+      var x = xScale(getIndex(data[index])) + barWidth * i + innerPadding * i;
+      var y = getY(data[index][key]);
+      var barHeight = getHeight(data[index][key], y);
+      if (barWidth >= 0 && barHeight >= 0) {
+        var barData = {
+          id: key,
+          value: data[index][key],
+          index: index,
+          indexValue: getIndex(data[index]),
+          data: data[index]
+        };
+        bars.push({
+          key: "".concat(key, ".").concat(barData.indexValue),
+          data: barData,
+          x: x,
+          y: y,
+          width: barWidth,
+          height: barHeight,
+          color: getColor(barData)
+        });
+      }
     });
-  }
+  });
   return {
     xScale: xScale,
     yScale: yScale,
@@ -532,7 +530,7 @@ var ArrowItem = function ArrowItem(_ref) {
       onClick = _ref.onClick,
       theme = _ref.theme;
   var ya = height * .75;
-  var xa = 35;
+  var xa = 55;
   var arrowHeight = 20;
   var arrowOffset = width / 2;
   return React__default.createElement("g", {
@@ -872,6 +870,15 @@ var barWillLeaveVertical = function barWillLeaveVertical(springConfig) {
     };
   };
 };
+var percentChange = function percentChange(a, b) {
+  if (b !== 0) {
+    if (a !== 0) {
+      return Math.floor((a - b) / b * 100);
+    }
+    return -100;
+  }
+  return Math.floor(a * 100);
+};
 var Bar = function Bar(props) {
   var data = props.data,
       getIndex = props.getIndex,
@@ -1042,8 +1049,7 @@ var Bar = function Bar(props) {
     var arrows = result.bars.map(function (bar, index) {
       var next = result.bars[index + 1];
       if (!next) return null;
-      var diff = bar.data[valueBy] - next.data[valueBy];
-      var num = Math.round((diff / bar.data[valueBy] * -100).toFixed(2));
+      var num = percentChange(next.data[valueBy], bar.data[valueBy]);
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(num, "%");
       return React__default.createElement(arrowComponent, _objectSpread$3({
