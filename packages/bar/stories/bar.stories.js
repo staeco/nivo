@@ -44,23 +44,35 @@ stories.add('grouped horizontal', () => (
 const data = [
     {
         country: 'A',
-        apple: 12
+        apple: 800
     },
     {
         country: 'B',
-        apple: 0
+        apple: 500
     },
     {
         country: 'C',
-        apple: 20
+        apple: 500
+    },
+    {
+        country: 'C.A',
+        apple: 1200
     },
     {
         country: 'D',
-        apple: 100
+        apple: 1000
     },
     {
         country: 'E',
-        apple: 50
+        apple: 500
+    },
+    {
+        country: 'F',
+        apple: 0
+    },
+    {
+        country: 'G',
+        apple: 1
     },
 ]
 stories.add('percent change', () => (
