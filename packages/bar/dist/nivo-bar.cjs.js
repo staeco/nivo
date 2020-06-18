@@ -1051,7 +1051,6 @@ var Bar = function Bar(props) {
       if (!next) return null;
       var a = next.data[valueBy];
       var b = bar.data[valueBy];
-      if (a === b) return null;
       var num = percentChange(a, b);
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(num, "%");

@@ -267,7 +267,7 @@ const Bar = props => {
                     const a = next.data[valueBy]
                     const b = bar.data[valueBy]
 
-                    if (a === b) return null
+                    // if (a === b) return null
                     const num = percentChange(a, b)
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
