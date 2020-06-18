@@ -523,8 +523,8 @@ var ArrowItem = function ArrowItem(_ref) {
       onClick = _ref.onClick,
       theme = _ref.theme;
   var ya = height * .75;
-  var xa = 55;
-  var arrowHeight = 20;
+  var xa = 50;
+  var arrowHeight = 16;
   var arrowOffset = width / 2;
   return React.createElement("g", {
     transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
@@ -555,7 +555,7 @@ var ArrowItem = function ArrowItem(_ref) {
     transform: "translate(".concat(xa, ")"),
     fill: color
   }), shouldRenderLabel && React.createElement("text", {
-    x: xa / 1.4,
+    x: xa / 2,
     y: arrowHeight / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
@@ -1042,7 +1042,10 @@ var Bar = function Bar(props) {
     var arrows = result.bars.map(function (bar, index) {
       var next = result.bars[index + 1];
       if (!next) return null;
-      var num = percentChange(next.data[valueBy], bar.data[valueBy]);
+      var a = next.data[valueBy];
+      var b = bar.data[valueBy];
+      if (a === b) return null;
+      var num = percentChange(a, b);
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(num, "%");
       return React.createElement(arrowComponent, _objectSpread$3({
