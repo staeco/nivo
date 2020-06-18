@@ -28,8 +28,8 @@ const ArrowItem = ({
     theme,
 }) => {
     const ya = height * .75 // y < 40 ? 0 : y - 20
-    const xa = 55
-    const arrowHeight = 20
+    const xa = 50
+    const arrowHeight = 16
     const arrowOffset = width / 2
     return (
         <g transform={`translate(${x+arrowOffset}, ${ya})`}>
@@ -62,7 +62,7 @@ const ArrowItem = ({
                 fill={color} />
             {shouldRenderLabel && (
                 <text
-                    x={xa / 1.4}
+                    x={xa / 2}
                     y={arrowHeight / 2}
                     textAnchor="middle"
                     dominantBaseline="central"

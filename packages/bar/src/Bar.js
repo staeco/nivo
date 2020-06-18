@@ -264,7 +264,11 @@ const Bar = props => {
                     const next = result.bars[index + 1]
                     if (!next) return null
 
-                    const num = percentChange(next.data[valueBy], bar.data[valueBy])
+                    const a = next.data[valueBy]
+                    const b = bar.data[valueBy]
+
+                    if (a === b) return null
+                    const num = percentChange(a, b)
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
                     return React.createElement(arrowComponent, {
