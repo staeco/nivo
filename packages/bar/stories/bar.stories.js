@@ -72,11 +72,11 @@ const data = [
     },
     {
         country: 'G',
-        apple: 100,
+        apple: null,
     },
     {
         country: 'H',
-        apple: 200,
+        apple: null,
     },
     {
         country: 'I',
