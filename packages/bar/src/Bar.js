@@ -48,7 +48,7 @@ const barWillLeaveVertical = springConfig => ({ style }) => ({
 const percentChange = (a, b) => {
     if (b !== 0) {
         if (a !== 0) {
-            return Math.floor((a - b) / b * 100)
+            return Math.floor(((a - b) / b) * 100)
         }
         return -100
     }
@@ -174,7 +174,6 @@ const Bar = props => {
         targetKey: 'data.fill',
     })
 
-
     return (
         <LegacyContainer
             isInteractive={isInteractive}
@@ -266,9 +265,10 @@ const Bar = props => {
 
                     const a = next.data[valueBy]
                     const b = bar.data[valueBy]
-
-                    // if (a === b) return null
                     const num = percentChange(a, b)
+
+                    if (num === Infinity) return null
+
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
                     return React.createElement(arrowComponent, {
@@ -282,6 +282,7 @@ const Bar = props => {
                         color: '#fff',
                         next,
                         label,
+                        barCount: result.bars.length,
                     })
                 })
 

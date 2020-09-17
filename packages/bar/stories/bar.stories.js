@@ -47,42 +47,59 @@ stories.add('grouped horizontal', () => (
 const data = [
     {
         country: 'A',
-        apple: 800
+        apple: 800,
     },
     {
         country: 'B',
-        apple: 500
+        apple: 500,
     },
     {
         country: 'C',
-        apple: 500
+        apple: 500,
     },
     {
         country: 'C.A',
-        apple: 1200
+        apple: 1200,
     },
     {
         country: 'D',
-        apple: 1000
+        apple: 1000,
     },
     {
         country: 'E',
-        apple: 500
+        apple: 500,
     },
     {
         country: 'F',
-        apple: 0
+        apple: null,
     },
     {
         country: 'G',
-        apple: 1
+        apple: 100,
+    },
+    {
+        country: 'H',
+        apple: 200,
+    },
+    {
+        country: 'I',
+        apple: 90,
+    },
+    {
+        country: 'J',
+        apple: 250,
+    },
+    {
+        country: 'K',
+        apple: 1,
     },
 ]
 stories.add('percent change', () => (
     <Bar
         {...commonProps}
+        width={1200}
         data={data}
-        keys={[ 'apple' ]}
+        keys={['apple']}
         arrowIndicators
         valueBy="value"
         padding={0.5}
