@@ -86,7 +86,7 @@ BarItem.propTypes = {
     data: PropTypes.shape({
         id: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        indexValue: PropTypes.string.isRequired,
+        indexValue: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.instanceOf(Date)]),
         fill: PropTypes.string,
     }).isRequired,
 
