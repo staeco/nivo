@@ -1049,7 +1049,7 @@ var Bar = function Bar(props) {
       var a = next.data[valueBy];
       var b = bar.data[valueBy];
       var num = percentChange(a, b);
-      if (num === Infinity) return null;
+      if (num === Infinity || isNaN(num)) return null;
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(num, "%");
       return React.createElement(arrowComponent, _objectSpread$3({
