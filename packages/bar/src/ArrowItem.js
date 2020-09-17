@@ -26,13 +26,19 @@ const ArrowItem = ({
     onClick,
 
     theme,
+
+    barCount,
 }) => {
-    const ya = height * .75 // y < 40 ? 0 : y - 20
-    const xa = 50
-    const arrowHeight = 16
+    // logic added by BT to dynamically size arrows based on bar count
+    const minifyThreshold = 12
+    const minify = barCount > minifyThreshold
+
+    const ya = height * 0.75 // y < 40 ? 0 : y - 20
+    const xa = minify ? 30 : 50
+    const arrowHeight = minify ? 12 : 16
     const arrowOffset = width / 2
     return (
-        <g transform={`translate(${x+arrowOffset}, ${ya})`}>
+        <g transform={`translate(${x + arrowOffset}, ${ya})`}>
             {/* "shadow" arrow */}
             <rect
                 width={xa}
@@ -40,16 +46,20 @@ const ArrowItem = ({
                 rx={borderRadius}
                 ry={borderRadius}
                 fill="#555"
-                stroke="#555" strokeWidth="2"
+                stroke="#555"
+                strokeWidth="2"
                 onClick={onClick}
             />
             <polygon
-                points={`0, ${arrowHeight * - .4} 0, ${arrowHeight * 1.4} ${arrowHeight * .8}, ${arrowHeight * .5}`}
+                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight *
+                    0.8}, ${arrowHeight * 0.5}`}
                 transform={`translate(${xa})`}
-                stroke="#555" strokeWidth="2"
-                fill="#555" />
+                stroke="#555"
+                strokeWidth="2"
+                fill="#555"
+            />
             <rect
-                width={xa+1}
+                width={xa + 1}
                 height={arrowHeight}
                 rx={borderRadius}
                 ry={borderRadius}
@@ -57,9 +67,11 @@ const ArrowItem = ({
                 onClick={onClick}
             />
             <polygon
-                points={`0, ${arrowHeight * - .4} 0, ${arrowHeight * 1.4} ${arrowHeight * .8}, ${arrowHeight * .5}`}
+                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight *
+                    0.8}, ${arrowHeight * 0.5}`}
                 transform={`translate(${xa})`}
-                fill={color} />
+                fill={color}
+            />
             {shouldRenderLabel && (
                 <text
                     x={xa / 2}
@@ -113,6 +125,8 @@ ArrowItem.propTypes = {
             text: PropTypes.object.isRequired,
         }).isRequired,
     }).isRequired,
+
+    barCount: PropTypes.number,
 }
 
 const enhance = compose(
