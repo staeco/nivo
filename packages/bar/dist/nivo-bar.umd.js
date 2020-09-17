@@ -443,7 +443,7 @@
       data: PropTypes.shape({
         id: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        indexValue: PropTypes.string.isRequired,
+        indexValue: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.instanceOf(Date)]),
         fill: PropTypes.string
       }).isRequired,
       x: PropTypes.number.isRequired,
@@ -518,10 +518,13 @@
           label = _ref.label,
           shouldRenderLabel = _ref.shouldRenderLabel,
           onClick = _ref.onClick,
-          theme = _ref.theme;
-      var ya = height * .75;
-      var xa = 50;
-      var arrowHeight = 16;
+          theme = _ref.theme,
+          barCount = _ref.barCount;
+      var minifyThreshold = 12;
+      var minify = barCount > minifyThreshold;
+      var ya = height * 0.75;
+      var xa = minify ? 30 : 50;
+      var arrowHeight = minify ? 12 : 16;
       var arrowOffset = width / 2;
       return React__default.createElement("g", {
         transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
@@ -535,7 +538,7 @@
         strokeWidth: "2",
         onClick: onClick
       }), React__default.createElement("polygon", {
-        points: "0, ".concat(arrowHeight * -.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * .8, ", ").concat(arrowHeight * .5),
+        points: "0, ".concat(arrowHeight * -0.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * 0.8, ", ").concat(arrowHeight * 0.5),
         transform: "translate(".concat(xa, ")"),
         stroke: "#555",
         strokeWidth: "2",
@@ -548,7 +551,7 @@
         fill: color,
         onClick: onClick
       }), React__default.createElement("polygon", {
-        points: "0, ".concat(arrowHeight * -.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * .8, ", ").concat(arrowHeight * .5),
+        points: "0, ".concat(arrowHeight * -0.4, " 0, ").concat(arrowHeight * 1.4, " ").concat(arrowHeight * 0.8, ", ").concat(arrowHeight * 0.5),
         transform: "translate(".concat(xa, ")"),
         fill: color
       }), shouldRenderLabel && React__default.createElement("text", {
@@ -591,7 +594,8 @@
         labels: PropTypes.shape({
           text: PropTypes.object.isRequired
         }).isRequired
-      }).isRequired
+      }).isRequired,
+      barCount: PropTypes.number
     };
     var enhance$1 = compose(withPropsOnChange(['data', 'color', 'onClick'], function (_ref2) {
       var data = _ref2.data,
@@ -1042,6 +1046,7 @@
           var a = next.data[valueBy];
           var b = bar.data[valueBy];
           var num = percentChange(a, b);
+          if (num === Infinity) return null;
           var sign = num < 0 ? '' : '+';
           var label = "".concat(sign).concat(num, "%");
           return React__default.createElement(arrowComponent, _objectSpread$3({
@@ -1053,7 +1058,8 @@
             shouldRenderLabel: true,
             color: '#fff',
             next: next,
-            label: label
+            label: label,
+            barCount: result.bars.length
           }));
         });
         var layerById = {
