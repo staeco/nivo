@@ -1055,7 +1055,7 @@
           var num = percentChange(a, b);
           if (num === Infinity || isNaN(num) || a === b && a === 0) return null;
           var sign = num < 0 ? '' : '+';
-          var label = "".concat(sign).concat(num, "%");
+          var label = Math.abs(num) >= 1000 ? "".concat(sign, ">1000%") : "".concat(sign).concat(num, "%");
           return React__default.createElement(arrowComponent, _objectSpread$3({
             key: bar.key
           }, commonProps, bar, {
