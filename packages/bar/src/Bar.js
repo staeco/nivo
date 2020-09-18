@@ -270,7 +270,7 @@ const Bar = props => {
                     if (num === Infinity || isNaN(num) || (a === b && a === 0)) return null
 
                     const sign = num < 0 ? '' : '+'
-                    const label = `${sign}${num}%`
+                    const label = Math.abs(num) >= 1000 ? `${sign}>1000%` : `${sign}${num}%`
                     return React.createElement(arrowComponent, {
                         key: bar.key,
                         ...commonProps,
