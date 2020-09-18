@@ -834,6 +834,15 @@ BarAnnotations.propTypes = {};
 function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
 function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var numFormatter = function numFormatter(num) {
+  if (num > 999 && num < 1000000) {
+    return (num / 1000).toFixed(0) + 'K';
+  } else if (num > 1000000) {
+    return (num / 1000000).toFixed(0) + 'M';
+  } else if (num < 900) {
+    return num;
+  }
+};
 var barWillEnterHorizontal = function barWillEnterHorizontal(_ref) {
   var style = _ref.style;
   return {
@@ -1058,7 +1067,7 @@ var Bar = function Bar(props) {
       var num = percentChange(a, b);
       if (num === Infinity || isNaN(num) || a === b && a === 0) return null;
       var sign = num < 0 ? '' : '+';
-      var label = Math.abs(num) >= 1000 ? "".concat(sign, ">1000%") : "".concat(sign).concat(num, "%");
+      var label = "".concat(sign).concat(numFormatter(num), "%");
       return React.createElement(arrowComponent, _objectSpread$3({
         key: bar.key
       }, commonProps, bar, {

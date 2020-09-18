@@ -17,6 +17,16 @@ import enhance from './enhance'
 import { BarSvgDefaultProps, BarSvgPropTypes } from './props'
 import BarAnnotations from './BarAnnotations'
 
+const numFormatter = num => {
+    if (num > 999 && num < 1000000) {
+        return (num / 1000).toFixed(0) + 'K' // convert to K for number from > 1000 < 1 million
+    } else if (num > 1000000) {
+        return (num / 1000000).toFixed(0) + 'M' // convert to M for number from > 1 million
+    } else if (num < 900) {
+        return num // if value < 1000, nothing to do
+    }
+}
+
 const barWillEnterHorizontal = ({ style }) => ({
     x: style.x.val,
     y: style.y.val,
@@ -270,7 +280,8 @@ const Bar = props => {
                     if (num === Infinity || isNaN(num) || (a === b && a === 0)) return null
 
                     const sign = num < 0 ? '' : '+'
-                    const label = Math.abs(num) >= 1000 ? `${sign}>1000%` : `${sign}${num}%`
+                    // const label = Math.abs(num) >= 1000 ? `${sign}>1000%` : `${sign}${num}%`
+                    const label = `${sign}${numFormatter(num)}%`
                     return React.createElement(arrowComponent, {
                         key: bar.key,
                         ...commonProps,
