@@ -837,7 +837,7 @@ function _defineProperty$3(obj, key, value) { if (key in obj) { Object.definePro
 var numFormatter = function numFormatter(num) {
   if (num > 999 && num < 1000000) {
     return (num / 1000).toFixed(0) + 'K';
-  } else if (num > 1000000) {
+  } else if (num > 1000000 && num < 1000000000) {
     return (num / 1000000).toFixed(0) + 'M';
   } else if (num > 1000000000) {
     return (num / 1000000000).toFixed(0) + 'B';
