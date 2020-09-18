@@ -28,6 +28,10 @@ const ArrowItem = ({
     theme,
 
     barCount,
+
+    tooltip,
+    hideTooltip,
+    showTooltip,
 }) => {
     // logic added by BT to dynamically size arrows based on bar count
     const minifyThreshold = 12
@@ -37,8 +41,13 @@ const ArrowItem = ({
     const xa = minify ? 30 : 50
     const arrowHeight = minify ? 12 : 16
     const arrowOffset = width / 2
+
     return (
-        <g transform={`translate(${x + arrowOffset}, ${ya})`}>
+        <g
+            transform={`translate(${x + arrowOffset}, ${ya})`}
+            onMouseEnter={e => showTooltip(tooltip, e)}
+            onMouseLeave={hideTooltip}
+        >
             {/* "shadow" arrow */}
             <rect
                 width={xa}
@@ -95,7 +104,7 @@ ArrowItem.propTypes = {
     data: PropTypes.shape({
         id: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        indexValue: PropTypes.string.isRequired,
+        indexValue: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
         fill: PropTypes.string,
     }).isRequired,
 

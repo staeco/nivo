@@ -71,15 +71,15 @@ const data = [
     },
     {
         country: 'F',
-        apple: null,
+        apple: 0,
     },
     {
         country: 'G',
-        apple: null,
+        apple: 0,
     },
     {
         country: 'H',
-        apple: null,
+        apple: 0,
     },
     {
         country: 'I',
