@@ -257,7 +257,7 @@ const Bar = props => {
                     const b = bar.data[valueBy]
                     const num = percentChange(a, b)
 
-                    if (num === Infinity || isNaN(num)) return null
+                    if (num === Infinity || isNaN(num) || (a === b && a === 0)) return null
 
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${num}%`
