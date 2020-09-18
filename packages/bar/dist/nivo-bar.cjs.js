@@ -529,7 +529,10 @@ var ArrowItem = function ArrowItem(_ref) {
       shouldRenderLabel = _ref.shouldRenderLabel,
       onClick = _ref.onClick,
       theme = _ref.theme,
-      barCount = _ref.barCount;
+      barCount = _ref.barCount,
+      tooltip = _ref.tooltip,
+      hideTooltip = _ref.hideTooltip,
+      showTooltip = _ref.showTooltip;
   var minifyThreshold = 12;
   var minify = barCount > minifyThreshold;
   var ya = height * 0.75;
@@ -537,7 +540,11 @@ var ArrowItem = function ArrowItem(_ref) {
   var arrowHeight = minify ? 12 : 16;
   var arrowOffset = width / 2;
   return React__default.createElement("g", {
-    transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")")
+    transform: "translate(".concat(x + arrowOffset, ", ").concat(ya, ")"),
+    onMouseEnter: function onMouseEnter(e) {
+      return showTooltip(tooltip, e);
+    },
+    onMouseLeave: hideTooltip
   }, React__default.createElement("rect", {
     width: xa,
     height: arrowHeight,
@@ -579,7 +586,7 @@ ArrowItem.propTypes = {
   data: PropTypes.shape({
     id: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,
-    indexValue: PropTypes.string.isRequired,
+    indexValue: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     fill: PropTypes.string
   }).isRequired,
   x: PropTypes.number.isRequired,
@@ -1056,7 +1063,7 @@ var Bar = function Bar(props) {
       var a = next.data[valueBy];
       var b = bar.data[valueBy];
       var num = percentChange(a, b);
-      if (num === Infinity || isNaN(num)) return null;
+      if (num === Infinity || isNaN(num) || a === b && a === 0) return null;
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(num, "%");
       return React__default.createElement(arrowComponent, _objectSpread$3({
