@@ -87,10 +87,10 @@ BarItem.propTypes = {
         id: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         indexValue: PropTypes.oneOfType([
-            PropTypes.string.isRequired,
+            PropTypes.string,
             PropTypes.instanceOf(Date),
             PropTypes.number,
-        ]),
+        ]).isRequired,
         fill: PropTypes.string,
     }).isRequired,
 
