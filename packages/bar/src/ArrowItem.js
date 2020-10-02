@@ -104,7 +104,11 @@ ArrowItem.propTypes = {
     data: PropTypes.shape({
         id: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        indexValue: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+        indexValue: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.instanceOf(Date),
+            PropTypes.number,
+        ]),
         fill: PropTypes.string,
     }).isRequired,
 
