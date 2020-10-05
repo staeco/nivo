@@ -529,7 +529,7 @@ var ArrowItem = function ArrowItem(_ref) {
   var minifyThreshold = 12;
   var minify = barCount > minifyThreshold;
   var ya = height * 0.75;
-  var xa = minify ? 30 : 50;
+  var xa = minify ? 38 : 50;
   var arrowHeight = minify ? 12 : 16;
   var arrowOffset = width / 2;
   return React.createElement("g", {

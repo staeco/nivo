@@ -38,7 +38,7 @@ const ArrowItem = ({
     const minify = barCount > minifyThreshold
 
     const ya = height * 0.75 // y < 40 ? 0 : y - 20
-    const xa = minify ? 30 : 50
+    const xa = minify ? 38 : 50
     const arrowHeight = minify ? 12 : 16
     const arrowOffset = width / 2
 
