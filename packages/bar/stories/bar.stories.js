@@ -90,6 +90,66 @@ const data = [
         country: 'K',
         apple: 1,
     },
+    {
+        country: 'L',
+        apple: 88,
+    },
+    {
+        country: 'M',
+        apple: 150,
+    },
+    {
+        country: 'N',
+        apple: 150,
+    },
+    {
+        country: 'O',
+        apple: 150,
+    },
+    {
+        country: 'P',
+        apple: 150,
+    },
+    {
+        country: 'Q',
+        apple: 150,
+    },
+    {
+        country: 'R',
+        apple: 150,
+    },
+    {
+        country: 'S',
+        apple: 150,
+    },
+    {
+        country: 'T',
+        apple: 150,
+    },
+    {
+        country: 'U',
+        apple: 150,
+    },
+    {
+        country: 'V',
+        apple: 150,
+    },
+    {
+        country: 'W',
+        apple: 150,
+    },
+    {
+        country: 'X',
+        apple: 150,
+    },
+    {
+        country: 'Y',
+        apple: 150,
+    },
+    {
+        country: 'Z',
+        apple: 150,
+    },
 ]
 stories.add('percent change', () => (
     <Bar
