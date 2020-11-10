@@ -278,7 +278,13 @@ const Bar = props => {
                     const b = bar.data[valueBy]
                     const num = percentChange(a, b)
 
-                    if (num === Infinity || isNaN(num) || (a === b && a === 0)) return null
+                    if (
+                        num === Infinity ||
+                        isNaN(num) ||
+                        (a === b && a === 0) ||
+                        (a !== 0 && b === 0)
+                    )
+                        return null
 
                     const sign = num < 0 ? '' : '+'
                     const label = `${sign}${numFormatter(num)}%`
