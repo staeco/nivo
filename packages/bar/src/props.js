@@ -26,7 +26,15 @@ export const BarPropTypes = {
     keys: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])).isRequired,
     layers: PropTypes.arrayOf(
         PropTypes.oneOfType([
-            PropTypes.oneOf(['grid', 'axes', 'bars', 'markers', 'legends', 'annotations', 'arrows']),
+            PropTypes.oneOf([
+                'grid',
+                'axes',
+                'bars',
+                'markers',
+                'legends',
+                'annotations',
+                'arrows',
+            ]),
             PropTypes.func,
         ])
     ).isRequired,

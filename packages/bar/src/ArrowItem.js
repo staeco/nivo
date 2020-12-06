@@ -60,8 +60,9 @@ const ArrowItem = ({
                 onClick={onClick}
             />
             <polygon
-                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight *
-                    0.8}, ${arrowHeight * 0.5}`}
+                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight * 0.8}, ${
+                    arrowHeight * 0.5
+                }`}
                 transform={`translate(${xa})`}
                 stroke="#555"
                 strokeWidth="2"
@@ -76,8 +77,9 @@ const ArrowItem = ({
                 onClick={onClick}
             />
             <polygon
-                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight *
-                    0.8}, ${arrowHeight * 0.5}`}
+                points={`0, ${arrowHeight * -0.4} 0, ${arrowHeight * 1.4} ${arrowHeight * 0.8}, ${
+                    arrowHeight * 0.5
+                }`}
                 transform={`translate(${xa})`}
                 fill={color}
             />
