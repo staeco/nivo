@@ -8,6 +8,7 @@ var React = require('react');
 var React__default = _interopDefault(React);
 var core = require('@nivo/core');
 var colors = require('@nivo/colors');
+var tooltip = require('@nivo/tooltip');
 var PropTypes = _interopDefault(require('prop-types'));
 var get = _interopDefault(require('lodash/get'));
 var isString = _interopDefault(require('lodash/isString'));
@@ -15,8 +16,102 @@ var isNumber = _interopDefault(require('lodash/isNumber'));
 var d3Force = require('d3-force');
 var reactMotion = require('react-motion');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var commonPropTypes = {
   nodes: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired
@@ -38,8 +133,10 @@ var commonPropTypes = {
   linkColor: colors.inheritedColorPropType.isRequired,
   isInteractive: PropTypes.bool.isRequired
 };
-var NetworkPropTypes = _objectSpread({}, commonPropTypes, core.motionPropTypes);
-var NetworkCanvasPropTypes = _objectSpread({
+var NetworkPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  role: PropTypes.string.isRequired
+}, core.motionPropTypes);
+var NetworkCanvasPropTypes = _objectSpread2({
   pixelRatio: PropTypes.number.isRequired
 }, commonPropTypes);
 var commonDefaultProps = {
@@ -59,21 +156,16 @@ var commonDefaultProps = {
   },
   isInteractive: true
 };
-var NetworkDefaultProps = _objectSpread({}, commonDefaultProps, {
+var NetworkDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   animate: true,
   motionStiffness: 90,
-  motionDamping: 15
+  motionDamping: 15,
+  role: 'img'
 });
-var NetworkCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var NetworkCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var computeForces = function computeForces(_ref) {
   var linkDistance = _ref.linkDistance,
       repulsivity = _ref.repulsivity,
@@ -127,10 +219,10 @@ var useNetwork = function useNetwork(_ref2) {
       center: center
     });
     var nodesCopy = nodes.map(function (node) {
-      return _objectSpread$1({}, node);
+      return _objectSpread2({}, node);
     });
     var linksCopy = links.map(function (link) {
-      return _objectSpread$1({
+      return _objectSpread2({
         id: "".concat(link.source, ".").concat(link.target)
       }, link);
     });
@@ -170,31 +262,31 @@ var useLinkThickness = function useLinkThickness(thickness) {
 };
 
 var Node = function Node(_ref) {
-  var x = _ref.x,
+  var node = _ref.node,
+      x = _ref.x,
       y = _ref.y,
       radius = _ref.radius,
       color = _ref.color,
       borderWidth = _ref.borderWidth,
       borderColor = _ref.borderColor,
       _ref$scale = _ref.scale,
-      scale = _ref$scale === void 0 ? 1 : _ref$scale;
+      scale = _ref$scale === void 0 ? 1 : _ref$scale,
+      handleNodeHover = _ref.handleNodeHover,
+      handleNodeLeave = _ref.handleNodeLeave;
   return React__default.createElement("circle", {
     transform: "translate(".concat(x, ",").concat(y, ") scale(").concat(scale, ")"),
     r: radius,
     fill: color,
     strokeWidth: borderWidth,
-    stroke: borderColor
+    stroke: borderColor,
+    onMouseEnter: function onMouseEnter(event) {
+      return handleNodeHover(node, event);
+    },
+    onMouseMove: function onMouseMove(event) {
+      return handleNodeHover(node, event);
+    },
+    onMouseLeave: handleNodeLeave
   });
-};
-Node.propTypes = {
-  node: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  radius: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  scale: PropTypes.number
 };
 var Node$1 = React.memo(Node);
 
@@ -222,7 +314,9 @@ var AnimatedNodes = function AnimatedNodes(_ref3) {
   var nodes = _ref3.nodes,
       color = _ref3.color,
       borderWidth = _ref3.borderWidth,
-      borderColor = _ref3.borderColor;
+      borderColor = _ref3.borderColor,
+      handleNodeHover = _ref3.handleNodeHover,
+      handleNodeLeave = _ref3.handleNodeLeave;
   var _useMotionConfig = core.useMotionConfig(),
       springConfig = _useMotionConfig.springConfig;
   return React__default.createElement(reactMotion.TransitionMotion, {
@@ -254,16 +348,12 @@ var AnimatedNodes = function AnimatedNodes(_ref3) {
         color: color(node),
         borderWidth: borderWidth,
         borderColor: borderColor(node),
-        scale: Math.max(style.scale, 0)
+        scale: Math.max(style.scale, 0),
+        handleNodeHover: handleNodeHover,
+        handleNodeLeave: handleNodeLeave
       });
     }));
   });
-};
-AnimatedNodes.propTypes = {
-  nodes: PropTypes.array.isRequired,
-  color: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.func.isRequired
 };
 var AnimatedNodes$1 = React.memo(AnimatedNodes);
 
@@ -271,7 +361,9 @@ var StaticNodes = function StaticNodes(_ref) {
   var nodes = _ref.nodes,
       color = _ref.color,
       borderWidth = _ref.borderWidth,
-      borderColor = _ref.borderColor;
+      borderColor = _ref.borderColor,
+      handleNodeHover = _ref.handleNodeHover,
+      handleNodeLeave = _ref.handleNodeLeave;
   return nodes.map(function (node) {
     return React__default.createElement(Node$1, {
       key: node.id,
@@ -281,15 +373,11 @@ var StaticNodes = function StaticNodes(_ref) {
       radius: node.radius,
       color: color(node),
       borderWidth: borderWidth,
-      borderColor: borderColor(node)
+      borderColor: borderColor(node),
+      handleNodeHover: handleNodeHover,
+      handleNodeLeave: handleNodeLeave
     });
   });
-};
-StaticNodes.propTypes = {
-  nodes: PropTypes.array.isRequired,
-  color: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.func.isRequired
 };
 var StaticNodes$1 = React.memo(StaticNodes);
 
@@ -309,15 +397,6 @@ var Link = function Link(_ref) {
     x2: targetX,
     y2: targetY
   });
-};
-Link.propTypes = {
-  link: PropTypes.object.isRequired,
-  sourceX: PropTypes.number.isRequired,
-  sourceY: PropTypes.number.isRequired,
-  targetX: PropTypes.number.isRequired,
-  targetY: PropTypes.number.isRequired,
-  thickness: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired
 };
 var Link$1 = React.memo(Link);
 
@@ -371,11 +450,6 @@ var AnimatedLinks = function AnimatedLinks(_ref2) {
     }));
   });
 };
-AnimatedLinks.propTypes = {
-  links: PropTypes.array.isRequired,
-  linkThickness: PropTypes.func.isRequired,
-  linkColor: PropTypes.func.isRequired
-};
 var AnimatedLinks$1 = React.memo(AnimatedLinks);
 
 var StaticLinks = function StaticLinks(_ref) {
@@ -395,19 +469,22 @@ var StaticLinks = function StaticLinks(_ref) {
     });
   });
 };
-StaticLinks.propTypes = {
-  links: PropTypes.array.isRequired,
-  linkThickness: PropTypes.func.isRequired,
-  linkColor: PropTypes.func.isRequired
-};
 var StaticLinks$1 = React.memo(StaticLinks);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
+var NetworkNodeTooltip = function NetworkNodeTooltip(_ref) {
+  var node = _ref.node,
+      format = _ref.format,
+      tooltip$1 = _ref.tooltip;
+  return React__default.createElement(tooltip.BasicTooltip, {
+    id: node.id,
+    enableChip: true,
+    color: node.color,
+    format: format,
+    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({}, node)) : null
+  });
+};
+var NetworkNodeTooltip$1 = React.memo(NetworkNodeTooltip);
+
 var Network = function Network(props) {
   var width = props.width,
       height = props.height,
@@ -424,7 +501,10 @@ var Network = function Network(props) {
       nodeBorderWidth = props.nodeBorderWidth,
       nodeBorderColor = props.nodeBorderColor,
       linkThickness = props.linkThickness,
-      linkColor = props.linkColor;
+      linkColor = props.linkColor,
+      tooltip$1 = props.tooltip,
+      isInteractive = props.isInteractive,
+      role = props.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       innerWidth = _useDimensions.innerWidth,
@@ -448,9 +528,21 @@ var Network = function Network(props) {
     iterations: iterations,
     center: [innerWidth / 2, innerHeight / 2]
   }),
-      _useNetwork2 = _slicedToArray$1(_useNetwork, 2),
+      _useNetwork2 = _slicedToArray(_useNetwork, 2),
       nodes = _useNetwork2[0],
       links = _useNetwork2[1];
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleNodeHover = React.useCallback(function (node, event) {
+    showTooltipFromEvent(React__default.createElement(NetworkNodeTooltip$1, {
+      node: node,
+      tooltip: tooltip$1
+    }), event);
+  }, [showTooltipFromEvent, tooltip$1]);
+  var handleNodeLeave = React.useCallback(function () {
+    hideTooltip();
+  }, [hideTooltip]);
   var layerById = {
     links: React__default.createElement(animate === true ? AnimatedLinks$1 : StaticLinks$1, {
       key: 'links',
@@ -463,18 +555,21 @@ var Network = function Network(props) {
       nodes: nodes,
       color: getColor,
       borderWidth: nodeBorderWidth,
-      borderColor: getBorderColor
+      borderColor: getBorderColor,
+      handleNodeHover: isInteractive ? handleNodeHover : undefined,
+      handleNodeLeave: isInteractive ? handleNodeLeave : undefined
     })
   };
   return React__default.createElement(core.SvgWrapper, {
     width: outerWidth,
     height: outerHeight,
-    margin: margin
+    margin: margin,
+    role: role
   }, layers.map(function (layer, i) {
     if (typeof layer === 'function') {
       return React__default.createElement(React.Fragment, {
         key: i
-      }, layer(_objectSpread$2({}, props, {
+      }, layer(_objectSpread2(_objectSpread2({}, props), {}, {
         innerWidth: innerWidth,
         innerHeight: innerHeight,
         nodes: nodes,
@@ -484,28 +579,20 @@ var Network = function Network(props) {
     return layerById[layer];
   }));
 };
-Network.propTypes = NetworkPropTypes;
 Network.defaultProps = NetworkDefaultProps;
 var Network$1 = core.withContainer(Network);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var ResponsiveNetwork = function ResponsiveNetwork(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Network$1, _extends({
+    return React__default.createElement(Network$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$2(arr, i) { return _arrayWithHoles$2(arr) || _iterableToArrayLimit$2(arr, i) || _nonIterableRest$2(); }
-function _nonIterableRest$2() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$2(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$2(arr) { if (Array.isArray(arr)) return arr; }
 var NetworkCanvas = function NetworkCanvas(props) {
   var width = props.width,
       height = props.height,
@@ -542,7 +629,7 @@ var NetworkCanvas = function NetworkCanvas(props) {
     iterations: iterations,
     center: [innerWidth / 2, innerHeight / 2]
   }),
-      _useNetwork2 = _slicedToArray$2(_useNetwork, 2),
+      _useNetwork2 = _slicedToArray(_useNetwork, 2),
       nodes = _useNetwork2[0],
       links = _useNetwork2[1];
   var theme = core.useTheme();
@@ -581,7 +668,7 @@ var NetworkCanvas = function NetworkCanvas(props) {
           }
         });
       } else if (typeof layer === 'function') {
-        layer(ctx, _objectSpread$3({}, props, {
+        layer(ctx, _objectSpread2(_objectSpread2({}, props), {}, {
           nodes: nodes,
           links: links
         }));
@@ -599,16 +686,14 @@ var NetworkCanvas = function NetworkCanvas(props) {
     }
   });
 };
-NetworkCanvas.propTypes = NetworkCanvasPropTypes;
 NetworkCanvas.defaultProps = NetworkCanvasDefaultProps;
 var NetworkCanvas$1 = core.withContainer(NetworkCanvas);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveNetworkCanvas = function ResponsiveNetworkCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(NetworkCanvas$1, _extends$1({
+    return React__default.createElement(NetworkCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -626,3 +711,4 @@ exports.ResponsiveNetworkCanvas = ResponsiveNetworkCanvas;
 exports.useLinkThickness = useLinkThickness;
 exports.useNetwork = useNetwork;
 exports.useNodeColor = useNodeColor;
+//# sourceMappingURL=nivo-network.cjs.js.map

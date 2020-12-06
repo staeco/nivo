@@ -62,7 +62,9 @@ var logScale = function logScale(_ref, xy, width, height) {
   });
   var sign;
   var hasMixedSign = false;
-  values.all.forEach(function (v) {
+  values.all.filter(function (v) {
+    return v != null;
+  }).forEach(function (v) {
     if (hasMixedSign === true) return;
     if (sign === undefined) {
       sign = Math.sign(v);
@@ -92,6 +94,35 @@ var logScalePropTypes = {
   max: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number])
 };
 
+var symlogScale = function symlogScale(_ref, xy, width, height) {
+  var axis = _ref.axis,
+      _ref$constant = _ref.constant,
+      constant = _ref$constant === void 0 ? 1 : _ref$constant,
+      _ref$min = _ref.min,
+      min = _ref$min === void 0 ? 'auto' : _ref$min,
+      _ref$max = _ref.max,
+      max = _ref$max === void 0 ? 'auto' : _ref$max;
+  var values = xy[axis];
+  var size = axis === 'x' ? width : height;
+  var minValue = min;
+  if (min === 'auto') {
+    minValue = values.min;
+  }
+  var maxValue = max;
+  if (max === 'auto') {
+    maxValue = values.max;
+  }
+  var scale = d3Scale.scaleSymlog().domain([minValue, maxValue]).constant(constant).rangeRound(axis === 'x' ? [0, size] : [size, 0]).nice();
+  scale.type = 'symlog';
+  return scale;
+};
+var symLogScalePropTypes = {
+  type: PropTypes.oneOf(['symlog']).isRequired,
+  constant: PropTypes.number,
+  min: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number]),
+  max: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number])
+};
+
 var pointScale = function pointScale(_ref, xy, width, height) {
   var axis = _ref.axis;
   var values = xy[axis];
@@ -104,8 +135,21 @@ var pointScalePropTypes = {
   type: PropTypes.oneOf(['point']).isRequired
 };
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
 var _precisionCutOffsByTy;
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var TIME_PRECISION_MILLISECOND = 'millisecond';
 var TIME_PRECISION_SECOND = 'second';
 var TIME_PRECISION_MINUTE = 'minute';
@@ -196,12 +240,73 @@ var timeScalePropTypes = {
   precision: PropTypes.oneOf(timePrecisions)
 };
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var bandScalePropTypes = {
+  type: PropTypes.oneOf(['band']).isRequired,
+  round: PropTypes.bool
+};
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var getOtherAxis = function getOtherAxis(axis) {
   return axis === 'x' ? 'y' : 'x';
 };
@@ -213,10 +318,10 @@ var compareDateValues = function compareDateValues(a, b) {
 };
 var computeXYScalesForSeries = function computeXYScalesForSeries(_series, xScaleSpec, yScaleSpec, width, height) {
   var series = _series.map(function (serie) {
-    return _objectSpread({}, serie, {
+    return _objectSpread2(_objectSpread2({}, serie), {}, {
       data: serie.data.map(function (d) {
         return {
-          data: _objectSpread({}, d)
+          data: _objectSpread2({}, d)
         };
       })
     });
@@ -228,10 +333,10 @@ var computeXYScalesForSeries = function computeXYScalesForSeries(_series, xScale
   if (yScaleSpec.stacked === true) {
     stackY(xScaleSpec.type, xy, series);
   }
-  var xScale = computeScale(_objectSpread({}, xScaleSpec, {
+  var xScale = computeScale(_objectSpread2(_objectSpread2({}, xScaleSpec), {}, {
     axis: 'x'
   }), xy, width, height);
-  var yScale = computeScale(_objectSpread({}, yScaleSpec, {
+  var yScale = computeScale(_objectSpread2(_objectSpread2({}, yScaleSpec), {}, {
     axis: 'y'
   }), xy, width, height);
   series.forEach(function (serie) {
@@ -242,14 +347,14 @@ var computeXYScalesForSeries = function computeXYScalesForSeries(_series, xScale
       };
     });
   });
-  return _objectSpread({}, xy, {
+  return _objectSpread2(_objectSpread2({}, xy), {}, {
     series: series,
     xScale: xScale,
     yScale: yScale
   });
 };
 var computeScale = function computeScale(spec, xy, width, height) {
-  if (spec.type === 'linear') return linearScale(spec, xy, width, height);else if (spec.type === 'point') return pointScale(spec, xy, width, height);else if (spec.type === 'time') return timeScale(spec, xy, width, height);else if (spec.type === 'log') return logScale(spec, xy, width, height);
+  if (spec.type === 'linear') return linearScale(spec, xy, width, height);else if (spec.type === 'point') return pointScale(spec, xy, width, height);else if (spec.type === 'time') return timeScale(spec, xy, width, height);else if (spec.type === 'log') return logScale(spec, xy, width, height);else if (spec.type === 'symlog') return symlogScale(spec, xy, width, height);
 };
 var generateSeriesXY = function generateSeriesXY(series, xScaleSpec, yScaleSpec) {
   return {
@@ -361,14 +466,14 @@ var computeAxisSlices = function computeAxisSlices(axis, data) {
     var _slice;
     var slice = (_slice = {
       id: v
-    }, _defineProperty$1(_slice, otherAxis, data["".concat(otherAxis, "Scale")](v)), _defineProperty$1(_slice, "data", []), _slice);
+    }, _defineProperty(_slice, otherAxis, data["".concat(otherAxis, "Scale")](v)), _defineProperty(_slice, "data", []), _slice);
     var compare = isDate(v) ? compareDateValues : compareValues;
     data.series.forEach(function (serie) {
       var datum = serie.data.find(function (d) {
         return compare(d.data[otherAxis], v);
       });
       if (datum !== undefined) {
-        slice.data.push(_objectSpread({}, datum, {
+        slice.data.push(_objectSpread2(_objectSpread2({}, datum), {}, {
           serie: serie
         }));
       }
@@ -384,8 +489,16 @@ var computeYSlices = function computeYSlices(data) {
   return computeAxisSlices('y', data);
 };
 
-var scalePropType = PropTypes.oneOfType([PropTypes.shape(linearScalePropTypes), PropTypes.shape(pointScalePropTypes), PropTypes.shape(timeScalePropTypes), PropTypes.shape(logScalePropTypes)]);
+var scalePropType = PropTypes.oneOfType([PropTypes.shape(linearScalePropTypes), PropTypes.shape(pointScalePropTypes), PropTypes.shape(timeScalePropTypes), PropTypes.shape(logScalePropTypes), PropTypes.shape(symLogScalePropTypes), PropTypes.shape(bandScalePropTypes)]);
 
+exports.TIME_PRECISION_DAY = TIME_PRECISION_DAY;
+exports.TIME_PRECISION_HOUR = TIME_PRECISION_HOUR;
+exports.TIME_PRECISION_MILLISECOND = TIME_PRECISION_MILLISECOND;
+exports.TIME_PRECISION_MINUTE = TIME_PRECISION_MINUTE;
+exports.TIME_PRECISION_MONTH = TIME_PRECISION_MONTH;
+exports.TIME_PRECISION_SECOND = TIME_PRECISION_SECOND;
+exports.TIME_PRECISION_YEAR = TIME_PRECISION_YEAR;
+exports.bandScalePropTypes = bandScalePropTypes;
 exports.compareDateValues = compareDateValues;
 exports.compareValues = compareValues;
 exports.computeAxisSlices = computeAxisSlices;
@@ -393,6 +506,8 @@ exports.computeScale = computeScale;
 exports.computeXSlices = computeXSlices;
 exports.computeXYScalesForSeries = computeXYScalesForSeries;
 exports.computeYSlices = computeYSlices;
+exports.createDateNormalizer = createDateNormalizer;
+exports.createPrecisionMethod = createPrecisionMethod;
 exports.generateSeriesAxis = generateSeriesAxis;
 exports.generateSeriesXY = generateSeriesXY;
 exports.getOtherAxis = getOtherAxis;
@@ -402,9 +517,15 @@ exports.logScale = logScale;
 exports.logScalePropTypes = logScalePropTypes;
 exports.pointScale = pointScale;
 exports.pointScalePropTypes = pointScalePropTypes;
+exports.precisionCutOffs = precisionCutOffs;
+exports.precisionCutOffsByType = precisionCutOffsByType;
 exports.scalePropType = scalePropType;
 exports.stackAxis = stackAxis;
 exports.stackX = stackX;
 exports.stackY = stackY;
+exports.symLogScalePropTypes = symLogScalePropTypes;
+exports.symlogScale = symlogScale;
+exports.timePrecisions = timePrecisions;
 exports.timeScale = timeScale;
 exports.timeScalePropTypes = timeScalePropTypes;
+//# sourceMappingURL=nivo-scales.cjs.js.map

@@ -4,26 +4,105 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var _setDisplayName = _interopDefault(require('recompose/setDisplayName'));
 var React = require('react');
 var React__default = _interopDefault(React);
 var core = require('@nivo/core');
 var legends = require('@nivo/legends');
 var PropTypes = _interopDefault(require('prop-types'));
 var d3TimeFormat = require('d3-time-format');
-var _pure = _interopDefault(require('recompose/pure'));
-var _withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
-var _defaultProps = _interopDefault(require('recompose/defaultProps'));
-var _compose = _interopDefault(require('recompose/compose'));
+var tooltip = require('@nivo/tooltip');
 var d3Scale = require('d3-scale');
 var memoize = _interopDefault(require('lodash.memoize'));
 var isDate = _interopDefault(require('lodash.isdate'));
 var range = _interopDefault(require('lodash.range'));
 var d3Time = require('d3-time');
-var tooltip = require('@nivo/tooltip');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+var CalendarTooltip = React.memo(function (_ref) {
+  var value = _ref.value,
+      day = _ref.day,
+      color = _ref.color;
+  if (value === undefined || isNaN(value)) return null;
+  return React__default.createElement(tooltip.BasicTooltip, {
+    id: day,
+    value: value,
+    color: color,
+    enableChip: true
+  });
+});
+CalendarTooltip.displayName = 'CalendarTooltip';
+
 var monthLabelFormat = d3TimeFormat.timeFormat('%b');
 var commonPropTypes = {
   from: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
@@ -33,14 +112,10 @@ var commonPropTypes = {
     value: PropTypes.number.isRequired
   })).isRequired,
   align: PropTypes.oneOf(core.boxAlignments).isRequired,
-  originX: PropTypes.number.isRequired,
-  originY: PropTypes.number.isRequired,
-  calendarWidth: PropTypes.number.isRequired,
-  calendarHeight: PropTypes.number.isRequired,
   minValue: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number]).isRequired,
   maxValue: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number]).isRequired,
   colors: PropTypes.arrayOf(PropTypes.string).isRequired,
-  colorScale: PropTypes.func.isRequired,
+  colorScale: PropTypes.func,
   direction: PropTypes.oneOf(['horizontal', 'vertical']),
   emptyColor: PropTypes.string.isRequired,
   yearLegend: PropTypes.func.isRequired,
@@ -50,21 +125,28 @@ var commonPropTypes = {
   monthBorderWidth: PropTypes.number.isRequired,
   monthBorderColor: PropTypes.string.isRequired,
   monthLegend: PropTypes.func.isRequired,
+  monthSpacing: PropTypes.number.isRequired,
   monthLegendPosition: PropTypes.oneOf(['before', 'after']).isRequired,
   monthLegendOffset: PropTypes.number.isRequired,
   daySpacing: PropTypes.number.isRequired,
   dayBorderWidth: PropTypes.number.isRequired,
   dayBorderColor: PropTypes.string.isRequired,
   isInteractive: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-  tooltip: PropTypes.func,
-  legends: PropTypes.arrayOf(PropTypes.shape(_objectSpread({}, legends.LegendPropShape, {
+  onClick: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
+  valueFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
+  legendFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
+  legends: PropTypes.arrayOf(PropTypes.shape(_objectSpread2(_objectSpread2({}, legends.LegendPropShape), {}, {
     itemCount: PropTypes.number.isRequired
   }))).isRequired
 };
-var CalendarPropTypes = commonPropTypes;
-var CalendarCanvasPropTypes = _objectSpread({}, commonPropTypes, {
+var CalendarPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
+var CalendarCanvasPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   pixelRatio: PropTypes.number.isRequired
 });
 var commonDefaultProps = {
@@ -82,6 +164,7 @@ var commonDefaultProps = {
   yearLegendOffset: 10,
   monthBorderWidth: 2,
   monthBorderColor: '#000',
+  monthSpacing: 0,
   monthLegend: function monthLegend(year, month, date) {
     return monthLabelFormat(date);
   },
@@ -94,24 +177,131 @@ var commonDefaultProps = {
   dayBorderWidth: 1,
   dayBorderColor: '#000',
   isInteractive: true,
-  onClick: core.noop,
-  legends: []
+  legends: [],
+  tooltip: CalendarTooltip
 };
-var CalendarDefaultProps = commonDefaultProps;
-var CalendarCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var CalendarDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
+  role: 'img'
+});
+var CalendarCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+var CalendarYearLegends = React.memo(function (_ref) {
+  var years = _ref.years,
+      legend = _ref.legend,
+      theme = _ref.theme;
+  return React__default.createElement(React__default.Fragment, null, years.map(function (year) {
+    return React__default.createElement("text", {
+      key: year.year,
+      transform: "translate(".concat(year.x, ",").concat(year.y, ") rotate(").concat(year.rotation, ")"),
+      textAnchor: "middle",
+      style: theme.labels.text
+    }, legend(year.year));
+  }));
+});
+CalendarYearLegends.displayName = 'CalendarYearLegends';
+
+var CalendarMonthPath = React.memo(function (_ref) {
+  var path = _ref.path,
+      borderWidth = _ref.borderWidth,
+      borderColor = _ref.borderColor;
+  return React__default.createElement("path", {
+    d: path,
+    style: {
+      fill: 'none',
+      strokeWidth: borderWidth,
+      stroke: borderColor,
+      pointerEvents: 'none'
+    }
+  });
+});
+CalendarMonthPath.displayName = 'CalendarMonthPath';
+
+var CalendarMonthLegends = React.memo(function (_ref) {
+  var months = _ref.months,
+      legend = _ref.legend,
+      theme = _ref.theme;
+  return React__default.createElement(React__default.Fragment, null, months.map(function (month) {
+    return React__default.createElement("text", {
+      key: "".concat(month.date.toString(), ".legend"),
+      transform: "translate(".concat(month.x, ",").concat(month.y, ") rotate(").concat(month.rotation, ")"),
+      textAnchor: "middle",
+      style: theme.labels.text
+    }, legend(month.year, month.month, month.date));
+  }));
+});
+CalendarMonthLegends.displayName = 'CalendarMonthLegends';
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
 var computeDomain = function computeDomain(data, minSpec, maxSpec) {
   var allValues = data.map(function (d) {
     return d.value;
@@ -126,16 +316,17 @@ var computeCellSize = function computeCellSize(_ref) {
       direction = _ref.direction,
       yearRange = _ref.yearRange,
       yearSpacing = _ref.yearSpacing,
+      monthSpacing = _ref.monthSpacing,
       daySpacing = _ref.daySpacing,
       maxWeeks = _ref.maxWeeks;
   var hCellSize;
   var vCellSize;
   if (direction === 'horizontal') {
-    hCellSize = (width - daySpacing * maxWeeks) / maxWeeks;
+    hCellSize = (width - monthSpacing * 12 - daySpacing * maxWeeks) / maxWeeks;
     vCellSize = (height - (yearRange.length - 1) * yearSpacing - yearRange.length * (8 * daySpacing)) / (yearRange.length * 7);
   } else {
     hCellSize = (width - (yearRange.length - 1) * yearSpacing - yearRange.length * (8 * daySpacing)) / (yearRange.length * 7);
-    vCellSize = (height - daySpacing * maxWeeks) / maxWeeks;
+    vCellSize = (height - monthSpacing * 12 - daySpacing * maxWeeks) / maxWeeks;
   }
   return Math.min(hCellSize, vCellSize);
 };
@@ -144,6 +335,7 @@ var monthPathAndBBox = function monthPathAndBBox(_ref2) {
       cellSize = _ref2.cellSize,
       yearIndex = _ref2.yearIndex,
       yearSpacing = _ref2.yearSpacing,
+      monthSpacing = _ref2.monthSpacing,
       daySpacing = _ref2.daySpacing,
       direction = _ref2.direction,
       originX = _ref2.originX,
@@ -156,9 +348,12 @@ var monthPathAndBBox = function monthPathAndBBox(_ref2) {
   var xO = originX;
   var yO = originY;
   var yearOffset = yearIndex * (7 * (cellSize + daySpacing) + yearSpacing);
+  var monthOffset = date.getMonth() * monthSpacing;
   if (direction === 'horizontal') {
     yO += yearOffset;
+    xO += monthOffset;
   } else {
+    yO += monthOffset;
     xO += yearOffset;
   }
   var path;
@@ -189,27 +384,28 @@ var memoMonthPathAndBBox = memoize(monthPathAndBBox, function (_ref3) {
       cellSize = _ref3.cellSize,
       yearIndex = _ref3.yearIndex,
       yearSpacing = _ref3.yearSpacing,
+      monthSpacing = _ref3.monthSpacing,
       daySpacing = _ref3.daySpacing,
       direction = _ref3.direction,
       originX = _ref3.originX,
       originY = _ref3.originY;
-  return "".concat(date.toString(), ".").concat(cellSize, ".").concat(yearIndex, ".").concat(yearSpacing, ".").concat(daySpacing, ".").concat(direction, ".").concat(originX, ".").concat(originY);
+  return "".concat(date.toString(), ".").concat(cellSize, ".").concat(yearIndex, ".").concat(yearSpacing, ".").concat(monthSpacing, ".").concat(daySpacing, ".").concat(direction, ".").concat(originX, ".").concat(originY);
 });
-var cellPositionHorizontal = function cellPositionHorizontal(cellSize, yearSpacing, daySpacing) {
+var cellPositionHorizontal = function cellPositionHorizontal(cellSize, yearSpacing, monthSpacing, daySpacing) {
   return function (originX, originY, d, yearIndex) {
     var weekOfYear = d3Time.timeWeek.count(d3Time.timeYear(d), d);
     return {
-      x: originX + weekOfYear * (cellSize + daySpacing) + daySpacing / 2,
+      x: originX + weekOfYear * (cellSize + daySpacing) + daySpacing / 2 + d.getMonth() * monthSpacing,
       y: originY + d.getDay() * (cellSize + daySpacing) + daySpacing / 2 + yearIndex * (yearSpacing + 7 * (cellSize + daySpacing))
     };
   };
 };
-var cellPositionVertical = function cellPositionVertical(cellSize, yearSpacing, daySpacing) {
+var cellPositionVertical = function cellPositionVertical(cellSize, yearSpacing, monthSpacing, daySpacing) {
   return function (originX, originY, d, yearIndex) {
     var weekOfYear = d3Time.timeWeek.count(d3Time.timeYear(d), d);
     return {
       x: originX + d.getDay() * (cellSize + daySpacing) + daySpacing / 2 + yearIndex * (yearSpacing + 7 * (cellSize + daySpacing)),
-      y: originY + weekOfYear * (cellSize + daySpacing) + daySpacing / 2
+      y: originY + weekOfYear * (cellSize + daySpacing) + daySpacing / 2 + d.getMonth() * monthSpacing
     };
   };
 };
@@ -221,6 +417,7 @@ var computeLayout = function computeLayout(_ref4) {
       to = _ref4.to,
       direction = _ref4.direction,
       yearSpacing = _ref4.yearSpacing,
+      monthSpacing = _ref4.monthSpacing,
       daySpacing = _ref4.daySpacing,
       align = _ref4.align;
   var fromDate = isDate(from) ? from : new Date(from);
@@ -235,10 +432,11 @@ var computeLayout = function computeLayout(_ref4) {
     direction: direction,
     yearRange: yearRange,
     yearSpacing: yearSpacing,
+    monthSpacing: monthSpacing,
     daySpacing: daySpacing,
     maxWeeks: maxWeeks
   });
-  var monthsSize = cellSize * maxWeeks + daySpacing * maxWeeks;
+  var monthsSize = cellSize * maxWeeks + daySpacing * maxWeeks + monthSpacing * 12;
   var yearsSize = (cellSize + daySpacing) * 7 * yearRange.length + yearSpacing * (yearRange.length - 1);
   var calendarWidth = direction === 'horizontal' ? monthsSize : yearsSize;
   var calendarHeight = direction === 'horizontal' ? yearsSize : monthsSize;
@@ -258,9 +456,9 @@ var computeLayout = function computeLayout(_ref4) {
       originY = _alignBox2[1];
   var cellPosition;
   if (direction === 'horizontal') {
-    cellPosition = cellPositionHorizontal(cellSize, yearSpacing, daySpacing);
+    cellPosition = cellPositionHorizontal(cellSize, yearSpacing, monthSpacing, daySpacing);
   } else {
-    cellPosition = cellPositionVertical(cellSize, yearSpacing, daySpacing);
+    cellPosition = cellPositionVertical(cellSize, yearSpacing, monthSpacing, daySpacing);
   }
   var years = [];
   var months = [];
@@ -269,14 +467,14 @@ var computeLayout = function computeLayout(_ref4) {
     var yearStart = new Date(year, 0, 1);
     var yearEnd = new Date(year + 1, 0, 1);
     days = days.concat(d3Time.timeDays(yearStart, yearEnd).map(function (dayDate) {
-      return _objectSpread$1({
+      return _objectSpread2({
         date: dayDate,
         day: dayFormat(dayDate),
         size: cellSize
       }, cellPosition(originX, originY, dayDate, i));
     }));
     var yearMonths = d3Time.timeMonths(yearStart, yearEnd).map(function (monthDate) {
-      return _objectSpread$1({
+      return _objectSpread2({
         date: monthDate,
         year: monthDate.getFullYear(),
         month: monthDate.getMonth()
@@ -287,6 +485,7 @@ var computeLayout = function computeLayout(_ref4) {
         direction: direction,
         yearIndex: i,
         yearSpacing: yearSpacing,
+        monthSpacing: monthSpacing,
         daySpacing: daySpacing,
         cellSize: cellSize
       }));
@@ -319,15 +518,19 @@ var bindDaysData = function bindDaysData(_ref5) {
       colorScale = _ref5.colorScale,
       emptyColor = _ref5.emptyColor;
   return days.map(function (day) {
-    day.color = emptyColor;
-    data.forEach(function (dayData) {
-      if (dayData.day === day.day) {
-        day.value = dayData.value;
-        day.color = colorScale(dayData.value);
-        day.data = dayData;
-      }
+    var dayData = data.find(function (item) {
+      return item.day === day.day;
     });
-    return day;
+    if (!dayData) {
+      return _objectSpread2(_objectSpread2({}, day), {}, {
+        color: emptyColor
+      });
+    }
+    return _objectSpread2(_objectSpread2({}, day), {}, {
+      color: colorScale(dayData.value),
+      data: dayData,
+      value: dayData.value
+    });
   });
 };
 var computeYearLegendPositions = function computeYearLegendPositions(_ref6) {
@@ -354,7 +557,7 @@ var computeYearLegendPositions = function computeYearLegendPositions(_ref6) {
       x = year.bbox.x + year.bbox.width / 2;
       y = year.bbox.y + year.bbox.height + offset;
     }
-    return _objectSpread$1({}, year, {
+    return _objectSpread2(_objectSpread2({}, year), {}, {
       x: x,
       y: y,
       rotation: rotation
@@ -385,7 +588,7 @@ var computeMonthLegendPositions = function computeMonthLegendPositions(_ref7) {
       y = month.bbox.y + month.bbox.height / 2;
       rotation = -90;
     }
-    return _objectSpread$1({}, month, {
+    return _objectSpread2(_objectSpread2({}, month), {}, {
       x: x,
       y: y,
       rotation: rotation
@@ -393,164 +596,128 @@ var computeMonthLegendPositions = function computeMonthLegendPositions(_ref7) {
   });
 };
 
-var commonEnhancers = [core.withTheme(), core.withDimensions(), _withPropsOnChange(['data', 'minValue', 'maxValue', 'colors', 'colorScale'], function (_ref) {
-  var data = _ref.data,
-      minValue = _ref.minValue,
-      maxValue = _ref.maxValue,
-      colors = _ref.colors,
-      colorScale = _ref.colorScale;
-  if (colorScale) return {
-    colorScale: colorScale
-  };
-  var domain = computeDomain(data, minValue, maxValue);
-  var defaultColorScale = d3Scale.scaleQuantize().domain(domain).range(colors);
-  return {
-    colorScale: defaultColorScale
-  };
-}), _withPropsOnChange(['width', 'height', 'from', 'to', 'direction', 'yearSpacing', 'daySpacing', 'align'], function (_ref2) {
-  var width = _ref2.width,
-      height = _ref2.height,
-      from = _ref2.from,
-      to = _ref2.to,
-      direction = _ref2.direction,
-      yearSpacing = _ref2.yearSpacing,
-      daySpacing = _ref2.daySpacing,
-      align = _ref2.align;
-  return computeLayout({
-    width: width,
-    height: height,
-    from: from,
-    to: to,
-    direction: direction,
-    yearSpacing: yearSpacing,
-    daySpacing: daySpacing,
-    align: align
-  });
-}), _withPropsOnChange(['years', 'direction', 'yearLegendPosition', 'yearLegendOffset'], function (_ref3) {
+var useCalendarLayout = function useCalendarLayout(_ref) {
+  var width = _ref.width,
+      height = _ref.height,
+      from = _ref.from,
+      to = _ref.to,
+      direction = _ref.direction,
+      yearSpacing = _ref.yearSpacing,
+      monthSpacing = _ref.monthSpacing,
+      daySpacing = _ref.daySpacing,
+      align = _ref.align;
+  return React.useMemo(function () {
+    return computeLayout({
+      width: width,
+      height: height,
+      from: from,
+      to: to,
+      direction: direction,
+      yearSpacing: yearSpacing,
+      monthSpacing: monthSpacing,
+      daySpacing: daySpacing,
+      align: align
+    });
+  }, [width, height, from, to, direction, yearSpacing, monthSpacing, daySpacing, align]);
+};
+var useColorScale = function useColorScale(_ref2) {
+  var data = _ref2.data,
+      minValue = _ref2.minValue,
+      maxValue = _ref2.maxValue,
+      colors = _ref2.colors,
+      colorScale = _ref2.colorScale;
+  return React.useMemo(function () {
+    if (colorScale) return colorScale;
+    var domain = computeDomain(data, minValue, maxValue);
+    var defaultColorScale = d3Scale.scaleQuantize().domain(domain).range(colors);
+    return defaultColorScale;
+  }, [data, minValue, maxValue, colors, colorScale]);
+};
+var useYearLegends = function useYearLegends(_ref3) {
   var years = _ref3.years,
       direction = _ref3.direction,
       yearLegendPosition = _ref3.yearLegendPosition,
       yearLegendOffset = _ref3.yearLegendOffset;
-  return {
-    yearLegends: computeYearLegendPositions({
+  return React.useMemo(function () {
+    return computeYearLegendPositions({
       years: years,
       direction: direction,
       position: yearLegendPosition,
       offset: yearLegendOffset
-    })
-  };
-}), _withPropsOnChange(['months', 'direction', 'monthLegendPosition', 'monthLegendOffset'], function (_ref4) {
+    });
+  }, [years, direction, yearLegendPosition, yearLegendOffset]);
+};
+var useMonthLegends = function useMonthLegends(_ref4) {
   var months = _ref4.months,
       direction = _ref4.direction,
       monthLegendPosition = _ref4.monthLegendPosition,
       monthLegendOffset = _ref4.monthLegendOffset;
-  return {
-    monthLegends: computeMonthLegendPositions({
+  return React.useMemo(function () {
+    return computeMonthLegendPositions({
       months: months,
       direction: direction,
       position: monthLegendPosition,
       offset: monthLegendOffset
-    })
-  };
-}), _withPropsOnChange(['days', 'data', 'colorScale', 'emptyColor'], function (_ref5) {
+    });
+  }, [months, direction, monthLegendPosition, monthLegendOffset]);
+};
+var useDays = function useDays(_ref5) {
   var days = _ref5.days,
       data = _ref5.data,
       colorScale = _ref5.colorScale,
       emptyColor = _ref5.emptyColor;
-  return {
-    days: bindDaysData({
+  return React.useMemo(function () {
+    return bindDaysData({
       days: days,
       data: data,
       colorScale: colorScale,
       emptyColor: emptyColor
-    })
-  };
-})];
-var enhance = (function (Component) {
-  switch (Component.displayName) {
-    case 'Calendar':
-      return _compose.apply(void 0, [_defaultProps(CalendarDefaultProps)].concat(commonEnhancers, [_pure]))(Component);
-    case 'CalendarCanvas':
-      return _compose.apply(void 0, [_defaultProps(CalendarCanvasDefaultProps)].concat(commonEnhancers, [_pure]))(Component);
-  }
-  return Component;
-});
-
-var CalendarYearLegends = React.memo(function (_ref) {
-  var years = _ref.years,
-      legend = _ref.legend,
-      theme = _ref.theme;
-  return React__default.createElement(React__default.Fragment, null, years.map(function (year) {
-    return React__default.createElement("text", {
-      key: year.year,
-      transform: "translate(".concat(year.x, ",").concat(year.y, ") rotate(").concat(year.rotation, ")"),
-      textAnchor: "middle",
-      style: theme.labels.text
-    }, legend(year.year));
-  }));
-});
-CalendarYearLegends.propTypes = {
-  years: PropTypes.array.isRequired,
-  legend: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired
+    });
+  }, [days, data, colorScale, emptyColor]);
 };
-CalendarYearLegends.displayName = 'CalendarYearLegends';
 
-var CalendarMonthPath = function CalendarMonthPath(_ref) {
-  var path = _ref.path,
-      borderWidth = _ref.borderWidth,
-      borderColor = _ref.borderColor;
-  return React__default.createElement("path", {
-    d: path,
-    style: {
-      fill: 'none',
-      strokeWidth: borderWidth,
-      stroke: borderColor,
-      pointerEvents: 'none'
-    }
-  });
-};
-CalendarMonthPath.propTypes = {
-  path: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired
-};
-var CalendarMonthPath$1 = _pure(CalendarMonthPath);
-
-var CalendarMonthLegends = React.memo(function (_ref) {
-  var months = _ref.months,
-      legend = _ref.legend,
-      theme = _ref.theme;
-  return React__default.createElement(React__default.Fragment, null, months.map(function (month) {
-    return React__default.createElement("text", {
-      key: "".concat(month.date.toString(), ".legend"),
-      transform: "translate(".concat(month.x, ",").concat(month.y, ") rotate(").concat(month.rotation, ")"),
-      textAnchor: "middle",
-      style: theme.labels.text
-    }, legend(month.year, month.month, month.date));
-  }));
-});
-CalendarMonthLegends.propTypes = {
-  months: PropTypes.array.isRequired,
-  legend: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired
-};
-CalendarMonthLegends.displayName = 'CalendarMonthLegends';
-
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var CalendarDay = React.memo(function (_ref) {
-  var x = _ref.x,
+  var data = _ref.data,
+      x = _ref.x,
       y = _ref.y,
       size = _ref.size,
-      spacing = _ref.spacing,
       color = _ref.color,
       borderWidth = _ref.borderWidth,
       borderColor = _ref.borderColor,
+      isInteractive = _ref.isInteractive,
+      tooltip$1 = _ref.tooltip,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseMove = _ref.onMouseMove,
+      onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip;
-  return React__default.createElement(React__default.Fragment, null, React__default.createElement("rect", {
+      formatValue = _ref.formatValue;
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleMouseEnter = React.useCallback(function (event) {
+    var formatedData = _objectSpread2(_objectSpread2({}, data), {}, {
+      value: formatValue(data.value),
+      data: _objectSpread2({}, data.data)
+    });
+    showTooltipFromEvent(React__default.createElement(tooltip$1, _objectSpread2({}, formatedData)), event);
+    onMouseEnter && onMouseEnter(data, event);
+  }, [showTooltipFromEvent, tooltip$1, data, onMouseEnter, formatValue]);
+  var handleMouseMove = React.useCallback(function (event) {
+    var formatedData = _objectSpread2(_objectSpread2({}, data), {}, {
+      value: formatValue(data.value),
+      data: _objectSpread2({}, data.data)
+    });
+    showTooltipFromEvent(React__default.createElement(tooltip$1, _objectSpread2({}, formatedData)), event);
+    onMouseMove && onMouseMove(data, event);
+  }, [showTooltipFromEvent, tooltip$1, data, onMouseMove, formatValue]);
+  var handleMouseLeave = React.useCallback(function (event) {
+    hideTooltip();
+    onMouseLeave && onMouseLeave(data, event);
+  }, [isInteractive, hideTooltip, data, onMouseLeave]);
+  var handleClick = React.useCallback(function (event) {
+    return onClick && onClick(data, event);
+  }, [isInteractive, data, onClick]);
+  return React__default.createElement("rect", {
     x: x,
     y: y,
     width: size,
@@ -559,406 +726,378 @@ var CalendarDay = React.memo(function (_ref) {
       fill: color,
       strokeWidth: borderWidth,
       stroke: borderColor
-    }
-  }), React__default.createElement("rect", {
-    fill: "rgba(0, 0, 0, 0)",
-    x: x - spacing / 2,
-    y: y - spacing / 2,
-    width: size + spacing,
-    height: size + spacing,
-    onClick: onClick,
-    onMouseEnter: showTooltip,
-    onMouseMove: showTooltip,
-    onMouseLeave: hideTooltip
-  }));
+    },
+    onMouseEnter: isInteractive ? handleMouseEnter : undefined,
+    onMouseMove: isInteractive ? handleMouseMove : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined
+  });
 });
-CalendarDay.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  data: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  spacing: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-  tooltip: PropTypes.func,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  theme: PropTypes.shape({
-    tooltip: PropTypes.shape({}).isRequired
-  }).isRequired
-};
 CalendarDay.displayName = 'CalendarDay';
-var enhance$1 = _compose(_withPropsOnChange(['data', 'onClick'], function (_ref2) {
-  var data = _ref2.data,
-      _onClick = _ref2.onClick;
-  return {
-    onClick: function onClick(event) {
-      return _onClick(data, event);
-    }
-  };
-}), _withPropsOnChange(['data', 'color', 'showTooltip', 'tooltipFormat', 'tooltip', 'theme'], function (_ref3) {
-  var data = _ref3.data,
-      color = _ref3.color,
-      _showTooltip = _ref3.showTooltip,
-      tooltipFormat = _ref3.tooltipFormat,
-      tooltip$1 = _ref3.tooltip,
-      theme = _ref3.theme;
-  if (data.value === undefined) return {
-    showTooltip: core.noop
-  };
-  return {
-    showTooltip: function showTooltip(event) {
-      return _showTooltip(React__default.createElement(tooltip.BasicTooltip, {
-        id: "".concat(data.day),
-        value: data.value,
-        enableChip: true,
-        color: color,
-        theme: theme,
-        format: tooltipFormat,
-        renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$2({
-          color: color
-        }, data)) : null
-      }), event);
-    }
-  };
-}), _pure);
-var CalendarDay$1 = enhance$1(CalendarDay);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var Calendar = function Calendar(_ref) {
-  var colorScale = _ref.colorScale,
-      margin = _ref.margin,
+  var partialMargin = _ref.margin,
       width = _ref.width,
       height = _ref.height,
-      outerWidth = _ref.outerWidth,
-      outerHeight = _ref.outerHeight,
-      yearLegends = _ref.yearLegends,
+      align = _ref.align,
+      colors = _ref.colors,
+      colorScale = _ref.colorScale,
+      data = _ref.data,
+      direction = _ref.direction,
+      emptyColor = _ref.emptyColor,
+      from = _ref.from,
+      to = _ref.to,
+      minValue = _ref.minValue,
+      maxValue = _ref.maxValue,
+      valueFormat = _ref.valueFormat,
+      legendFormat = _ref.legendFormat,
       yearLegend = _ref.yearLegend,
-      monthLegends = _ref.monthLegends,
-      monthLegend = _ref.monthLegend,
-      monthBorderWidth = _ref.monthBorderWidth,
+      yearLegendOffset = _ref.yearLegendOffset,
+      yearLegendPosition = _ref.yearLegendPosition,
+      yearSpacing = _ref.yearSpacing,
       monthBorderColor = _ref.monthBorderColor,
-      daySpacing = _ref.daySpacing,
-      dayBorderWidth = _ref.dayBorderWidth,
+      monthBorderWidth = _ref.monthBorderWidth,
+      monthLegend = _ref.monthLegend,
+      monthLegendOffset = _ref.monthLegendOffset,
+      monthLegendPosition = _ref.monthLegendPosition,
+      monthSpacing = _ref.monthSpacing,
       dayBorderColor = _ref.dayBorderColor,
-      theme = _ref.theme,
+      dayBorderWidth = _ref.dayBorderWidth,
+      daySpacing = _ref.daySpacing,
       isInteractive = _ref.isInteractive,
-      tooltipFormat = _ref.tooltipFormat,
       tooltip = _ref.tooltip,
       onClick = _ref.onClick,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseLeave = _ref.onMouseLeave,
+      onMouseMove = _ref.onMouseMove,
       legends$1 = _ref.legends,
-      months = _ref.months,
-      days = _ref.days;
-  return React__default.createElement(core.Container, {
-    isInteractive: isInteractive,
-    theme: theme,
-    animate: false
-  }, function (_ref2) {
-    var showTooltip = _ref2.showTooltip,
-        hideTooltip = _ref2.hideTooltip;
-    return React__default.createElement(core.SvgWrapper, {
-      width: outerWidth,
-      height: outerHeight,
-      margin: margin,
-      theme: theme
-    }, days.map(function (d) {
-      return React__default.createElement(CalendarDay$1, {
-        key: d.date.toString(),
-        data: d,
-        x: d.x,
-        y: d.y,
-        size: d.size,
-        spacing: daySpacing,
-        color: d.color,
-        borderWidth: dayBorderWidth,
-        borderColor: dayBorderColor,
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        tooltipFormat: tooltipFormat,
-        tooltip: tooltip,
-        theme: theme,
-        onClick: onClick
-      });
-    }), months.map(function (m) {
-      return React__default.createElement(CalendarMonthPath$1, {
-        key: m.date.toString(),
-        path: m.path,
-        borderWidth: monthBorderWidth,
-        borderColor: monthBorderColor
-      });
-    }), React__default.createElement(CalendarMonthLegends, {
-      months: monthLegends,
-      legend: monthLegend,
-      theme: theme
-    }), React__default.createElement(CalendarYearLegends, {
-      years: yearLegends,
-      legend: yearLegend,
-      theme: theme
-    }), legends$1.map(function (legend, i) {
-      var legendData = colorScale.ticks(legend.itemCount).map(function (value) {
-        return {
-          id: value,
-          label: value,
-          color: colorScale(value)
-        };
-      });
-      return React__default.createElement(legends.BoxLegendSvg, _extends({
-        key: i
-      }, legend, {
-        containerWidth: width,
-        containerHeight: height,
-        data: legendData,
-        theme: theme
-      }));
-    }));
+      role = _ref.role;
+  var theme = core.useTheme();
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useCalendarLayout = useCalendarLayout({
+    width: innerWidth,
+    height: innerHeight,
+    from: from,
+    to: to,
+    direction: direction,
+    yearSpacing: yearSpacing,
+    monthSpacing: monthSpacing,
+    daySpacing: daySpacing,
+    align: align
+  }),
+      months = _useCalendarLayout.months,
+      years = _useCalendarLayout.years,
+      rest = _objectWithoutProperties(_useCalendarLayout, ["months", "years"]);
+  var colorScaleFn = useColorScale({
+    data: data,
+    minValue: minValue,
+    maxValue: maxValue,
+    colors: colors,
+    colorScale: colorScale
   });
+  var monthLegends = useMonthLegends({
+    months: months,
+    direction: direction,
+    monthLegendPosition: monthLegendPosition,
+    monthLegendOffset: monthLegendOffset
+  });
+  var yearLegends = useYearLegends({
+    years: years,
+    direction: direction,
+    yearLegendPosition: yearLegendPosition,
+    yearLegendOffset: yearLegendOffset
+  });
+  var days = useDays({
+    days: rest.days,
+    data: data,
+    colorScale: colorScaleFn,
+    emptyColor: emptyColor
+  });
+  var formatLegend = core.useValueFormatter(legendFormat);
+  var formatValue = core.useValueFormatter(valueFormat);
+  return React__default.createElement(core.SvgWrapper, {
+    width: outerWidth,
+    height: outerHeight,
+    margin: margin,
+    theme: theme,
+    role: role
+  }, days.map(function (d) {
+    return React__default.createElement(CalendarDay, {
+      key: d.date.toString(),
+      data: d,
+      x: d.x,
+      y: d.y,
+      size: d.size,
+      spacing: daySpacing,
+      color: d.color,
+      borderWidth: dayBorderWidth,
+      borderColor: dayBorderColor,
+      onMouseEnter: onMouseEnter,
+      onMouseLeave: onMouseLeave,
+      onMouseMove: onMouseMove,
+      isInteractive: isInteractive,
+      tooltip: tooltip,
+      theme: theme,
+      onClick: onClick,
+      formatValue: formatValue
+    });
+  }), months.map(function (m) {
+    return React__default.createElement(CalendarMonthPath, {
+      key: m.date.toString(),
+      path: m.path,
+      borderWidth: monthBorderWidth,
+      borderColor: monthBorderColor
+    });
+  }), React__default.createElement(CalendarMonthLegends, {
+    months: monthLegends,
+    legend: monthLegend,
+    theme: theme
+  }), React__default.createElement(CalendarYearLegends, {
+    years: yearLegends,
+    legend: yearLegend,
+    theme: theme
+  }), legends$1.map(function (legend, i) {
+    var legendData = colorScaleFn.ticks(legend.itemCount).map(function (value) {
+      return {
+        id: value,
+        label: formatLegend(value),
+        color: colorScaleFn(value)
+      };
+    });
+    return React__default.createElement(legends.BoxLegendSvg, Object.assign({
+      key: i
+    }, legend, {
+      containerWidth: width,
+      containerHeight: height,
+      data: legendData,
+      theme: theme
+    }));
+  }));
 };
 Calendar.displayName = 'Calendar';
-Calendar.propTypes = CalendarPropTypes;
-var Calendar$1 = _setDisplayName('Calendar')(enhance(Calendar));
+Calendar.defaultProps = CalendarDefaultProps;
+var Calendar$1 = core.withContainer(Calendar);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveCalendar = function ResponsiveCalendar(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Calendar$1, _extends$1({
+    return React__default.createElement(Calendar$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var findDayUnderCursor = function findDayUnderCursor(days, size, spacing, margin, x, y) {
+var findDayUnderCursor = function findDayUnderCursor(event, canvasEl, days, size, dayBorderWidth, margin) {
+  var _getRelativeCursor = core.getRelativeCursor(canvasEl, event),
+      _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
+      x = _getRelativeCursor2[0],
+      y = _getRelativeCursor2[1];
   return days.find(function (day) {
-    return day.value !== undefined && core.isCursorInRect(day.x + margin.left - spacing / 2, day.y + margin.top - spacing / 2, size + spacing, size + spacing, x, y);
+    return day.value !== undefined && core.isCursorInRect(day.x + margin.left - dayBorderWidth / 2, day.y + margin.top - dayBorderWidth / 2, size + dayBorderWidth, size + dayBorderWidth, x, y);
   });
 };
-var CalendarCanvas =
-function (_Component) {
-  _inherits(CalendarCanvas, _Component);
-  function CalendarCanvas() {
-    var _getPrototypeOf2;
-    var _this;
-    _classCallCheck(this, CalendarCanvas);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(CalendarCanvas)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$3(_assertThisInitialized(_this), "handleMouseHover", function (showTooltip, hideTooltip) {
-      return function (event) {
-        var _this$props = _this.props,
-            isInteractive = _this$props.isInteractive,
-            margin = _this$props.margin,
-            theme = _this$props.theme,
-            days = _this$props.days,
-            daySpacing = _this$props.daySpacing,
-            tooltipFormat = _this$props.tooltipFormat,
-            tooltip$1 = _this$props.tooltip;
-        if (!isInteractive || !days || days.length === 0) return;
-        var _getRelativeCursor = core.getRelativeCursor(_this.surface, event),
-            _getRelativeCursor2 = _slicedToArray$1(_getRelativeCursor, 2),
-            x = _getRelativeCursor2[0],
-            y = _getRelativeCursor2[1];
-        var currentDay = findDayUnderCursor(days, days[0].size, daySpacing, margin, x, y);
-        if (currentDay !== undefined) {
-          showTooltip(React__default.createElement(tooltip.BasicTooltip, {
-            id: "".concat(currentDay.day),
-            value: currentDay.value,
-            enableChip: true,
-            color: currentDay.color,
-            theme: theme,
-            format: tooltipFormat,
-            renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, currentDay) : null
-          }), event);
-        } else {
-          hideTooltip();
-        }
-      };
-    });
-    _defineProperty$3(_assertThisInitialized(_this), "handleMouseLeave", function (hideTooltip) {
-      return function () {
-        if (_this.props.isInteractive !== true) return;
-        hideTooltip();
-      };
-    });
-    _defineProperty$3(_assertThisInitialized(_this), "handleClick", function (event) {
-      var _this$props2 = _this.props,
-          isInteractive = _this$props2.isInteractive,
-          margin = _this$props2.margin,
-          onClick = _this$props2.onClick,
-          days = _this$props2.days,
-          daySpacing = _this$props2.daySpacing;
-      if (!isInteractive || !days || days.length === 0) return;
-      var _getRelativeCursor3 = core.getRelativeCursor(_this.surface, event),
-          _getRelativeCursor4 = _slicedToArray$1(_getRelativeCursor3, 2),
-          x = _getRelativeCursor4[0],
-          y = _getRelativeCursor4[1];
-      var currentDay = findDayUnderCursor(days, days[0].size, daySpacing, margin, x, y);
-      if (currentDay !== undefined) onClick(currentDay, event);
-    });
-    return _this;
-  }
-  _createClass(CalendarCanvas, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
-    }
-  }, {
-    key: "shouldComponentUpdate",
-    value: function shouldComponentUpdate(props) {
-      if (this.props.outerWidth !== props.outerWidth || this.props.outerHeight !== props.outerHeight || this.props.isInteractive !== props.isInteractive || this.props.theme !== props.theme) {
-        return true;
-      } else {
-        this.draw(props);
-        return false;
+var CalendarCanvas = React.memo(function (_ref) {
+  var partialMargin = _ref.margin,
+      width = _ref.width,
+      height = _ref.height,
+      pixelRatio = _ref.pixelRatio,
+      align = _ref.align,
+      colors = _ref.colors,
+      colorScale = _ref.colorScale,
+      data = _ref.data,
+      direction = _ref.direction,
+      emptyColor = _ref.emptyColor,
+      from = _ref.from,
+      to = _ref.to,
+      minValue = _ref.minValue,
+      maxValue = _ref.maxValue,
+      valueFormat = _ref.valueFormat,
+      legendFormat = _ref.legendFormat,
+      yearLegend = _ref.yearLegend,
+      yearLegendOffset = _ref.yearLegendOffset,
+      yearLegendPosition = _ref.yearLegendPosition,
+      yearSpacing = _ref.yearSpacing,
+      monthLegend = _ref.monthLegend,
+      monthLegendOffset = _ref.monthLegendOffset,
+      monthLegendPosition = _ref.monthLegendPosition,
+      monthSpacing = _ref.monthSpacing,
+      dayBorderColor = _ref.dayBorderColor,
+      dayBorderWidth = _ref.dayBorderWidth,
+      daySpacing = _ref.daySpacing,
+      isInteractive = _ref.isInteractive,
+      tooltip$1 = _ref.tooltip,
+      onClick = _ref.onClick,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseLeave = _ref.onMouseLeave,
+      onMouseMove = _ref.onMouseMove,
+      legends$1 = _ref.legends;
+  var canvasEl = React.useRef(null);
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight,
+      margin = _useDimensions.margin;
+  var _useCalendarLayout = useCalendarLayout({
+    width: innerWidth,
+    height: innerHeight,
+    from: from,
+    to: to,
+    direction: direction,
+    yearSpacing: yearSpacing,
+    monthSpacing: monthSpacing,
+    daySpacing: daySpacing,
+    align: align
+  }),
+      months = _useCalendarLayout.months,
+      years = _useCalendarLayout.years,
+      rest = _objectWithoutProperties(_useCalendarLayout, ["months", "years"]);
+  var colorScaleFn = useColorScale({
+    data: data,
+    minValue: minValue,
+    maxValue: maxValue,
+    colors: colors,
+    colorScale: colorScale
+  });
+  var monthLegends = useMonthLegends({
+    months: months,
+    direction: direction,
+    monthLegendPosition: monthLegendPosition,
+    monthLegendOffset: monthLegendOffset
+  });
+  var yearLegends = useYearLegends({
+    years: years,
+    direction: direction,
+    yearLegendPosition: yearLegendPosition,
+    yearLegendOffset: yearLegendOffset
+  });
+  var days = useDays({
+    days: rest.days,
+    data: data,
+    colorScale: colorScaleFn,
+    emptyColor: emptyColor
+  });
+  var _useState = React.useState(null),
+      _useState2 = _slicedToArray(_useState, 2),
+      currentDay = _useState2[0],
+      setCurrentDay = _useState2[1];
+  var theme = core.useTheme();
+  var formatValue = core.useValueFormatter(valueFormat);
+  var formatLegend = core.useValueFormatter(legendFormat);
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  React.useEffect(function () {
+    canvasEl.current.width = outerWidth * pixelRatio;
+    canvasEl.current.height = outerHeight * pixelRatio;
+    var ctx = canvasEl.current.getContext('2d');
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.fillStyle = theme.background;
+    ctx.fillRect(0, 0, outerWidth, outerHeight);
+    ctx.translate(margin.left, margin.top);
+    days.forEach(function (day) {
+      ctx.fillStyle = day.color;
+      if (dayBorderWidth > 0) {
+        ctx.strokeStyle = dayBorderColor;
+        ctx.lineWidth = dayBorderWidth;
       }
+      ctx.beginPath();
+      ctx.rect(day.x, day.y, day.size, day.size);
+      ctx.fill();
+      if (dayBorderWidth > 0) {
+        ctx.stroke();
+      }
+    });
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = theme.labels.text.fill;
+    ctx.font = "".concat(theme.labels.text.fontSize, "px ").concat(theme.labels.text.fontFamily);
+    monthLegends.forEach(function (month) {
+      ctx.save();
+      ctx.translate(month.x, month.y);
+      ctx.rotate(core.degreesToRadians(month.rotation));
+      ctx.fillText(monthLegend(month.year, month.month, month.date), 0, 0);
+      ctx.restore();
+    });
+    yearLegends.forEach(function (year) {
+      ctx.save();
+      ctx.translate(year.x, year.y);
+      ctx.rotate(core.degreesToRadians(year.rotation));
+      ctx.fillText(yearLegend(year.year), 0, 0);
+      ctx.restore();
+    });
+    legends$1.forEach(function (legend) {
+      var legendData = colorScaleFn.ticks(legend.itemCount).map(function (value) {
+        return {
+          id: value,
+          label: formatLegend(value),
+          color: colorScaleFn(value)
+        };
+      });
+      legends.renderLegendToCanvas(ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
+        data: legendData,
+        containerWidth: innerWidth,
+        containerHeight: innerHeight,
+        theme: theme
+      }));
+    });
+  }, [canvasEl, innerHeight, innerWidth, outerWidth, outerHeight, pixelRatio, margin, days, dayBorderColor, dayBorderWidth, colorScale, yearLegend, yearLegends, monthLegend, monthLegends, legends$1, theme, formatLegend]);
+  var handleMouseHover = React.useCallback(function (event) {
+    var data = findDayUnderCursor(event, canvasEl.current, days, days[0].size, dayBorderWidth, margin);
+    if (data) {
+      setCurrentDay(data);
+      var formatedData = _objectSpread2(_objectSpread2({}, data), {}, {
+        value: formatValue(data.value),
+        data: _objectSpread2({}, data.data)
+      });
+      showTooltipFromEvent(React__default.createElement(tooltip$1, _objectSpread2({}, formatedData)), event);
+      !currentDay && onMouseEnter && onMouseEnter(data, event);
+      onMouseMove && onMouseMove(data, event);
+      currentDay && currentDay.id !== data.id && onMouseLeave && onMouseLeave(data, event);
+    } else {
+      hideTooltip();
+      onMouseLeave && onMouseLeave(data, event);
     }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
-    }
-  }, {
-    key: "draw",
-    value: function draw(props) {
-      var _this2 = this;
-      var pixelRatio = props.pixelRatio,
-          margin = props.margin,
-          width = props.width,
-          height = props.height,
-          outerWidth = props.outerWidth,
-          outerHeight = props.outerHeight,
-          colorScale = props.colorScale,
-          yearLegends = props.yearLegends,
-          yearLegend = props.yearLegend,
-          monthLegends = props.monthLegends,
-          monthLegend = props.monthLegend,
-          days = props.days,
-          dayBorderWidth = props.dayBorderWidth,
-          dayBorderColor = props.dayBorderColor,
-          legends$1 = props.legends,
-          theme = props.theme;
-      this.surface.width = outerWidth * pixelRatio;
-      this.surface.height = outerHeight * pixelRatio;
-      this.ctx.scale(pixelRatio, pixelRatio);
-      this.ctx.fillStyle = theme.background;
-      this.ctx.fillRect(0, 0, outerWidth, outerHeight);
-      this.ctx.translate(margin.left, margin.top);
-      days.forEach(function (day) {
-        _this2.ctx.fillStyle = day.color;
-        if (dayBorderWidth > 0) {
-          _this2.ctx.strokeStyle = dayBorderColor;
-          _this2.ctx.lineWidth = dayBorderWidth;
-        }
-        _this2.ctx.beginPath();
-        _this2.ctx.rect(day.x, day.y, day.size, day.size);
-        _this2.ctx.fill();
-        if (dayBorderWidth > 0) {
-          _this2.ctx.stroke();
-        }
-      });
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillStyle = theme.labels.text.fill;
-      this.ctx.font = "".concat(theme.labels.text.fontSize, "px ").concat(theme.labels.text.fontFamily);
-      monthLegends.forEach(function (month) {
-        _this2.ctx.save();
-        _this2.ctx.translate(month.x, month.y);
-        _this2.ctx.rotate(core.degreesToRadians(month.rotation));
-        _this2.ctx.fillText(monthLegend(month.year, month.month, month.date), 0, 0);
-        _this2.ctx.restore();
-      });
-      yearLegends.forEach(function (year) {
-        _this2.ctx.save();
-        _this2.ctx.translate(year.x, year.y);
-        _this2.ctx.rotate(core.degreesToRadians(year.rotation));
-        _this2.ctx.fillText(yearLegend(year.year), 0, 0);
-        _this2.ctx.restore();
-      });
-      legends$1.forEach(function (legend) {
-        var legendData = colorScale.ticks(legend.itemCount).map(function (value) {
-          return {
-            id: value,
-            label: value,
-            color: colorScale(value)
-          };
-        });
-        legends.renderLegendToCanvas(_this2.ctx, _objectSpread$3({}, legend, {
-          data: legendData,
-          containerWidth: width,
-          containerHeight: height,
-          theme: theme
-        }));
-      });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this3 = this;
-      var _this$props3 = this.props,
-          outerWidth = _this$props3.outerWidth,
-          outerHeight = _this$props3.outerHeight,
-          pixelRatio = _this$props3.pixelRatio,
-          isInteractive = _this$props3.isInteractive,
-          theme = _this$props3.theme;
-      return React__default.createElement(core.Container, {
-        isInteractive: isInteractive,
-        theme: theme,
-        animate: false
-      }, function (_ref) {
-        var showTooltip = _ref.showTooltip,
-            hideTooltip = _ref.hideTooltip;
-        return React__default.createElement("canvas", {
-          ref: function ref(surface) {
-            _this3.surface = surface;
-          },
-          width: outerWidth * pixelRatio,
-          height: outerHeight * pixelRatio,
-          style: {
-            width: outerWidth,
-            height: outerHeight
-          },
-          onMouseEnter: _this3.handleMouseHover(showTooltip, hideTooltip),
-          onMouseMove: _this3.handleMouseHover(showTooltip, hideTooltip),
-          onMouseLeave: _this3.handleMouseLeave(hideTooltip),
-          onClick: _this3.handleClick
-        });
-      });
-    }
-  }]);
-  return CalendarCanvas;
-}(React.Component);
-_defineProperty$3(CalendarCanvas, "propTypes", CalendarCanvasPropTypes);
+  }, [canvasEl, margin, days, setCurrentDay, formatValue, daySpacing, showTooltipFromEvent, hideTooltip, onMouseEnter, onMouseMove, onMouseLeave]);
+  var handleMouseLeave = React.useCallback(function () {
+    setCurrentDay(null);
+    hideTooltip();
+  }, [setCurrentDay, hideTooltip]);
+  var handleClick = React.useCallback(function (event) {
+    if (!onClick) return;
+    var data = findDayUnderCursor(event, canvasEl.current, days, days[0].size, daySpacing, margin);
+    data && onClick(data, event);
+  }, [canvasEl, daySpacing, margin, setCurrentDay, days, onClick]);
+  return React__default.createElement("canvas", {
+    ref: canvasEl,
+    width: outerWidth * pixelRatio,
+    height: outerHeight * pixelRatio,
+    style: {
+      width: outerWidth,
+      height: outerHeight
+    },
+    onMouseEnter: isInteractive ? handleMouseHover : undefined,
+    onMouseMove: isInteractive ? handleMouseHover : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined
+  });
+});
 CalendarCanvas.displayName = 'CalendarCanvas';
-var CalendarCanvas$1 = _setDisplayName(CalendarCanvas.displayName)(enhance(CalendarCanvas));
+CalendarCanvas.defaultProps = CalendarCanvasDefaultProps;
+var CalendarCanvas$1 = core.withContainer(CalendarCanvas);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveCalendarCanvas = function ResponsiveCalendarCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(CalendarCanvas$1, _extends$2({
+    return React__default.createElement(CalendarCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -973,3 +1112,14 @@ exports.CalendarDefaultProps = CalendarDefaultProps;
 exports.CalendarPropTypes = CalendarPropTypes;
 exports.ResponsiveCalendar = ResponsiveCalendar;
 exports.ResponsiveCalendarCanvas = ResponsiveCalendarCanvas;
+exports.bindDaysData = bindDaysData;
+exports.computeDomain = computeDomain;
+exports.computeLayout = computeLayout;
+exports.computeMonthLegendPositions = computeMonthLegendPositions;
+exports.computeYearLegendPositions = computeYearLegendPositions;
+exports.useCalendarLayout = useCalendarLayout;
+exports.useColorScale = useColorScale;
+exports.useDays = useDays;
+exports.useMonthLegends = useMonthLegends;
+exports.useYearLegends = useYearLegends;
+//# sourceMappingURL=nivo-calendar.cjs.js.map

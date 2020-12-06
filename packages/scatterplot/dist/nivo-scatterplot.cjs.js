@@ -22,12 +22,82 @@ var tooltip = require('@nivo/tooltip');
 var reactMotion = require('react-motion');
 var voronoi = require('@nivo/voronoi');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
 var getNodeSizeGenerator = function getNodeSizeGenerator(size) {
   if (typeof size === 'function') return size;
   if (isNumber(size)) return function () {
@@ -61,7 +131,7 @@ var computePoints = function computePoints(_ref) {
         id: "".concat(serie.id, ".").concat(i),
         x: d.position.x,
         y: d.position.y,
-        data: _objectSpread({}, d.data, {
+        data: _objectSpread2(_objectSpread2({}, d.data), {}, {
           id: "".concat(serie.id, ".").concat(i),
           serieId: serie.id,
           formattedX: formatX(d.data.x),
@@ -72,8 +142,6 @@ var computePoints = function computePoints(_ref) {
   }, []);
 };
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var useNodeSize = function useNodeSize(size) {
   return React.useMemo(function () {
     return getNodeSizeGenerator(size);
@@ -108,7 +176,7 @@ var useScatterPlot = function useScatterPlot(_ref) {
   var getColor = colors.useOrdinalColorScale(colors$1, 'serieId');
   var nodes = React.useMemo(function () {
     return rawNodes.map(function (rawNode) {
-      return _objectSpread$1({}, rawNode, {
+      return _objectSpread2(_objectSpread2({}, rawNode), {}, {
         size: getNodeSize(rawNode.data),
         style: {
           color: getColor(rawNode.data)
@@ -173,18 +241,6 @@ var Node = function Node(_ref) {
     onClick: onClick
   });
 };
-Node.propTypes = {
-  node: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
 var Node$1 = React.memo(Node);
 
 var Tooltip = function Tooltip(_ref) {
@@ -196,16 +252,11 @@ var Tooltip = function Tooltip(_ref) {
     color: node.style.color
   });
 };
-Tooltip.propTypes = {
-  node: PropTypes.object.isRequired
-};
 var Tooltip$1 = React.memo(Tooltip);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     data: PropTypes.arrayOf(PropTypes.shape({
       x: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
       y: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired
@@ -245,10 +296,11 @@ var commonPropTypes = {
   })),
   legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired
 };
-var ScatterPlotPropTypes = _objectSpread$2({}, commonPropTypes, {
+var ScatterPlotPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  role: PropTypes.string.isRequired,
   useMesh: PropTypes.bool.isRequired
 }, core.motionPropTypes);
-var ScatterPlotCanvasPropTypes = _objectSpread$2({}, commonPropTypes, {
+var ScatterPlotCanvasPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   pixelRatio: PropTypes.number.isRequired
 });
 var commonDefaultProps = {
@@ -279,14 +331,15 @@ var commonDefaultProps = {
   legends: [],
   annotations: []
 };
-var ScatterPlotDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var ScatterPlotDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   layers: ['grid', 'axes', 'nodes', 'markers', 'mesh', 'legends', 'annotations'],
+  role: 'img',
   useMesh: true,
   animate: true,
   motionStiffness: 90,
   motionDamping: 15
 });
-var ScatterPlotCanvasDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var ScatterPlotCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   layers: ['grid', 'axes', 'nodes', 'mesh', 'legends', 'annotations'],
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
@@ -297,7 +350,7 @@ var NodePropType = PropTypes.shape({
   size: PropTypes.number.isRequired,
   data: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    serieId: PropTypes.string.isRequired,
+    serieId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     x: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
     formattedX: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     y: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
@@ -357,21 +410,6 @@ var NodeWrapper = function NodeWrapper(_ref) {
     onClick: isInteractive && onClick ? handleClick : undefined
   });
 };
-NodeWrapper.propTypes = {
-  node: NodePropType.isRequired,
-  renderNode: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  blendMode: core.blendModePropType.isRequired
-};
 var NodeWrapper$1 = React.memo(NodeWrapper);
 
 var AnimatedNodes = function AnimatedNodes(_ref) {
@@ -422,20 +460,8 @@ var AnimatedNodes = function AnimatedNodes(_ref) {
     }));
   });
 };
-AnimatedNodes.propTypes = {
-  nodes: PropTypes.arrayOf(NodePropType).isRequired,
-  renderNode: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  blendMode: core.blendModePropType.isRequired
-};
 var AnimatedNodes$1 = React.memo(AnimatedNodes);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var ScatterPlotAnnotations = function ScatterPlotAnnotations(_ref) {
   var nodes = _ref.nodes,
       annotations$1 = _ref.annotations,
@@ -443,7 +469,7 @@ var ScatterPlotAnnotations = function ScatterPlotAnnotations(_ref) {
       innerHeight = _ref.innerHeight;
   var boundAnnotations = useScatterPlotAnnotations(nodes, annotations$1);
   return boundAnnotations.map(function (annotation, i) {
-    return React__default.createElement(annotations.Annotation, _extends({
+    return React__default.createElement(annotations.Annotation, Object.assign({
       key: i
     }, annotation, {
       containerWidth: innerWidth,
@@ -451,7 +477,6 @@ var ScatterPlotAnnotations = function ScatterPlotAnnotations(_ref) {
     }));
   });
 };
-ScatterPlotAnnotations.propTypes = {};
 
 var StaticNodes = function StaticNodes(_ref) {
   var nodes = _ref.nodes,
@@ -482,17 +507,6 @@ var StaticNodes = function StaticNodes(_ref) {
     });
   });
 };
-StaticNodes.propTypes = {
-  nodes: PropTypes.arrayOf(NodePropType).isRequired,
-  renderNode: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  blendMode: core.blendModePropType.isRequired
-};
 var StaticNodes$1 = React.memo(StaticNodes);
 
 var Mesh = function Mesh(_ref) {
@@ -501,6 +515,7 @@ var Mesh = function Mesh(_ref) {
       height = _ref.height,
       onMouseEnter = _ref.onMouseEnter,
       onMouseMove = _ref.onMouseMove,
+      onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
       tooltip$1 = _ref.tooltip,
       debug = _ref.debug;
@@ -519,9 +534,10 @@ var Mesh = function Mesh(_ref) {
     }), event);
     onMouseMove && onMouseMove(node, event);
   }, [showTooltipFromEvent, tooltip$1, onMouseMove]);
-  var handleMouseLeave = React.useCallback(function () {
+  var handleMouseLeave = React.useCallback(function (node, event) {
     hideTooltip();
-  }, [hideTooltip]);
+    onMouseLeave && onMouseLeave(node, event);
+  }, [hideTooltip, onMouseLeave]);
   var handleClick = React.useCallback(function (node, event) {
     onClick && onClick(node, event);
   }, [onClick]);
@@ -536,21 +552,8 @@ var Mesh = function Mesh(_ref) {
     debug: debug
   });
 };
-Mesh.propTypes = {
-  nodes: PropTypes.arrayOf(NodePropType).isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  debug: PropTypes.bool.isRequired
-};
 var Mesh$1 = React.memo(Mesh);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var ScatterPlot = function ScatterPlot(props) {
   var data = props.data,
       xScaleSpec = props.xScale,
@@ -583,7 +586,8 @@ var ScatterPlot = function ScatterPlot(props) {
       onClick = props.onClick,
       tooltip = props.tooltip,
       markers = props.markers,
-      legends$1 = props.legends;
+      legends$1 = props.legends,
+      role = props.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       innerWidth = _useDimensions.innerWidth,
@@ -609,7 +613,7 @@ var ScatterPlot = function ScatterPlot(props) {
       nodes = _useScatterPlot.nodes,
       legendData = _useScatterPlot.legendData;
   var customLayerProps = React.useMemo(function () {
-    return _objectSpread$3({}, props, {
+    return _objectSpread2(_objectSpread2({}, props), {}, {
       xScale: xScale,
       yScale: yScale,
       nodes: nodes,
@@ -672,7 +676,7 @@ var ScatterPlot = function ScatterPlot(props) {
       animate: animate
     }),
     legends: legends$1.map(function (legend, i) {
-      return React__default.createElement(legends.BoxLegendSvg, _extends$1({
+      return React__default.createElement(legends.BoxLegendSvg, Object.assign({
         key: i
       }, legend, {
         containerWidth: innerWidth,
@@ -700,7 +704,8 @@ var ScatterPlot = function ScatterPlot(props) {
     width: outerWidth,
     height: outerHeight,
     margin: margin,
-    theme: theme
+    theme: theme,
+    role: role
   }, layers.map(function (layer, i) {
     if (layerById[layer] !== undefined) {
       return layerById[layer];
@@ -713,28 +718,56 @@ var ScatterPlot = function ScatterPlot(props) {
     throw new Error("Unknown layer (".concat(layer, ")"));
   }));
 };
-ScatterPlot.propTypes = ScatterPlotPropTypes;
 ScatterPlot.defaultProps = ScatterPlotDefaultProps;
 var ScatterPlot$1 = React.memo(core.withContainer(ScatterPlot));
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveScatterPlot = function ResponsiveScatterPlot(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(ScatterPlot$1, _extends$2({
+    return React__default.createElement(ScatterPlot$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
   var data = props.data,
       xScaleSpec = props.xScale,
@@ -757,6 +790,7 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
       axisRight = props.axisRight,
       axisBottom = props.axisBottom,
       axisLeft = props.axisLeft,
+      annotations$1 = props.annotations,
       isInteractive = props.isInteractive,
       debugMesh = props.debugMesh,
       onMouseEnter = props.onMouseEnter,
@@ -792,6 +826,7 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
       yScale = _useScatterPlot.yScale,
       nodes = _useScatterPlot.nodes,
       legendData = _useScatterPlot.legendData;
+  var boundAnnotations = useScatterPlotAnnotations(nodes, annotations$1);
   var _useVoronoiMesh = voronoi.useVoronoiMesh({
     points: nodes,
     width: innerWidth,
@@ -801,7 +836,7 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
       delaunay = _useVoronoiMesh.delaunay,
       voronoi$1 = _useVoronoiMesh.voronoi;
   var customLayerProps = React.useMemo(function () {
-    return _objectSpread$4({}, props, {
+    return _objectSpread2(_objectSpread2({}, props), {}, {
       xScale: xScale,
       yScale: yScale,
       nodes: nodes,
@@ -838,6 +873,11 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
           axis: 'y',
           values: gridYValues
         });
+      } else if (layer === 'annotations') {
+        annotations.renderAnnotationsToCanvas(ctx, {
+          annotations: boundAnnotations,
+          theme: theme
+        });
       } else if (layer === 'axes') {
         axes.renderAxesToCanvas(ctx, {
           xScale: xScale,
@@ -863,7 +903,7 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
         }
       } else if (layer === 'legends') {
         legends$1.forEach(function (legend) {
-          legends.renderLegendToCanvas(ctx, _objectSpread$4({}, legend, {
+          legends.renderLegendToCanvas(ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
             data: legendData,
             containerWidth: innerWidth,
             containerHeight: innerHeight,
@@ -935,8 +975,7 @@ var ScatterPlotCanvas = function ScatterPlotCanvas(props) {
     onClick: isInteractive ? handleClick : undefined
   });
 };
-ScatterPlotCanvas.propTypes = ScatterPlotCanvasPropTypes;
-ScatterPlotCanvas.defaultProps = _objectSpread$4({}, ScatterPlotCanvasDefaultProps, {
+ScatterPlotCanvas.defaultProps = _objectSpread2(_objectSpread2({}, ScatterPlotCanvasDefaultProps), {}, {
   renderNode: function renderNode(ctx, node) {
     ctx.beginPath();
     ctx.arc(node.x, node.y, node.size / 2, 0, 2 * Math.PI);
@@ -946,12 +985,11 @@ ScatterPlotCanvas.defaultProps = _objectSpread$4({}, ScatterPlotCanvasDefaultPro
 });
 var ScatterPlotCanvas$1 = React.memo(core.withContainer(ScatterPlotCanvas));
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveScatterPlotCanvas = function ResponsiveScatterPlotCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(ScatterPlotCanvas$1, _extends$3({
+    return React__default.createElement(ScatterPlotCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -969,3 +1007,4 @@ exports.ScatterPlotDefaultProps = ScatterPlotDefaultProps;
 exports.ScatterPlotPropTypes = ScatterPlotPropTypes;
 exports.useScatterPlot = useScatterPlot;
 exports.useScatterPlotAnnotations = useScatterPlotAnnotations;
+//# sourceMappingURL=nivo-scatterplot.cjs.js.map

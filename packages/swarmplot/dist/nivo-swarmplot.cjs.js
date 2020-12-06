@@ -22,8 +22,49 @@ var d3Scale = require('d3-scale');
 var d3Force = require('d3-force');
 var reactMotion = require('react-motion');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var commonPropTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   groups: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -65,8 +106,10 @@ var commonPropTypes = {
   debugMesh: PropTypes.bool.isRequired,
   tooltip: PropTypes.any
 };
-var SwarmPlotPropTypes = _objectSpread({}, commonPropTypes, core.motionPropTypes);
-var SwarmPlotCanvasPropTypes = _objectSpread({
+var SwarmPlotPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  role: PropTypes.string.isRequired
+}, core.motionPropTypes);
+var SwarmPlotCanvasPropTypes = _objectSpread2({
   pixelRatio: PropTypes.number.isRequired
 }, commonPropTypes);
 var commonDefaultProps = {
@@ -103,21 +146,49 @@ var commonDefaultProps = {
   useMesh: false,
   debugMesh: false
 };
-var SwarmPlotDefaultProps = _objectSpread({}, commonDefaultProps, {
+var SwarmPlotDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   animate: true,
   motionStiffness: 90,
-  motionDamping: 15
+  motionDamping: 15,
+  role: 'img'
 });
-var SwarmPlotCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var SwarmPlotCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
 var getSizeGenerator = function getSizeGenerator(size) {
   if (typeof size === 'function') return size;
   if (isNumber(size)) return function () {
@@ -148,14 +219,28 @@ var computeValueScale = function computeValueScale(_ref) {
       scale = _ref.scale,
       data = _ref.data;
   var values = data.map(getValue);
-  var min = Math.min.apply(Math, _toConsumableArray(values));
-  var max = Math.max.apply(Math, _toConsumableArray(values));
-  return scales.computeScale(_objectSpread$1({}, scale, {
-    axis: axis
-  }), _defineProperty$1({}, axis, {
-    min: min,
-    max: max
-  }), width, height);
+  if (scale.type === 'time') {
+    var series = [{
+      data: values.map(function (p) {
+        return {
+          data: _defineProperty({}, axis, p)
+        };
+      })
+    }];
+    var axes = scales.generateSeriesAxis(series, axis, scale);
+    return scales.computeScale(_objectSpread2(_objectSpread2({}, scale), {}, {
+      axis: axis
+    }), _defineProperty({}, axis, axes), width, height);
+  } else {
+    var min = Math.min.apply(Math, _toConsumableArray(values));
+    var max = Math.max.apply(Math, _toConsumableArray(values));
+    return scales.computeScale(_objectSpread2(_objectSpread2({}, scale), {}, {
+      axis: axis
+    }), _defineProperty({}, axis, {
+      min: min,
+      max: max
+    }), width, height);
+  }
 };
 var computeOrdinalScale = function computeOrdinalScale(_ref2) {
   var width = _ref2.width,
@@ -210,6 +295,17 @@ var computeForces = function computeForces(_ref3) {
     collision: collisionForce
   };
 };
+var getParsedValue = function getParsedValue(scaleSpec) {
+  if (scaleSpec.type === 'linear') {
+    return parseFloat;
+  } else if (scaleSpec.type === 'time' && scaleSpec.format !== 'native') {
+    return scales.createDateNormalizer(scaleSpec);
+  } else {
+    return function (x) {
+      return x;
+    };
+  }
+};
 var computeNodes = function computeNodes(_ref4) {
   var _ref5;
   var data = _ref4.data,
@@ -221,7 +317,8 @@ var computeNodes = function computeNodes(_ref4) {
       ordinalScale = _ref4.ordinalScale,
       getSize = _ref4.getSize,
       forces = _ref4.forces,
-      simulationIterations = _ref4.simulationIterations;
+      simulationIterations = _ref4.simulationIterations,
+      valueScaleConfig = _ref4.valueScaleConfig;
   var config = {
     horizontal: ['x', 'y'],
     vertical: ['y', 'x']
@@ -230,14 +327,14 @@ var computeNodes = function computeNodes(_ref4) {
     return {
       id: getIdentity(d),
       group: getGroup(d),
-      value: getValue(d),
+      value: getParsedValue(valueScaleConfig)(getValue(d)),
       size: getSize(d),
-      data: _objectSpread$1({}, d)
+      data: _objectSpread2({}, d)
     };
   });
   var simulation = d3Force.forceSimulation(simulatedNodes).force('x', forces.x).force('y', forces.y).force('collide', forces.collision).stop();
   simulation.tick(simulationIterations);
-  return _ref5 = {}, _defineProperty$1(_ref5, "".concat(config[layout][0], "Scale"), valueScale), _defineProperty$1(_ref5, "".concat(config[layout][1], "Scale"), ordinalScale), _defineProperty$1(_ref5, "nodes", simulation.nodes()), _ref5;
+  return _ref5 = {}, _defineProperty(_ref5, "".concat(config[layout][0], "Scale"), valueScale), _defineProperty(_ref5, "".concat(config[layout][1], "Scale"), ordinalScale), _defineProperty(_ref5, "nodes", simulation.nodes()), _ref5;
 };
 
 var SwarmPlotTooltip = function SwarmPlotTooltip(_ref) {
@@ -248,14 +345,6 @@ var SwarmPlotTooltip = function SwarmPlotTooltip(_ref) {
     enableChip: true,
     color: node.color
   });
-};
-SwarmPlotTooltip.propTypes = {
-  node: PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    formattedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    color: PropTypes.string.isRequired
-  }).isRequired
 };
 
 var useValueScale = function useValueScale(_ref) {
@@ -389,7 +478,8 @@ var useSwarmPlot = function useSwarmPlot(_ref4) {
       ordinalScale: ordinalScale,
       getSize: getSize,
       forces: forces,
-      simulationIterations: simulationIterations
+      simulationIterations: simulationIterations,
+      valueScaleConfig: valueScaleConfig
     });
   }, [data, getIdentity, layout, getValue, valueScale, getGroup, ordinalScale, getSize, forces, simulationIterations]),
       nodes = _useMemo.nodes,
@@ -489,8 +579,6 @@ var useSwarmPlotAnnotations = function useSwarmPlotAnnotations(items, annotation
   });
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var willEnter = function willEnter(_ref) {
   var style = _ref.style;
   return {
@@ -540,11 +628,11 @@ var AnimatedSwarmPlotNodes = React.memo(function (_ref3) {
       return {
         key: node.id,
         data: node,
-        style: _objectSpread$2({
+        style: _objectSpread2(_objectSpread2({
           x: reactMotion.spring(node.x, springConfig),
           y: reactMotion.spring(node.y, springConfig),
           size: reactMotion.spring(node.size, springConfig)
-        }, colors.interpolateColor(node.color, springConfig), {
+        }, colors.interpolateColor(node.color, springConfig)), {}, {
           scale: reactMotion.spring(1, springConfig)
         })
       };
@@ -576,19 +664,6 @@ var AnimatedSwarmPlotNodes = React.memo(function (_ref3) {
   });
 });
 AnimatedSwarmPlotNodes.displayName = 'AnimatedSwarmPlotNodes';
-AnimatedSwarmPlotNodes.propTypes = {
-  nodes: PropTypes.array.isRequired,
-  renderNode: PropTypes.func.isRequired,
-  getBorderWidth: PropTypes.func.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  motionStiffness: PropTypes.number.isRequired,
-  motionDamping: PropTypes.number.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
 
 var StaticSwarmPlotNodes = React.memo(function (_ref) {
   var nodes = _ref.nodes,
@@ -620,17 +695,6 @@ var StaticSwarmPlotNodes = React.memo(function (_ref) {
   });
 });
 StaticSwarmPlotNodes.displayName = 'StaticSwarmPlotNodes';
-StaticSwarmPlotNodes.propTypes = {
-  nodes: PropTypes.array.isRequired,
-  renderNode: PropTypes.func.isRequired,
-  getBorderWidth: PropTypes.func.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
 
 var SwarmPlotNode = React.memo(function (_ref) {
   var node = _ref.node,
@@ -670,26 +734,10 @@ var SwarmPlotNode = React.memo(function (_ref) {
   });
 });
 SwarmPlotNode.displayName = 'SwarmPlotNode';
-SwarmPlotNode.propTypes = {
-  node: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  scale: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
 SwarmPlotNode.defaultProps = {
   scale: 1
 };
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var SwarmPlotAnnotations = function SwarmPlotAnnotations(_ref) {
   var nodes = _ref.nodes,
       annotations$1 = _ref.annotations,
@@ -697,7 +745,7 @@ var SwarmPlotAnnotations = function SwarmPlotAnnotations(_ref) {
       innerHeight = _ref.innerHeight;
   var boundAnnotations = useSwarmPlotAnnotations(nodes, annotations$1);
   return boundAnnotations.map(function (annotation, i) {
-    return React__default.createElement(annotations.Annotation, _extends({
+    return React__default.createElement(annotations.Annotation, Object.assign({
       key: i
     }, annotation, {
       containerWidth: innerWidth,
@@ -705,10 +753,7 @@ var SwarmPlotAnnotations = function SwarmPlotAnnotations(_ref) {
     }));
   });
 };
-SwarmPlotAnnotations.propTypes = {};
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var SwarmPlot = React.memo(function (_ref) {
   var width = _ref.width,
       height = _ref.height,
@@ -750,6 +795,7 @@ var SwarmPlot = React.memo(function (_ref) {
       onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
       tooltip = _ref.tooltip,
+      role = _ref.role,
       animate = _ref.animate,
       motionStiffness = _ref.motionStiffness,
       motionDamping = _ref.motionDamping;
@@ -888,7 +934,8 @@ var SwarmPlot = React.memo(function (_ref) {
     width: outerWidth,
     height: outerHeight,
     margin: margin,
-    theme: theme
+    theme: theme,
+    role: role
   }, layers.map(function (layer, i) {
     if (layerById[layer] !== undefined) {
       return layerById[layer];
@@ -902,32 +949,60 @@ var SwarmPlot = React.memo(function (_ref) {
   }));
 });
 SwarmPlot.displayName = 'SwarmPlot';
-SwarmPlot.propTypes = SwarmPlotPropTypes;
-SwarmPlot.defaultProps = _objectSpread$3({}, SwarmPlotDefaultProps, {
+SwarmPlot.defaultProps = _objectSpread2(_objectSpread2({}, SwarmPlotDefaultProps), {}, {
   renderNode: function renderNode(props) {
     return React__default.createElement(SwarmPlotNode, props);
   }
 });
 var SwarmPlot$1 = core.withContainer(SwarmPlot);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveSwarmPlot = function ResponsiveSwarmPlot(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(SwarmPlot$1, _extends$1({
+    return React__default.createElement(SwarmPlot$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var renderCanvasNode = function renderCanvasNode(ctx, _ref) {
   var node = _ref.node,
       getBorderWidth = _ref.getBorderWidth,
@@ -1178,18 +1253,16 @@ var SwarmPlotCanvas = React.memo(function (_ref2) {
   });
 });
 SwarmPlotCanvas.displayName = 'SwarmPlotCanvas';
-SwarmPlotCanvas.propTypes = SwarmPlotCanvasPropTypes;
-SwarmPlotCanvas.defaultProps = _objectSpread$4({}, SwarmPlotCanvasDefaultProps, {
+SwarmPlotCanvas.defaultProps = _objectSpread2(_objectSpread2({}, SwarmPlotCanvasDefaultProps), {}, {
   renderNode: renderCanvasNode
 });
 var SwarmPlotCanvas$1 = core.withContainer(SwarmPlotCanvas);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveSwarmPlotCanvas = function ResponsiveSwarmPlotCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(SwarmPlotCanvas$1, _extends$2({
+    return React__default.createElement(SwarmPlotCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1209,6 +1282,7 @@ exports.computeForces = computeForces;
 exports.computeNodes = computeNodes;
 exports.computeOrdinalScale = computeOrdinalScale;
 exports.computeValueScale = computeValueScale;
+exports.getParsedValue = getParsedValue;
 exports.getSizeGenerator = getSizeGenerator;
 exports.useBorderWidth = useBorderWidth;
 exports.useForces = useForces;
@@ -1217,3 +1291,4 @@ exports.useOrdinalScale = useOrdinalScale;
 exports.useSwarmPlot = useSwarmPlot;
 exports.useSwarmPlotAnnotations = useSwarmPlotAnnotations;
 exports.useValueScale = useValueScale;
+//# sourceMappingURL=nivo-swarmplot.cjs.js.map

@@ -10,342 +10,473 @@ var reactMotion = require('react-motion');
 var core = require('@nivo/core');
 var axes = require('@nivo/axes');
 var legends = require('@nivo/legends');
-var min = _interopDefault(require('lodash/min'));
-var max = _interopDefault(require('lodash/max'));
-var range = _interopDefault(require('lodash/range'));
+var scales = require('@nivo/scales');
 var d3Scale = require('d3-scale');
-var flattenDepth = _interopDefault(require('lodash/flattenDepth'));
 var d3Shape = require('d3-shape');
 var _uniqBy = _interopDefault(require('lodash/uniqBy'));
 var setDisplayName = _interopDefault(require('recompose/setDisplayName'));
-var compose = _interopDefault(require('recompose/compose'));
+var recompose = require('recompose');
 var defaultProps = _interopDefault(require('recompose/defaultProps'));
 var withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
 var pure = _interopDefault(require('recompose/pure'));
 var colors = require('@nivo/colors');
 var PropTypes = _interopDefault(require('prop-types'));
+var compose = _interopDefault(require('recompose/compose'));
 var tooltip = require('@nivo/tooltip');
 var annotations = require('@nivo/annotations');
 
-var getIndexedScale = function getIndexedScale(data, getIndex, range, padding) {
-  return d3Scale.scaleBand().rangeRound(range).domain(data.map(getIndex)).padding(padding);
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
+var getIndexScale = function getIndexScale(data, getIndex, range, padding, indexScale) {
+  return d3Scale.scaleBand().domain(data.map(getIndex)).range(range).round(Boolean(indexScale.round)).padding(padding);
+};
+var normalizeData = function normalizeData(data, keys) {
+  return data.map(function (item) {
+    return _objectSpread2(_objectSpread2({}, keys.reduce(function (acc, key) {
+      return _objectSpread2(_objectSpread2({}, acc), {}, _defineProperty({}, key, null));
+    }, {})), item);
+  });
+};
+var filterNullValues = function filterNullValues(data) {
+  return Object.keys(data).reduce(function (acc, key) {
+    return data[key] ? _objectSpread2(_objectSpread2({}, acc), {}, _defineProperty({}, key, data[key])) : acc;
+  }, {});
 };
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-var getGroupedScale = function getGroupedScale(data, keys, _minValue, _maxValue, range) {
-  var allValues = data.reduce(function (acc, entry) {
-    return [].concat(_toConsumableArray(acc), _toConsumableArray(keys.map(function (k) {
-      return entry[k];
-    })));
-  }, []);
-  var maxValue = _maxValue;
-  if (maxValue === 'auto') {
-    maxValue = max(allValues);
-  }
-  var minValue = _minValue;
-  if (minValue === 'auto') {
-    minValue = min(allValues);
-    if (minValue > 0) minValue = 0;
-  }
-  return d3Scale.scaleLinear().rangeRound(range).domain([minValue, maxValue]);
+var gt = function gt(value, other) {
+  return value > other;
 };
-var generateVerticalGroupedBars = function generateVerticalGroupedBars(_ref) {
-  var data = _ref.data,
-      getIndex = _ref.getIndex,
-      keys = _ref.keys,
-      minValue = _ref.minValue,
-      maxValue = _ref.maxValue,
-      reverse = _ref.reverse,
-      width = _ref.width,
-      height = _ref.height,
-      getColor = _ref.getColor,
-      _ref$padding = _ref.padding,
-      padding = _ref$padding === void 0 ? 0 : _ref$padding,
-      _ref$innerPadding = _ref.innerPadding,
-      innerPadding = _ref$innerPadding === void 0 ? 0 : _ref$innerPadding;
-  var xScale = getIndexedScale(data, getIndex, [0, width], padding);
-  var yRange = reverse ? [0, height] : [height, 0];
-  var yScale = getGroupedScale(data, keys, minValue, maxValue, yRange);
-  var barWidth = (xScale.bandwidth() - innerPadding * (keys.length - 1)) / keys.length;
-  var yRef = yScale(0);
+var lt = function lt(value, other) {
+  return value < other;
+};
+var flatten = function flatten(array) {
+  var _ref;
+  return (_ref = []).concat.apply(_ref, _toConsumableArray(array));
+};
+var range = function range(start, end) {
+  return Array.from(' '.repeat(end - start), function (_, index) {
+    return start + index;
+  });
+};
+var clampToZero = function clampToZero(value) {
+  return gt(value, 0) ? 0 : value;
+};
+var generateVerticalGroupedBars = function generateVerticalGroupedBars(_ref2, barWidth, reverse, yRef) {
+  var data = _ref2.data,
+      getIndex = _ref2.getIndex,
+      keys = _ref2.keys,
+      getColor = _ref2.getColor,
+      innerPadding = _ref2.innerPadding,
+      xScale = _ref2.xScale,
+      yScale = _ref2.yScale;
+  var compare = reverse ? lt : gt;
   var getY = function getY(d) {
-    return d > 0 ? yScale(d) : yRef;
+    return compare(d, 0) ? yScale(d) : yRef;
   };
   var getHeight = function getHeight(d, y) {
-    return d > 0 ? yRef - y : yScale(d) - yRef;
+    return compare(d, 0) ? yRef - y : yScale(d) - yRef;
   };
-  if (reverse) {
-    getY = function getY(d) {
-      return d < 0 ? yScale(d) : yRef;
-    };
-    getHeight = function getHeight(d, y) {
-      return d < 0 ? yRef - y : yScale(d) - yRef;
-    };
-  }
-  var bars = [];
-  keys.forEach(function (key, i) {
-    range(xScale.domain().length).forEach(function (index) {
+  var bars = flatten(keys.map(function (key, i) {
+    return range(0, xScale.domain().length).map(function (index) {
       var x = xScale(getIndex(data[index])) + barWidth * i + innerPadding * i;
       var y = getY(data[index][key]);
       var barHeight = getHeight(data[index][key], y);
-      if (barWidth >= 0 && barHeight >= 0) {
-        var barData = {
-          id: key,
-          value: data[index][key],
-          index: index,
-          indexValue: getIndex(data[index]),
-          data: data[index]
-        };
-        bars.push({
-          key: "".concat(key, ".").concat(barData.indexValue),
-          data: barData,
-          x: x,
-          y: y,
-          width: barWidth,
-          height: barHeight,
-          color: getColor(barData)
-        });
-      }
+      var barData = {
+        id: key,
+        value: data[index][key],
+        index: index,
+        indexValue: getIndex(data[index]),
+        data: filterNullValues(data[index])
+      };
+      return {
+        key: "".concat(key, ".").concat(barData.indexValue),
+        data: barData,
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight,
+        color: getColor(barData)
+      };
     });
-  });
-  return {
-    xScale: xScale,
-    yScale: yScale,
-    bars: bars
-  };
+  }));
+  return bars;
 };
-var generateHorizontalGroupedBars = function generateHorizontalGroupedBars(_ref2) {
-  var data = _ref2.data,
-      getIndex = _ref2.getIndex,
-      keys = _ref2.keys,
-      minValue = _ref2.minValue,
-      maxValue = _ref2.maxValue,
-      reverse = _ref2.reverse,
-      width = _ref2.width,
-      height = _ref2.height,
-      getColor = _ref2.getColor,
-      _ref2$padding = _ref2.padding,
-      padding = _ref2$padding === void 0 ? 0 : _ref2$padding,
-      _ref2$innerPadding = _ref2.innerPadding,
-      innerPadding = _ref2$innerPadding === void 0 ? 0 : _ref2$innerPadding;
-  var xRange = reverse ? [width, 0] : [0, width];
-  var xScale = getGroupedScale(data, keys, minValue, maxValue, xRange);
-  var yScale = getIndexedScale(data, getIndex, [height, 0], padding);
-  var barHeight = (yScale.bandwidth() - innerPadding * (keys.length - 1)) / keys.length;
-  var xRef = xScale(0);
+var generateHorizontalGroupedBars = function generateHorizontalGroupedBars(_ref3, barHeight, reverse, xRef) {
+  var data = _ref3.data,
+      getIndex = _ref3.getIndex,
+      keys = _ref3.keys,
+      getColor = _ref3.getColor,
+      _ref3$innerPadding = _ref3.innerPadding,
+      innerPadding = _ref3$innerPadding === void 0 ? 0 : _ref3$innerPadding,
+      xScale = _ref3.xScale,
+      yScale = _ref3.yScale;
+  var compare = reverse ? lt : gt;
   var getX = function getX(d) {
-    return d > 0 ? xRef : xScale(d);
+    return compare(d, 0) ? xRef : xScale(d);
   };
   var getWidth = function getWidth(d, x) {
-    return d > 0 ? xScale(d) - xRef : xRef - x;
+    return compare(d, 0) ? xScale(d) - xRef : xRef - x;
   };
-  if (reverse) {
-    getX = function getX(d) {
-      return d < 0 ? xRef : xScale(d);
-    };
-    getWidth = function getWidth(d, x) {
-      return d < 0 ? xScale(d) - xRef : xRef - x;
-    };
-  }
-  var bars = [];
-  if (barHeight > 0) {
-    keys.forEach(function (key, i) {
-      range(yScale.domain().length).forEach(function (index) {
-        var x = getX(data[index][key]);
-        var y = yScale(getIndex(data[index])) + barHeight * i + innerPadding * i;
-        var barWidth = getWidth(data[index][key], x);
-        if (barWidth > 0) {
-          var barData = {
-            id: key,
-            value: data[index][key],
-            index: index,
-            indexValue: getIndex(data[index]),
-            data: data[index]
-          };
-          bars.push({
-            key: "".concat(key, ".").concat(barData.indexValue),
-            data: barData,
-            x: x,
-            y: y,
-            width: barWidth,
-            height: barHeight,
-            color: getColor(barData)
-          });
-        }
-      });
+  var bars = flatten(keys.map(function (key, i) {
+    return range(0, yScale.domain().length).map(function (index) {
+      var x = getX(data[index][key]);
+      var y = yScale(getIndex(data[index])) + barHeight * i + innerPadding * i;
+      var barWidth = getWidth(data[index][key], x);
+      var barData = {
+        id: key,
+        value: data[index][key],
+        index: index,
+        indexValue: getIndex(data[index]),
+        data: filterNullValues(data[index])
+      };
+      return {
+        key: "".concat(key, ".").concat(barData.indexValue),
+        data: barData,
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight,
+        color: getColor(barData)
+      };
     });
-  }
+  }));
+  return bars;
+};
+var generateGroupedBars = function generateGroupedBars(_ref4) {
+  var layout = _ref4.layout,
+      keys = _ref4.keys,
+      minValue = _ref4.minValue,
+      maxValue = _ref4.maxValue,
+      reverse = _ref4.reverse,
+      width = _ref4.width,
+      height = _ref4.height,
+      _ref4$padding = _ref4.padding,
+      padding = _ref4$padding === void 0 ? 0 : _ref4$padding,
+      _ref4$innerPadding = _ref4.innerPadding,
+      innerPadding = _ref4$innerPadding === void 0 ? 0 : _ref4$innerPadding,
+      valueScale = _ref4.valueScale,
+      indexScaleConfig = _ref4.indexScale,
+      props = _objectWithoutProperties(_ref4, ["layout", "keys", "minValue", "maxValue", "reverse", "width", "height", "padding", "innerPadding", "valueScale", "indexScale"]);
+  var data = normalizeData(props.data, keys);
+  var _ref5 = layout === 'vertical' ? ['y', [0, width]] : ['x', [height, 0]],
+      _ref6 = _slicedToArray(_ref5, 2),
+      axis = _ref6[0],
+      range = _ref6[1];
+  var indexScale = getIndexScale(data, props.getIndex, range, padding, indexScaleConfig);
+  var scaleSpec = _objectSpread2({
+    axis: axis,
+    max: maxValue,
+    min: minValue,
+    reverse: reverse
+  }, valueScale);
+  var clampMin = scaleSpec.min === 'auto' ? clampToZero : function (value) {
+    return value;
+  };
+  var values = data.reduce(function (acc, entry) {
+    return [].concat(_toConsumableArray(acc), _toConsumableArray(keys.map(function (k) {
+      return entry[k];
+    })));
+  }, []).filter(Boolean);
+  var min = clampMin(Math.min.apply(Math, _toConsumableArray(values)));
+  var max = Math.max.apply(Math, _toConsumableArray(values));
+  var scale = scales.computeScale(scaleSpec, _defineProperty({}, axis, {
+    min: min,
+    max: max
+  }), width, height);
+  var _ref7 = layout === 'vertical' ? [indexScale, scale] : [scale, indexScale],
+      _ref8 = _slicedToArray(_ref7, 2),
+      xScale = _ref8[0],
+      yScale = _ref8[1];
+  var bandwidth = (indexScale.bandwidth() - innerPadding * (keys.length - 1)) / keys.length;
+  var params = [_objectSpread2(_objectSpread2({}, props), {}, {
+    data: data,
+    keys: keys,
+    innerPadding: innerPadding,
+    xScale: xScale,
+    yScale: yScale
+  }), bandwidth, scaleSpec.reverse, scale(0)];
+  var bars = bandwidth > 0 ? layout === 'vertical' ? generateVerticalGroupedBars.apply(void 0, params) : generateHorizontalGroupedBars.apply(void 0, params) : [];
   return {
     xScale: xScale,
     yScale: yScale,
     bars: bars
   };
-};
-var generateGroupedBars = function generateGroupedBars(options) {
-  return options.layout === 'vertical' ? generateVerticalGroupedBars(options) : generateHorizontalGroupedBars(options);
 };
 
-var getStackedScale = function getStackedScale(data, _minValue, _maxValue, range) {
-  var allValues = flattenDepth(data, 2);
-  var minValue = _minValue;
-  if (minValue === 'auto') {
-    minValue = min(allValues);
-  }
-  var maxValue = _maxValue;
-  if (maxValue === 'auto') {
-    maxValue = max(allValues);
-  }
-  return d3Scale.scaleLinear().rangeRound(range).domain([minValue, maxValue]);
+var flattenDeep = function flattenDeep(array) {
+  var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  return depth > 0 ? array.reduce(function (acc, value) {
+    return acc.concat(Array.isArray(value) ? flattenDeep(value, depth - 1) : value);
+  }, []) : array.slice();
 };
-var generateVerticalStackedBars = function generateVerticalStackedBars(_ref) {
-  var data = _ref.data,
-      getIndex = _ref.getIndex,
-      keys = _ref.keys,
-      minValue = _ref.minValue,
-      maxValue = _ref.maxValue,
-      reverse = _ref.reverse,
-      width = _ref.width,
-      height = _ref.height,
+var generateVerticalStackedBars = function generateVerticalStackedBars(_ref, barWidth, reverse) {
+  var getIndex = _ref.getIndex,
       getColor = _ref.getColor,
-      _ref$padding = _ref.padding,
-      padding = _ref$padding === void 0 ? 0 : _ref$padding,
-      _ref$innerPadding = _ref.innerPadding,
-      innerPadding = _ref$innerPadding === void 0 ? 0 : _ref$innerPadding;
-  var stackedData = d3Shape.stack().keys(keys).offset(d3Shape.stackOffsetDiverging)(data);
-  var xScale = getIndexedScale(data, getIndex, [0, width], padding);
-  var yRange = reverse ? [0, height] : [height, 0];
-  var yScale = getStackedScale(stackedData, minValue, maxValue, yRange);
-  var bars = [];
-  var barWidth = xScale.bandwidth();
+      innerPadding = _ref.innerPadding,
+      stackedData = _ref.stackedData,
+      xScale = _ref.xScale,
+      yScale = _ref.yScale;
   var getY = function getY(d) {
-    return yScale(d[1]);
+    return yScale(d[reverse ? 0 : 1]);
   };
   var getHeight = function getHeight(d, y) {
-    return yScale(d[0]) - y;
+    return yScale(d[reverse ? 1 : 0]) - y;
   };
-  if (reverse) {
-    getY = function getY(d) {
-      return yScale(d[0]);
-    };
-    getHeight = function getHeight(d, y) {
-      return yScale(d[1]) - y;
-    };
-  }
-  if (barWidth > 0) {
-    stackedData.forEach(function (stackedDataItem) {
-      xScale.domain().forEach(function (index, i) {
-        var d = stackedDataItem[i];
-        var x = xScale(getIndex(d.data));
-        var y = getY(d);
-        var barHeight = getHeight(d, y);
-        if (innerPadding > 0) {
-          y += innerPadding * 0.5;
-          barHeight -= innerPadding;
-        }
-        if (barHeight > 0) {
-          var barData = {
-            id: stackedDataItem.key,
-            value: d.data[stackedDataItem.key],
-            index: i,
-            indexValue: index,
-            data: d.data
-          };
-          bars.push({
-            key: "".concat(stackedDataItem.key, ".").concat(index),
-            data: barData,
-            x: x,
-            y: y,
-            width: barWidth,
-            height: barHeight,
-            color: getColor(barData)
-          });
-        }
-      });
+  var bars = flattenDeep(stackedData.map(function (stackedDataItem) {
+    return xScale.domain().map(function (index, i) {
+      var d = stackedDataItem[i];
+      var x = xScale(getIndex(d.data));
+      var y = getY(d) + innerPadding * 0.5;
+      var barHeight = getHeight(d, y) - innerPadding;
+      var barData = {
+        id: stackedDataItem.key,
+        value: d.data[stackedDataItem.key],
+        index: i,
+        indexValue: index,
+        data: filterNullValues(d.data)
+      };
+      return {
+        key: "".concat(stackedDataItem.key, ".").concat(index),
+        data: barData,
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight,
+        color: getColor(barData)
+      };
     });
-  }
-  return {
-    xScale: xScale,
-    yScale: yScale,
-    bars: bars
-  };
+  }));
+  return bars;
 };
-var generateHorizontalStackedBars = function generateHorizontalStackedBars(_ref2) {
-  var data = _ref2.data,
-      getIndex = _ref2.getIndex,
-      keys = _ref2.keys,
-      minValue = _ref2.minValue,
-      maxValue = _ref2.maxValue,
-      reverse = _ref2.reverse,
-      width = _ref2.width,
-      height = _ref2.height,
+var generateHorizontalStackedBars = function generateHorizontalStackedBars(_ref2, barHeight, reverse) {
+  var getIndex = _ref2.getIndex,
       getColor = _ref2.getColor,
-      _ref2$padding = _ref2.padding,
-      padding = _ref2$padding === void 0 ? 0 : _ref2$padding,
-      _ref2$innerPadding = _ref2.innerPadding,
-      innerPadding = _ref2$innerPadding === void 0 ? 0 : _ref2$innerPadding;
-  var stackedData = d3Shape.stack().keys(keys).offset(d3Shape.stackOffsetDiverging)(data);
-  var xRange = reverse ? [width, 0] : [0, width];
-  var xScale = getStackedScale(stackedData, minValue, maxValue, xRange);
-  var yScale = getIndexedScale(data, getIndex, [height, 0], padding);
-  var bars = [];
-  var barHeight = yScale.bandwidth();
+      innerPadding = _ref2.innerPadding,
+      stackedData = _ref2.stackedData,
+      xScale = _ref2.xScale,
+      yScale = _ref2.yScale;
   var getX = function getX(d) {
-    return xScale(d[0]);
+    return xScale(d[reverse ? 1 : 0]);
   };
   var getWidth = function getWidth(d, x) {
-    return xScale(d[1]) - x;
+    return xScale(d[reverse ? 0 : 1]) - x;
   };
-  if (reverse) {
-    getX = function getX(d) {
-      return xScale(d[1]);
-    };
-    getWidth = function getWidth(d, y) {
-      return xScale(d[0]) - y;
-    };
-  }
-  if (barHeight > 0) {
-    stackedData.forEach(function (stackedDataItem) {
-      yScale.domain().forEach(function (index, i) {
-        var d = stackedDataItem[i];
-        var y = yScale(getIndex(d.data));
-        var barData = {
-          id: stackedDataItem.key,
-          value: d.data[stackedDataItem.key],
-          index: i,
-          indexValue: index,
-          data: d.data
-        };
-        var x = getX(d);
-        var barWidth = getWidth(d, x);
-        if (innerPadding > 0) {
-          x += innerPadding * 0.5;
-          barWidth -= innerPadding;
-        }
-        if (barWidth > 0) {
-          bars.push({
-            key: "".concat(stackedDataItem.key, ".").concat(index),
-            data: barData,
-            x: x,
-            y: y,
-            width: barWidth,
-            height: barHeight,
-            color: getColor(barData)
-          });
-        }
-      });
+  var bars = flattenDeep(stackedData.map(function (stackedDataItem) {
+    return yScale.domain().map(function (index, i) {
+      var d = stackedDataItem[i];
+      var y = yScale(getIndex(d.data));
+      var x = getX(d) + innerPadding * 0.5;
+      var barWidth = getWidth(d, x) - innerPadding;
+      var barData = {
+        id: stackedDataItem.key,
+        value: d.data[stackedDataItem.key],
+        index: i,
+        indexValue: index,
+        data: filterNullValues(d.data)
+      };
+      return {
+        key: "".concat(stackedDataItem.key, ".").concat(index),
+        data: barData,
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight,
+        color: getColor(barData)
+      };
     });
-  }
+  }));
+  return bars;
+};
+var generateStackedBars = function generateStackedBars(_ref3) {
+  var data = _ref3.data,
+      keys = _ref3.keys,
+      layout = _ref3.layout,
+      minValue = _ref3.minValue,
+      maxValue = _ref3.maxValue,
+      reverse = _ref3.reverse,
+      width = _ref3.width,
+      height = _ref3.height,
+      _ref3$padding = _ref3.padding,
+      padding = _ref3$padding === void 0 ? 0 : _ref3$padding,
+      valueScale = _ref3.valueScale,
+      indexScaleConfig = _ref3.indexScale,
+      props = _objectWithoutProperties(_ref3, ["data", "keys", "layout", "minValue", "maxValue", "reverse", "width", "height", "padding", "valueScale", "indexScale"]);
+  var stackedData = d3Shape.stack().keys(keys).offset(d3Shape.stackOffsetDiverging)(normalizeData(data, keys));
+  var _ref4 = layout === 'vertical' ? ['y', [0, width]] : ['x', [height, 0]],
+      _ref5 = _slicedToArray(_ref4, 2),
+      axis = _ref5[0],
+      range = _ref5[1];
+  var indexScale = getIndexScale(data, props.getIndex, range, padding, indexScaleConfig);
+  var scaleSpec = _objectSpread2({
+    axis: axis,
+    max: maxValue,
+    min: minValue,
+    reverse: reverse
+  }, valueScale);
+  var values = flattenDeep(stackedData, 2);
+  var min = Math.min.apply(Math, _toConsumableArray(values));
+  var max = Math.max.apply(Math, _toConsumableArray(values));
+  var scale = scales.computeScale(scaleSpec, _defineProperty({}, axis, {
+    min: min,
+    max: max
+  }), width, height);
+  var _ref6 = layout === 'vertical' ? [indexScale, scale] : [scale, indexScale],
+      _ref7 = _slicedToArray(_ref6, 2),
+      xScale = _ref7[0],
+      yScale = _ref7[1];
+  var innerPadding = props.innerPadding > 0 ? props.innerPadding : 0;
+  var bandwidth = indexScale.bandwidth();
+  var params = [_objectSpread2(_objectSpread2({}, props), {}, {
+    innerPadding: innerPadding,
+    stackedData: stackedData,
+    xScale: xScale,
+    yScale: yScale
+  }), bandwidth, scaleSpec.reverse];
+  var bars = bandwidth > 0 ? layout === 'vertical' ? generateVerticalStackedBars.apply(void 0, params) : generateHorizontalStackedBars.apply(void 0, params) : [];
   return {
     xScale: xScale,
     yScale: yScale,
     bars: bars
   };
-};
-var generateStackedBars = function generateStackedBars(options) {
-  return options.layout === 'vertical' ? generateVerticalStackedBars(options) : generateHorizontalStackedBars(options);
 };
 
 var getLegendDataForKeys = function getLegendDataForKeys(bars, layout, direction, groupMode, reverse) {
@@ -391,8 +522,6 @@ var getLegendData = function getLegendData(_ref3) {
   return getLegendDataForKeys(bars, layout, direction, groupMode, reverse);
 };
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var BarItem = function BarItem(_ref) {
   var data = _ref.data,
       x = _ref.x,
@@ -443,44 +572,11 @@ var BarItem = function BarItem(_ref) {
     y: height / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
-    style: _objectSpread({}, theme.labels.text, {
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
       pointerEvents: 'none',
       fill: labelColor
     })
   }, label));
-};
-BarItem.propTypes = {
-  data: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    indexValue: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date), PropTypes.number]).isRequired,
-    fill: PropTypes.string
-  }).isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderRadius: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  label: PropTypes.node.isRequired,
-  shouldRenderLabel: PropTypes.bool.isRequired,
-  labelColor: PropTypes.string.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  getTooltipLabel: PropTypes.func.isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-  onClick: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  tooltip: PropTypes.element.isRequired,
-  theme: PropTypes.shape({
-    tooltip: PropTypes.shape({}).isRequired,
-    labels: PropTypes.shape({
-      text: PropTypes.object.isRequired
-    }).isRequired
-  }).isRequired
 };
 var enhance = compose(withPropsOnChange(['data', 'color', 'onClick'], function (_ref2) {
   var data = _ref2.data,
@@ -488,7 +584,7 @@ var enhance = compose(withPropsOnChange(['data', 'color', 'onClick'], function (
       _onClick = _ref2.onClick;
   return {
     onClick: function onClick(event) {
-      return _onClick(_objectSpread({
+      return _onClick(_objectSpread2({
         color: color
       }, data), event);
     }
@@ -508,7 +604,7 @@ var enhance = compose(withPropsOnChange(['data', 'color', 'onClick'], function (
       color: color,
       theme: theme,
       format: tooltipFormat,
-      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread({
+      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({
         color: color,
         theme: theme
       }, data)) : null
@@ -517,8 +613,6 @@ var enhance = compose(withPropsOnChange(['data', 'color', 'onClick'], function (
 }), pure);
 var BarItem$1 = enhance(BarItem);
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var ArrowItem = function ArrowItem(_ref) {
   var x = _ref.x,
       width = _ref.width,
@@ -576,43 +670,11 @@ var ArrowItem = function ArrowItem(_ref) {
     y: arrowHeight / 2,
     textAnchor: "middle",
     dominantBaseline: "central",
-    style: _objectSpread$1({}, theme.labels.text, {
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
       pointerEvents: 'none',
       fill: '#000'
     })
   }, label));
-};
-ArrowItem.propTypes = {
-  data: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    indexValue: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date), PropTypes.number]),
-    fill: PropTypes.string
-  }).isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderRadius: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  label: PropTypes.node.isRequired,
-  shouldRenderLabel: PropTypes.bool.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  getTooltipLabel: PropTypes.func.isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-  onClick: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  tooltip: PropTypes.element.isRequired,
-  theme: PropTypes.shape({
-    tooltip: PropTypes.shape({}).isRequired,
-    labels: PropTypes.shape({
-      text: PropTypes.object.isRequired
-    }).isRequired
-  }).isRequired,
-  barCount: PropTypes.number
 };
 var enhance$1 = compose(withPropsOnChange(['data', 'color', 'onClick'], function (_ref2) {
   var data = _ref2.data,
@@ -620,7 +682,7 @@ var enhance$1 = compose(withPropsOnChange(['data', 'color', 'onClick'], function
       _onClick = _ref2.onClick;
   return {
     onClick: function onClick(event) {
-      return _onClick(_objectSpread$1({
+      return _onClick(_objectSpread2({
         color: color
       }, data), event);
     }
@@ -640,7 +702,7 @@ var enhance$1 = compose(withPropsOnChange(['data', 'color', 'onClick'], function
       color: color,
       theme: theme,
       format: tooltipFormat,
-      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$1({
+      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({
         color: color,
         theme: theme
       }, data)) : null
@@ -649,9 +711,7 @@ var enhance$1 = compose(withPropsOnChange(['data', 'color', 'onClick'], function
 }), pure);
 var ArrowItem$1 = enhance$1(ArrowItem);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var BarPropTypes = _objectSpread$2({
+var BarPropTypes = _objectSpread2(_objectSpread2({
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   indexBy: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
   getIndex: PropTypes.func.isRequired,
@@ -660,6 +720,8 @@ var BarPropTypes = _objectSpread$2({
   groupMode: PropTypes.oneOf(['stacked', 'grouped']).isRequired,
   layout: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
   reverse: PropTypes.bool.isRequired,
+  valueScale: scales.scalePropType.isRequired,
+  indexScale: scales.bandScalePropTypes.isRequired,
   minValue: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['auto'])]).isRequired,
   maxValue: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf(['auto'])]).isRequired,
   padding: PropTypes.number.isRequired,
@@ -688,7 +750,7 @@ var BarPropTypes = _objectSpread$2({
   colorBy: colors.colorPropertyAccessorPropType.isRequired,
   borderRadius: PropTypes.number.isRequired,
   getColor: PropTypes.func.isRequired
-}, core.defsPropTypes, {
+}, core.defsPropTypes), {}, {
   borderWidth: PropTypes.number.isRequired,
   borderColor: colors.inheritedColorPropType.isRequired,
   getBorderColor: PropTypes.func.isRequired,
@@ -700,10 +762,13 @@ var BarPropTypes = _objectSpread$2({
   getTooltipLabel: PropTypes.func.isRequired,
   tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   tooltip: PropTypes.func,
-  legends: PropTypes.arrayOf(PropTypes.shape(_objectSpread$2({
+  legends: PropTypes.arrayOf(PropTypes.shape(_objectSpread2({
     dataFrom: PropTypes.oneOf(['indexes', 'keys']).isRequired
   }, legends.LegendPropShape))).isRequired,
   pixelRatio: PropTypes.number.isRequired
+});
+var BarSvgPropTypes = _objectSpread2(_objectSpread2({}, BarPropTypes), {}, {
+  role: PropTypes.string.isRequired
 });
 var BarDefaultProps = {
   indexBy: 'id',
@@ -714,6 +779,13 @@ var BarDefaultProps = {
   reverse: false,
   minValue: 'auto',
   maxValue: 'auto',
+  valueScale: {
+    type: 'linear'
+  },
+  indexScale: {
+    type: 'band',
+    round: true
+  },
   padding: 0.1,
   innerPadding: 0,
   axisBottom: {},
@@ -747,9 +819,12 @@ var BarDefaultProps = {
   annotations: [],
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 };
+var BarSvgDefaultProps = _objectSpread2(_objectSpread2({}, BarDefaultProps), {}, {
+  role: 'img'
+});
 
 var enhance$2 = (function (Component) {
-  return compose(defaultProps(BarDefaultProps), core.withTheme(), core.withDimensions(), core.withMotion(), withPropsOnChange(['colors', 'colorBy'], function (_ref) {
+  return recompose.compose(defaultProps(BarDefaultProps), core.withTheme(), core.withDimensions(), core.withMotion(), withPropsOnChange(['colors', 'colorBy'], function (_ref) {
     var colors$1 = _ref.colors,
         colorBy = _ref.colorBy;
     return {
@@ -798,11 +873,12 @@ var enhance$2 = (function (Component) {
   }), pure)(Component);
 });
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var BarAnnotations = function BarAnnotations(_ref) {
   var bars = _ref.bars,
       annotations$1 = _ref.annotations,
       animate = _ref.animate,
+      innerWidth = _ref.innerWidth,
+      innerHeight = _ref.innerHeight,
       motionStiffness = _ref.motionStiffness,
       motionDamping = _ref.motionDamping;
   var boundAnnotations = annotations.useAnnotations({
@@ -825,7 +901,7 @@ var BarAnnotations = function BarAnnotations(_ref) {
     }
   });
   return boundAnnotations.map(function (annotation, i) {
-    return React__default.createElement(annotations.Annotation, _extends({
+    return React__default.createElement(annotations.Annotation, Object.assign({
       key: i
     }, annotation, {
       containerWidth: innerWidth,
@@ -836,11 +912,7 @@ var BarAnnotations = function BarAnnotations(_ref) {
     }));
   });
 };
-BarAnnotations.propTypes = {};
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var numFormatter = function numFormatter(num) {
   if (num > 999 && num < 1000000) {
     return (num / 1000).toFixed(0) + 'K';
@@ -909,6 +981,8 @@ var Bar = function Bar(props) {
       reverse = props.reverse,
       minValue = props.minValue,
       maxValue = props.maxValue,
+      valueScale = props.valueScale,
+      indexScale = props.indexScale,
       margin = props.margin,
       width = props.width,
       height = props.height,
@@ -953,8 +1027,10 @@ var Bar = function Bar(props) {
       arrowIndicators = props.arrowIndicators,
       animate = props.animate,
       motionStiffness = props.motionStiffness,
-      motionDamping = props.motionDamping;
-  var options = {
+      motionDamping = props.motionDamping,
+      role = props.role;
+  var generateBars = groupMode === 'grouped' ? generateGroupedBars : generateStackedBars;
+  var result = generateBars({
     layout: layout,
     reverse: reverse,
     data: data,
@@ -966,9 +1042,10 @@ var Bar = function Bar(props) {
     height: height,
     getColor: getColor,
     padding: padding,
-    innerPadding: innerPadding
-  };
-  var result = groupMode === 'grouped' ? generateGroupedBars(options) : generateStackedBars(options);
+    innerPadding: innerPadding,
+    valueScale: valueScale,
+    indexScale: indexScale
+  });
   var motionProps = {
     animate: animate,
     motionDamping: motionDamping,
@@ -992,7 +1069,7 @@ var Bar = function Bar(props) {
     dataKey: 'data',
     targetKey: 'data.fill'
   });
-  return React__default.createElement(core.Container, {
+  return React__default.createElement(core.LegacyContainer, {
     isInteractive: isInteractive,
     theme: theme,
     animate: animate,
@@ -1023,7 +1100,9 @@ var Bar = function Bar(props) {
         key: "bars",
         willEnter: willEnter,
         willLeave: willLeave,
-        styles: result.bars.map(function (bar) {
+        styles: result.bars.filter(function (bar) {
+          return bar.data.value !== null;
+        }).map(function (bar) {
           return {
             key: bar.key,
             data: bar,
@@ -1040,10 +1119,10 @@ var Bar = function Bar(props) {
           var key = _ref7.key,
               style = _ref7.style,
               bar = _ref7.data;
-          var baseProps = _objectSpread$3({}, bar, style);
-          return React__default.createElement(barComponent, _objectSpread$3({
+          var baseProps = _objectSpread2(_objectSpread2({}, bar), style);
+          return React__default.createElement(barComponent, _objectSpread2(_objectSpread2(_objectSpread2({
             key: key
-          }, baseProps, commonProps, {
+          }, baseProps), commonProps), {}, {
             shouldRenderLabel: shouldRenderLabel(baseProps),
             width: Math.max(style.width, 0),
             height: Math.max(style.height, 0),
@@ -1055,10 +1134,12 @@ var Bar = function Bar(props) {
         }));
       });
     } else {
-      bars = result.bars.map(function (d) {
-        return React__default.createElement(barComponent, _objectSpread$3({
+      bars = result.bars.filter(function (bar) {
+        return bar.data.value !== null;
+      }).map(function (d) {
+        return React__default.createElement(barComponent, _objectSpread2(_objectSpread2(_objectSpread2({
           key: d.key
-        }, d, commonProps, {
+        }, d), commonProps), {}, {
           label: getLabel(d.data),
           shouldRenderLabel: shouldRenderLabel(d),
           labelColor: getLabelTextColor(d, theme),
@@ -1076,9 +1157,9 @@ var Bar = function Bar(props) {
       if (num === Infinity || isNaN(num) || a === b && a === 0 || a !== 0 && b === 0) return null;
       var sign = num < 0 ? '' : '+';
       var label = "".concat(sign).concat(numFormatter(num), "%");
-      return React__default.createElement(arrowComponent, _objectSpread$3({
+      return React__default.createElement(arrowComponent, _objectSpread2(_objectSpread2(_objectSpread2({
         key: bar.key
-      }, commonProps, bar, {
+      }, commonProps), bar), {}, {
         height: height,
         labelColor: '#000',
         borderColor: getBorderColor(bar),
@@ -1130,7 +1211,7 @@ var Bar = function Bar(props) {
           reverse: reverse
         });
         if (legendData === undefined) return null;
-        return React__default.createElement(legends.BoxLegendSvg, _extends$1({
+        return React__default.createElement(legends.BoxLegendSvg, Object.assign({
           key: i
         }, legend, {
           containerWidth: width,
@@ -1139,7 +1220,7 @@ var Bar = function Bar(props) {
           theme: theme
         }));
       }),
-      annotations: React__default.createElement(BarAnnotations, _extends$1({
+      annotations: React__default.createElement(BarAnnotations, Object.assign({
         key: "annotations",
         innerWidth: width,
         innerHeight: height,
@@ -1155,12 +1236,13 @@ var Bar = function Bar(props) {
       height: outerHeight,
       margin: margin,
       defs: boundDefs,
-      theme: theme
+      theme: theme,
+      role: role
     }, layers.map(function (layer, i) {
       if (typeof layer === 'function') {
         return React__default.createElement(React.Fragment, {
           key: i
-        }, layer(_objectSpread$3({}, props, result, {
+        }, layer(_objectSpread2(_objectSpread2(_objectSpread2({}, props), result), {}, {
           showTooltip: showTooltip,
           hideTooltip: hideTooltip
         })));
@@ -1169,41 +1251,129 @@ var Bar = function Bar(props) {
     }));
   });
 };
-Bar.propTypes = BarPropTypes;
+Bar.defaultProps = BarSvgDefaultProps;
 var Bar$1 = setDisplayName('Bar')(enhance$2(Bar));
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+  return _typeof(obj);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  }
+  return _assertThisInitialized(self);
+}
+
+function _createSuper(Derived) {
+  return function () {
+    var Super = _getPrototypeOf(Derived),
+        result;
+    if (_isNativeReflectConstruct()) {
+      var NewTarget = _getPrototypeOf(this).constructor;
+      result = Reflect.construct(Super, arguments, NewTarget);
+    } else {
+      result = Super.apply(this, arguments);
+    }
+    return _possibleConstructorReturn(this, result);
+  };
+}
+
 var findNodeUnderCursor = function findNodeUnderCursor(nodes, margin, x, y) {
   return nodes.find(function (node) {
     return core.isCursorInRect(node.x + margin.left, node.y + margin.top, node.width, node.height, x, y);
   });
 };
-var BarCanvas =
-function (_Component) {
+var BarCanvas = function (_Component) {
   _inherits(BarCanvas, _Component);
+  var _super = _createSuper(BarCanvas);
   function BarCanvas() {
-    var _getPrototypeOf2;
     var _this;
     _classCallCheck(this, BarCanvas);
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(BarCanvas)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$4(_assertThisInitialized(_this), "handleMouseHover", function (showTooltip, hideTooltip) {
+    _this = _super.call.apply(_super, [this].concat(args));
+    _this.handleMouseHover = function (showTooltip, hideTooltip) {
       return function (event) {
         if (!_this.bars) return;
         var _this$props = _this.props,
@@ -1225,7 +1395,7 @@ function (_Component) {
             color: bar.color,
             theme: theme,
             format: tooltipFormat,
-            renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$4({
+            renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({
               color: bar.color
             }, bar.data)) : null
           }), event);
@@ -1233,13 +1403,13 @@ function (_Component) {
           hideTooltip();
         }
       };
-    });
-    _defineProperty$4(_assertThisInitialized(_this), "handleMouseLeave", function (hideTooltip) {
+    };
+    _this.handleMouseLeave = function (hideTooltip) {
       return function () {
         hideTooltip();
       };
-    });
-    _defineProperty$4(_assertThisInitialized(_this), "handleClick", function (event) {
+    };
+    _this.handleClick = function (event) {
       if (!_this.bars) return;
       var _this$props2 = _this.props,
           margin = _this$props2.margin,
@@ -1250,7 +1420,7 @@ function (_Component) {
           y = _getRelativeCursor4[1];
       var node = findNodeUnderCursor(_this.bars, margin, x, y);
       if (node !== undefined) onClick(node.data, event);
-    });
+    };
     return _this;
   }
   _createClass(BarCanvas, [{
@@ -1284,6 +1454,8 @@ function (_Component) {
           getIndex = props.getIndex,
           minValue = props.minValue,
           maxValue = props.maxValue,
+          valueScale = props.valueScale,
+          indexScale = props.indexScale,
           width = props.width,
           height = props.height,
           outerWidth = props.outerWidth,
@@ -1323,7 +1495,9 @@ function (_Component) {
         height: height,
         getColor: getColor,
         padding: padding,
-        innerPadding: innerPadding
+        innerPadding: innerPadding,
+        valueScale: valueScale,
+        indexScale: indexScale
       };
       var result = groupMode === 'grouped' ? generateGroupedBars(options) : generateStackedBars(options);
       this.bars = result.bars;
@@ -1379,7 +1553,7 @@ function (_Component) {
           legendData = legendDataForIndexes;
         }
         if (legendData === undefined) return null;
-        legends.renderLegendToCanvas(_this2.ctx, _objectSpread$4({}, legend, {
+        legends.renderLegendToCanvas(_this2.ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
           data: legendData,
           containerWidth: width,
           containerHeight: height,
@@ -1427,8 +1601,9 @@ function (_Component) {
           outerHeight = _this$props3.outerHeight,
           pixelRatio = _this$props3.pixelRatio,
           isInteractive = _this$props3.isInteractive,
-          theme = _this$props3.theme;
-      return React__default.createElement(core.Container, {
+          theme = _this$props3.theme,
+          canvasRef = _this$props3.canvasRef;
+      return React__default.createElement(core.LegacyContainer, {
         isInteractive: isInteractive,
         theme: theme,
         animate: false
@@ -1438,6 +1613,7 @@ function (_Component) {
         return React__default.createElement("canvas", {
           ref: function ref(surface) {
             _this3.surface = surface;
+            if (canvasRef) canvasRef.current = surface;
           },
           width: outerWidth * pixelRatio,
           height: outerHeight * pixelRatio,
@@ -1455,36 +1631,46 @@ function (_Component) {
   }]);
   return BarCanvas;
 }(React.Component);
-BarCanvas.propTypes = BarPropTypes;
-var BarCanvas$1 = setDisplayName('BarCanvas')(enhance$2(BarCanvas));
+BarCanvas.defaultProps = BarDefaultProps;
+var EnhancedBarCanvas = setDisplayName('BarCanvas')(enhance$2(BarCanvas));
+var BarCanvas$1 = React__default.forwardRef(function (props, ref) {
+  return React__default.createElement(EnhancedBarCanvas, Object.assign({}, props, {
+    canvasRef: ref
+  }));
+});
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveBar = function ResponsiveBar(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Bar$1, _extends$2({
+    return React__default.createElement(Bar$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
-var ResponsiveBarCanvas = function ResponsiveBarCanvas(props) {
+var ResponsiveBarCanvas = function ResponsiveBarCanvas(props, ref) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(BarCanvas$1, _extends$3({
+    return React__default.createElement(BarCanvas$1, Object.assign({
       width: width,
       height: height
-    }, props));
+    }, props, {
+      ref: ref
+    }));
   });
 };
+var ResponsiveBarCanvas$1 = React__default.forwardRef(ResponsiveBarCanvas);
 
 exports.Bar = Bar$1;
 exports.BarCanvas = BarCanvas$1;
 exports.BarDefaultProps = BarDefaultProps;
+exports.BarItem = BarItem$1;
 exports.BarPropTypes = BarPropTypes;
+exports.BarSvgDefaultProps = BarSvgDefaultProps;
+exports.BarSvgPropTypes = BarSvgPropTypes;
 exports.ResponsiveBar = ResponsiveBar;
-exports.ResponsiveBarCanvas = ResponsiveBarCanvas;
+exports.ResponsiveBarCanvas = ResponsiveBarCanvas$1;
+//# sourceMappingURL=nivo-bar.cjs.js.map

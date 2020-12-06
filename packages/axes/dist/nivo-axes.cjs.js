@@ -6,16 +6,56 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var PropTypes = _interopDefault(require('prop-types'));
-var reactMotion = require('react-motion');
+var reactSpring = require('react-spring');
 var core = require('@nivo/core');
-var isNumber = _interopDefault(require('lodash/isNumber'));
 var d3Time = require('d3-time');
 var d3TimeFormat = require('d3-time-format');
 var d3Format = require('d3-format');
+var PropTypes = _interopDefault(require('prop-types'));
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var centerScale = function centerScale(scale) {
   var bandwidth = scale.bandwidth();
   if (bandwidth === 0) return scale;
@@ -46,6 +86,9 @@ var timeByType = {
 };
 var timeTypes = Object.keys(timeByType);
 var timeIntervalRegexp = new RegExp("^every\\s*(\\d+)?\\s*(".concat(timeTypes.join('|'), ")s?$"), 'i');
+var isInteger = function isInteger(value) {
+  return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+};
 var getScaleTicks = function getScaleTicks(scale, spec) {
   if (Array.isArray(spec)) {
     return spec;
@@ -54,7 +97,7 @@ var getScaleTicks = function getScaleTicks(scale, spec) {
     if (spec === undefined) {
       return scale.ticks();
     }
-    if (isNumber(spec)) {
+    if (isInteger(spec)) {
       return scale.ticks(spec);
     }
     if (typeof spec === 'string') {
@@ -134,10 +177,10 @@ var computeCartesianTicks = function computeCartesianTicks(_ref) {
     }
   }
   var ticks = values.map(function (value) {
-    return _objectSpread({
+    return _objectSpread2(_objectSpread2(_objectSpread2({
       key: value,
       value: value
-    }, translate(value), line, text);
+    }, translate(value)), line), text);
   });
   return {
     ticks: ticks,
@@ -162,7 +205,7 @@ var computeGridLines = function computeGridLines(_ref2) {
       axis = _ref2.axis,
       _values = _ref2.values;
   var lineValues = Array.isArray(_values) ? _values : undefined;
-  var lineCount = isNumber(_values) ? _values : undefined;
+  var lineCount = isInteger(_values) ? _values : undefined;
   var values = lineValues || getScaleTicks(scale, lineCount);
   var position = scale.bandwidth ? centerScale(scale) : scale;
   var lines;
@@ -200,38 +243,33 @@ var axisPropTypes = {
   renderTick: PropTypes.func,
   legend: PropTypes.node,
   legendPosition: PropTypes.oneOf(['start', 'middle', 'end']),
-  legendOffset: PropTypes.number
+  legendOffset: PropTypes.number,
+  ariaHidden: PropTypes.bool
 };
 var axisPropType = PropTypes.shape(axisPropTypes);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var AxisTick = function AxisTick(_ref) {
   var _value = _ref.value,
-      x = _ref.x,
-      y = _ref.y,
-      opacity = _ref.opacity,
-      rotate = _ref.rotate,
       format = _ref.format,
       lineX = _ref.lineX,
       lineY = _ref.lineY,
       _onClick = _ref.onClick,
-      textX = _ref.textX,
-      textY = _ref.textY,
       textBaseline = _ref.textBaseline,
-      textAnchor = _ref.textAnchor;
+      textAnchor = _ref.textAnchor,
+      animatedProps = _ref.animatedProps;
   var theme = core.useTheme();
   var value = _value;
   if (format !== undefined) {
     value = format(value);
   }
   var gStyle = {
-    opacity: opacity
+    opacity: animatedProps.opacity
   };
   if (_onClick) {
     gStyle['cursor'] = 'pointer';
   }
-  return React__default.createElement("g", _extends({
-    transform: "translate(".concat(x, ",").concat(y, ")")
+  return React__default.createElement(reactSpring.animated.g, Object.assign({
+    transform: animatedProps.transform
   }, _onClick ? {
     onClick: function onClick(e) {
       return _onClick(e, value);
@@ -244,27 +282,12 @@ var AxisTick = function AxisTick(_ref) {
     y1: 0,
     y2: lineY,
     style: theme.axis.ticks.line
-  }), React__default.createElement("text", {
+  }), React__default.createElement(reactSpring.animated.text, {
     dominantBaseline: textBaseline,
     textAnchor: textAnchor,
-    transform: "translate(".concat(textX, ",").concat(textY, ") rotate(").concat(rotate, ")"),
+    transform: animatedProps.textTransform,
     style: theme.axis.ticks.text
   }, value));
-};
-AxisTick.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
-  format: PropTypes.func,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  lineX: PropTypes.number.isRequired,
-  lineY: PropTypes.number.isRequired,
-  textX: PropTypes.number.isRequired,
-  textY: PropTypes.number.isRequired,
-  textBaseline: PropTypes.string.isRequired,
-  textAnchor: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  rotate: PropTypes.number.isRequired,
-  onClick: PropTypes.func
 };
 AxisTick.defaultProps = {
   opacity: 1,
@@ -272,55 +295,28 @@ AxisTick.defaultProps = {
 };
 var AxisTick$1 = React.memo(AxisTick);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var willEnter = function willEnter() {
-  return {
-    rotate: 0,
-    opacity: 0,
-    x: 0,
-    y: 0
-  };
-};
-var willLeave = function willLeave(springConfig) {
-  return function (_ref) {
-    var _ref$style = _ref.style,
-        x = _ref$style.x,
-        y = _ref$style.y,
-        rotate = _ref$style.rotate;
-    return {
-      rotate: rotate,
-      opacity: reactMotion.spring(0, springConfig),
-      x: reactMotion.spring(x.val, springConfig),
-      y: reactMotion.spring(y.val, springConfig)
-    };
-  };
-};
 var defaultTickRenderer = function defaultTickRenderer(props) {
   return React__default.createElement(AxisTick$1, props);
 };
-var Axis = function Axis(_ref2) {
-  var axis = _ref2.axis,
-      scale = _ref2.scale,
-      x = _ref2.x,
-      y = _ref2.y,
-      length = _ref2.length,
-      ticksPosition = _ref2.ticksPosition,
-      tickValues = _ref2.tickValues,
-      tickSize = _ref2.tickSize,
-      tickPadding = _ref2.tickPadding,
-      tickRotation = _ref2.tickRotation,
-      format = _ref2.format,
-      renderTick = _ref2.renderTick,
-      legend = _ref2.legend,
-      legendPosition = _ref2.legendPosition,
-      legendOffset = _ref2.legendOffset,
-      onClick = _ref2.onClick;
+var Axis = function Axis(_ref) {
+  var axis = _ref.axis,
+      scale = _ref.scale,
+      x = _ref.x,
+      y = _ref.y,
+      length = _ref.length,
+      ticksPosition = _ref.ticksPosition,
+      tickValues = _ref.tickValues,
+      tickSize = _ref.tickSize,
+      tickPadding = _ref.tickPadding,
+      tickRotation = _ref.tickRotation,
+      format = _ref.format,
+      renderTick = _ref.renderTick,
+      legend = _ref.legend,
+      legendPosition = _ref.legendPosition,
+      legendOffset = _ref.legendOffset,
+      onClick = _ref.onClick,
+      ariaHidden = _ref.ariaHidden;
   var theme = core.useTheme();
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
   var formatValue = React.useMemo(function () {
     return getFormatter(format, scale);
   }, [format, scale]);
@@ -369,99 +365,82 @@ var Axis = function Axis(_ref2) {
     legendNode = React__default.createElement("text", {
       transform: "translate(".concat(legendX, ", ").concat(legendY, ") rotate(").concat(legendRotation, ")"),
       textAnchor: textAnchor,
-      style: _objectSpread$1({
+      style: _objectSpread2({
         dominantBaseline: 'central'
       }, theme.axis.legend.text)
     }, legend);
   }
-  if (animate !== true) {
-    return React__default.createElement("g", {
-      transform: "translate(".concat(x, ",").concat(y, ")")
-    }, ticks.map(function (tick, tickIndex) {
-      return React__default.createElement(renderTick, _objectSpread$1({
-        tickIndex: tickIndex,
-        format: formatValue,
-        rotate: tickRotation,
-        textBaseline: textBaseline,
-        textAnchor: textAlign
-      }, tick, onClick ? {
-        onClick: onClick
-      } : {}));
-    }), React__default.createElement("line", {
-      style: theme.axis.domain.line,
-      x1: 0,
-      x2: axis === 'x' ? length : 0,
-      y1: 0,
-      y2: axis === 'x' ? 0 : length
-    }), legendNode);
-  }
-  return React__default.createElement(reactMotion.Motion, {
-    style: {
-      x: reactMotion.spring(x, springConfig),
-      y: reactMotion.spring(y, springConfig)
-    }
-  }, function (xy) {
-    return React__default.createElement("g", {
-      transform: "translate(".concat(xy.x, ",").concat(xy.y, ")")
-    }, React__default.createElement(reactMotion.TransitionMotion, {
-      willEnter: willEnter,
-      willLeave: willLeave(springConfig),
-      styles: ticks.map(function (tick) {
-        return {
-          key: "".concat(tick.key),
-          data: tick,
-          style: {
-            opacity: reactMotion.spring(1, springConfig),
-            x: reactMotion.spring(tick.x, springConfig),
-            y: reactMotion.spring(tick.y, springConfig),
-            rotate: reactMotion.spring(tickRotation, springConfig)
-          }
-        };
-      })
-    }, function (interpolatedStyles) {
-      return React__default.createElement(React.Fragment, null, interpolatedStyles.map(function (_ref3, tickIndex) {
-        var style = _ref3.style,
-            tick = _ref3.data;
-        return React__default.createElement(renderTick, _objectSpread$1({
-          tickIndex: tickIndex,
-          format: formatValue,
-          textBaseline: textBaseline,
-          textAnchor: textAlign
-        }, tick, style, onClick ? {
-          onClick: onClick
-        } : {}));
-      }));
-    }), React__default.createElement(reactMotion.Motion, {
-      style: {
-        x2: reactMotion.spring(axis === 'x' ? length : 0, springConfig),
-        y2: reactMotion.spring(axis === 'x' ? 0 : length, springConfig)
-      }
-    }, function (values) {
-      return React__default.createElement("line", _extends$1({
-        style: theme.axis.domain.line,
-        x1: 0,
-        y1: 0
-      }, values));
-    }), legendNode);
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    transform: "translate(".concat(x, ",").concat(y, ")"),
+    lineX2: axis === 'x' ? length : 0,
+    lineY2: axis === 'x' ? 0 : length,
+    config: springConfig,
+    immediate: !animate
   });
-};
-Axis.propTypes = {
-  axis: PropTypes.oneOf(['x', 'y']).isRequired,
-  scale: PropTypes.func.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  length: PropTypes.number.isRequired,
-  ticksPosition: PropTypes.oneOf(['before', 'after']).isRequired,
-  tickValues: axisPropTypes.tickValues,
-  tickSize: PropTypes.number.isRequired,
-  tickPadding: PropTypes.number.isRequired,
-  tickRotation: PropTypes.number.isRequired,
-  format: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-  renderTick: PropTypes.func.isRequired,
-  legend: PropTypes.node,
-  legendPosition: PropTypes.oneOf(['start', 'middle', 'end']).isRequired,
-  legendOffset: PropTypes.number.isRequired,
-  onClick: PropTypes.func
+  var transition = reactSpring.useTransition(ticks, {
+    key: function key(tick) {
+      return tick.key;
+    },
+    initial: function initial(tick) {
+      return {
+        opacity: 1,
+        transform: "translate(".concat(tick.x, ",").concat(tick.y, ")"),
+        textTransform: "translate(".concat(tick.textX, ",").concat(tick.textY, ") rotate(").concat(tickRotation, ")")
+      };
+    },
+    from: function from(tick) {
+      return {
+        opacity: 0,
+        transform: "translate(".concat(tick.x, ",").concat(tick.y, ")"),
+        textTransform: "translate(".concat(tick.textX, ",").concat(tick.textY, ") rotate(").concat(tickRotation, ")")
+      };
+    },
+    enter: function enter(tick) {
+      return {
+        opacity: 1,
+        transform: "translate(".concat(tick.x, ",").concat(tick.y, ")"),
+        textTransform: "translate(".concat(tick.textX, ",").concat(tick.textY, ") rotate(").concat(tickRotation, ")")
+      };
+    },
+    update: function update(tick) {
+      return {
+        opacity: 1,
+        transform: "translate(".concat(tick.x, ",").concat(tick.y, ")"),
+        textTransform: "translate(".concat(tick.textX, ",").concat(tick.textY, ") rotate(").concat(tickRotation, ")")
+      };
+    },
+    leave: {
+      opacity: 0
+    },
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.g, {
+    transform: animatedProps.transform,
+    "aria-hidden": ariaHidden
+  }, transition(function (transitionProps, tick, state, tickIndex) {
+    return React__default.createElement(renderTick, _objectSpread2(_objectSpread2(_objectSpread2({
+      tickIndex: tickIndex,
+      format: formatValue,
+      rotate: tickRotation,
+      textBaseline: textBaseline,
+      textAnchor: textAlign,
+      animatedProps: transitionProps
+    }, tick), onClick ? {
+      onClick: onClick
+    } : {}), {}, {
+      key: tick.key
+    }));
+  }), React__default.createElement(reactSpring.animated.line, {
+    style: theme.axis.domain.line,
+    x1: 0,
+    x2: animatedProps.lineX2,
+    y1: 0,
+    y2: animatedProps.lineY2
+  }), legendNode);
 };
 Axis.defaultProps = {
   x: 0,
@@ -475,7 +454,6 @@ Axis.defaultProps = {
 };
 var Axis$1 = React.memo(Axis);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var positions = ['top', 'right', 'bottom', 'left'];
 var Axes = function Axes(_ref) {
   var xScale = _ref.xScale,
@@ -497,7 +475,7 @@ var Axes = function Axes(_ref) {
     if (!axis) return null;
     var isXAxis = position === 'top' || position === 'bottom';
     var ticksPosition = position === 'top' || position === 'left' ? 'before' : 'after';
-    return React__default.createElement(Axis$1, _extends$2({
+    return React__default.createElement(Axis$1, Object.assign({
       key: position
     }, axis, {
       axis: isXAxis ? 'x' : 'y',
@@ -509,26 +487,12 @@ var Axes = function Axes(_ref) {
     }));
   });
 };
-Axes.propTypes = {
-  xScale: PropTypes.func,
-  yScale: PropTypes.func,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  top: axisPropType,
-  right: axisPropType,
-  bottom: axisPropType,
-  left: axisPropType
-};
 var Axes$1 = React.memo(Axes);
 
-var GridLine = function GridLine(props) {
-  return React__default.createElement("line", props);
-};
-GridLine.propTypes = {
-  x1: PropTypes.number.isRequired,
-  x2: PropTypes.number.isRequired,
-  y1: PropTypes.number.isRequired,
-  y2: PropTypes.number.isRequired
+var GridLine = function GridLine(_ref) {
+  var animatedProps = _ref.animatedProps;
+  var theme = core.useTheme();
+  return React__default.createElement(reactSpring.animated.line, Object.assign({}, animatedProps, theme.grid.line));
 };
 GridLine.defaultProps = {
   x1: 0,
@@ -538,79 +502,63 @@ GridLine.defaultProps = {
 };
 var GridLine$1 = React.memo(GridLine);
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var GridLines = function GridLines(_ref) {
-  var type = _ref.type,
-      lines = _ref.lines;
-  var theme = core.useTheme();
+  var lines = _ref.lines;
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  var lineWillEnter = React.useMemo(function () {
-    return function (_ref2) {
-      var style = _ref2.style;
+      springConfig = _useMotionConfig.config;
+  var transition = reactSpring.useTransition(lines, {
+    key: function key(line) {
+      return line.key;
+    },
+    initial: function initial(line) {
+      return {
+        opacity: 1,
+        x1: line.x1,
+        x2: line.x2,
+        y1: line.y1,
+        y2: line.y2
+      };
+    },
+    from: function from(line) {
       return {
         opacity: 0,
-        x1: type === 'x' ? 0 : style.x1.val,
-        x2: type === 'x' ? 0 : style.x2.val,
-        y1: type === 'y' ? 0 : style.y1.val,
-        y2: type === 'y' ? 0 : style.y2.val
+        x1: line.x1,
+        x2: line.x2,
+        y1: line.y1,
+        y2: line.y2
       };
-    };
-  }, [type]);
-  var lineWillLeave = React.useMemo(function () {
-    return function (_ref3) {
-      var style = _ref3.style;
+    },
+    enter: function enter(line) {
       return {
-        opacity: reactMotion.spring(0, springConfig),
-        x1: reactMotion.spring(style.x1.val, springConfig),
-        x2: reactMotion.spring(style.x2.val, springConfig),
-        y1: reactMotion.spring(style.y1.val, springConfig),
-        y2: reactMotion.spring(style.y2.val, springConfig)
+        opacity: 1,
+        x1: line.x1,
+        x2: line.x2,
+        y1: line.y1,
+        y2: line.y2
       };
-    };
-  }, [springConfig]);
-  if (!animate) {
-    return React__default.createElement("g", null, lines.map(function (line) {
-      return React__default.createElement(GridLine$1, _extends$3({
-        key: line.key
-      }, line, theme.grid.line));
-    }));
-  }
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    willEnter: lineWillEnter,
-    willLeave: lineWillLeave,
-    styles: lines.map(function (line) {
+    },
+    update: function update(line) {
       return {
-        key: line.key,
-        style: {
-          opacity: reactMotion.spring(1, springConfig),
-          x1: reactMotion.spring(line.x1 || 0, springConfig),
-          x2: reactMotion.spring(line.x2 || 0, springConfig),
-          y1: reactMotion.spring(line.y1 || 0, springConfig),
-          y2: reactMotion.spring(line.y2 || 0, springConfig)
-        }
+        opacity: 1,
+        x1: line.x1,
+        x2: line.x2,
+        y1: line.y1,
+        y2: line.y2
       };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement("g", null, interpolatedStyles.map(function (interpolatedStyle) {
-      var key = interpolatedStyle.key,
-          style = interpolatedStyle.style;
-      return React__default.createElement(GridLine$1, _extends$3({
-        key: key
-      }, theme.grid.line, style));
-    }));
+    },
+    leave: {
+      opacity: 0
+    },
+    config: springConfig,
+    immediate: !animate
   });
-};
-GridLines.propTypes = {
-  type: PropTypes.oneOf(['x', 'y']).isRequired,
-  lines: PropTypes.arrayOf(PropTypes.shape({
-    key: PropTypes.string.isRequired,
-    x1: PropTypes.number,
-    x2: PropTypes.number,
-    y1: PropTypes.number,
-    y2: PropTypes.number
-  })).isRequired
+  return React__default.createElement("g", null, transition(function (animatedProps, line) {
+    return React__default.createElement(GridLine$1, Object.assign({}, line, {
+      key: line.key,
+      animatedProps: animatedProps
+    }));
+  }));
 };
 var GridLines$1 = React.memo(GridLines);
 
@@ -630,7 +578,7 @@ var Grid = function Grid(_ref) {
       axis: 'x',
       values: xValues
     });
-  }, [xScale, xValues]);
+  }, [xScale, xValues, width, height]);
   var yLines = yScale ? computeGridLines({
     width: width,
     height: height,
@@ -646,22 +594,12 @@ var Grid = function Grid(_ref) {
     lines: yLines
   }));
 };
-Grid.propTypes = {
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  xScale: PropTypes.func,
-  yScale: PropTypes.func,
-  xValues: PropTypes.oneOfType([PropTypes.number, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]))]),
-  yValues: PropTypes.oneOfType([PropTypes.number, PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]))])
-};
 var Grid$1 = React.memo(Grid);
 
 var degreesToRadians = function degreesToRadians(degrees) {
   return degrees * Math.PI / 180;
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var renderAxisToCanvas = function renderAxisToCanvas(ctx, _ref) {
   var axis = _ref.axis,
       scale = _ref.scale,
@@ -793,7 +731,7 @@ var renderAxesToCanvas = function renderAxesToCanvas(ctx, _ref2) {
     var ticksPosition = position === 'top' || position === 'left' ? 'before' : 'after';
     var scale = isXAxis ? xScale : yScale;
     var format = getFormatter(axis.format, scale);
-    renderAxisToCanvas(ctx, _objectSpread$2({}, axis, {
+    renderAxisToCanvas(ctx, _objectSpread2(_objectSpread2({}, axis), {}, {
       axis: isXAxis ? 'x' : 'y',
       x: position === 'right' ? width : 0,
       y: position === 'bottom' ? height : 0,
@@ -834,3 +772,4 @@ exports.axisPropTypes = axisPropTypes;
 exports.renderAxesToCanvas = renderAxesToCanvas;
 exports.renderAxisToCanvas = renderAxisToCanvas;
 exports.renderGridLinesToCanvas = renderGridLinesToCanvas;
+//# sourceMappingURL=nivo-axes.cjs.js.map

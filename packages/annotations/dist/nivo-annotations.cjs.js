@@ -7,11 +7,11 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var React__default = _interopDefault(React);
 var PropTypes = _interopDefault(require('prop-types'));
-var reactMotion = require('react-motion');
-var core = require('@nivo/core');
 var isPlainObject = _interopDefault(require('lodash/isPlainObject'));
 var filter = _interopDefault(require('lodash/filter'));
 var omit = _interopDefault(require('lodash/omit'));
+var core = require('@nivo/core');
+var reactSpring = require('react-spring');
 
 var annotationSpecPropType = PropTypes.shape({
   match: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
@@ -35,8 +35,49 @@ var defaultProps = {
   motionDamping: 13
 };
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var defaultPositionAccessor = function defaultPositionAccessor(item) {
   return {
     x: item.x,
@@ -53,7 +94,7 @@ var bindAnnotations = function bindAnnotations(_ref) {
     filter(items, annotation.match).forEach(function (item) {
       var position = getPosition(item);
       var dimensions = getDimensions(item, annotation.offset || 0);
-      acc.push(_objectSpread({}, omit(annotation, ['match', 'offset']), position, dimensions, {
+      acc.push(_objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, omit(annotation, ['match', 'offset'])), position), dimensions), {}, {
         datum: item,
         size: annotation.size || dimensions.size
       }));
@@ -150,8 +191,6 @@ var computeAnnotation = function computeAnnotation(_ref2) {
   };
 };
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var useAnnotations = function useAnnotations(_ref) {
   var items = _ref.items,
       annotations = _ref.annotations,
@@ -172,8 +211,8 @@ var useComputedAnnotations = function useComputedAnnotations(_ref2) {
       containerHeight = _ref2.containerHeight;
   return React.useMemo(function () {
     return annotations.map(function (annotation) {
-      return _objectSpread$1({}, annotation, {
-        computed: computeAnnotation(_objectSpread$1({
+      return _objectSpread2(_objectSpread2({}, annotation), {}, {
+        computed: computeAnnotation(_objectSpread2({
           containerWidth: containerWidth,
           containerHeight: containerHeight
         }, annotation))
@@ -212,14 +251,21 @@ var useComputedAnnotation = function useComputedAnnotation(_ref3) {
   }, [type, containerWidth, containerHeight, x, y, size, width, height, noteX, noteY, noteWidth, noteTextOffset]);
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var AnnotationNote = React.memo(function (_ref) {
   var datum = _ref.datum,
       x = _ref.x,
       y = _ref.y,
       note = _ref.note;
   var theme = core.useTheme();
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfiig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x,
+    y: y,
+    config: springConfiig,
+    immediate: !animate
+  });
   if (typeof note === 'function') {
     return note({
       x: x,
@@ -227,83 +273,147 @@ var AnnotationNote = React.memo(function (_ref) {
       datum: datum
     });
   }
-  return React__default.createElement(React__default.Fragment, null, theme.annotations.text.outlineWidth > 0 && React__default.createElement("text", {
-    x: x,
-    y: y,
-    style: _objectSpread$2({}, theme.annotations.text, {
+  return React__default.createElement(React__default.Fragment, null, theme.annotations.text.outlineWidth > 0 && React__default.createElement(reactSpring.animated.text, {
+    x: animatedProps.x,
+    y: animatedProps.y,
+    style: _objectSpread2(_objectSpread2({}, theme.annotations.text), {}, {
       strokeLinejoin: 'round',
       strokeWidth: theme.annotations.text.outlineWidth * 2,
       stroke: theme.annotations.text.outlineColor
     })
-  }, note), React__default.createElement("text", {
-    x: x,
-    y: y,
+  }, note), React__default.createElement(reactSpring.animated.text, {
+    x: animatedProps.x,
+    y: animatedProps.y,
     style: omit(theme.annotations.text, ['outlineWidth', 'outlineColor'])
   }, note));
 });
 AnnotationNote.displayName = 'AnnotationNote';
-AnnotationNote.propTypes = {
-  datum: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  note: PropTypes.oneOfType([PropTypes.node, PropTypes.func]).isRequired
-};
 AnnotationNote.defaultProps = {};
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _toArray(arr) {
+  return _arrayWithHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableRest();
+}
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+  var key, i;
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
 var AnnotationLink = React.memo(function (_ref) {
-  var points = _ref.points,
-      isOutline = _ref.isOutline;
+  var isOutline = _ref.isOutline,
+      props = _objectWithoutProperties(_ref, ["isOutline"]);
   var theme = core.useTheme();
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
+  var _props$points = _toArray(props.points),
+      point = _props$points[0],
+      points = _props$points.slice(1);
+  var path = points.reduce(function (acc, _ref2) {
+    var _ref3 = _slicedToArray(_ref2, 2),
+        x = _ref3[0],
+        y = _ref3[1];
+    return "".concat(acc, " L").concat(x, ",").concat(y);
+  }, "M".concat(point[0], ",").concat(point[1]));
+  var animatedPath = core.useAnimatedPath(path);
   if (isOutline && theme.annotations.link.outlineWidth <= 0) {
     return null;
   }
-  var style = _objectSpread$3({}, theme.annotations.link);
+  var style = _objectSpread2({}, theme.annotations.link);
   if (isOutline) {
     style.strokeLinecap = 'square';
     style.strokeWidth = theme.annotations.link.strokeWidth + theme.annotations.link.outlineWidth * 2;
     style.stroke = theme.annotations.link.outlineColor;
   }
-  var path = "M".concat(points[0][0], ",").concat(points[0][1]);
-  points.slice(1).forEach(function (point) {
-    path = "".concat(path, " L").concat(point[0], ",").concat(point[1]);
-  });
-  if (!animate) {
-    return React__default.createElement("path", {
-      fill: "none",
-      d: path,
-      style: style
-    });
-  }
-  return React__default.createElement(core.SmartMotion, {
-    style: function style(spring) {
-      return {
-        d: spring(path, springConfig)
-      };
-    }
-  }, function (interpolated) {
-    return React__default.createElement("path", {
-      fill: "none",
-      d: interpolated.d,
-      style: style
-    });
+  return React__default.createElement(reactSpring.animated.path, {
+    fill: "none",
+    d: animatedPath,
+    style: style
   });
 });
 AnnotationLink.displayName = 'AnnotationLink';
-AnnotationLink.propTypes = {
-  points: PropTypes.arrayOf(PropTypes.array).isRequired,
-  isOutline: PropTypes.bool.isRequired
-};
 AnnotationLink.defaultProps = {
   isOutline: false
 };
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var CircleAnnotationOutline = React.memo(function (_ref) {
   var x = _ref.x,
       y = _ref.y,
@@ -311,57 +421,32 @@ var CircleAnnotationOutline = React.memo(function (_ref) {
   var theme = core.useTheme();
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (!animate) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("circle", {
-      cx: x,
-      cy: y,
-      r: size / 2,
-      style: _objectSpread$4({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("circle", {
-      cx: x,
-      cy: y,
-      r: size / 2,
-      style: theme.annotations.outline
-    }));
-  }
-  return React__default.createElement(reactMotion.Motion, {
-    style: {
-      x: reactMotion.spring(x, springConfig),
-      y: reactMotion.spring(y, springConfig),
-      size: reactMotion.spring(size, springConfig)
-    }
-  }, function (interpolated) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("circle", {
-      cx: interpolated.x,
-      cy: interpolated.y,
-      r: interpolated.size / 2,
-      style: _objectSpread$4({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("circle", {
-      cx: interpolated.x,
-      cy: interpolated.y,
-      r: interpolated.size / 2,
-      style: theme.annotations.outline
-    }));
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x,
+    y: y,
+    radius: size / 2,
+    config: springConfig,
+    immediate: !animate
   });
+  return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: animatedProps.radius,
+    style: _objectSpread2(_objectSpread2({}, theme.annotations.outline), {}, {
+      fill: 'none',
+      strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
+      stroke: theme.annotations.outline.outlineColor
+    })
+  }), React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: animatedProps.radius,
+    style: theme.annotations.outline
+  }));
 });
 CircleAnnotationOutline.displayName = 'CircleAnnotationOutline';
-CircleAnnotationOutline.propTypes = {
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired
-};
 
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var DotAnnotationOutline = React.memo(function (_ref) {
   var x = _ref.x,
       y = _ref.y,
@@ -369,60 +454,35 @@ var DotAnnotationOutline = React.memo(function (_ref) {
   var theme = core.useTheme();
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (!animate) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("circle", {
-      cx: x,
-      cy: y,
-      r: size / 2,
-      style: _objectSpread$5({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("circle", {
-      cx: x,
-      cy: y,
-      r: size / 2,
-      style: theme.annotations.symbol
-    }));
-  }
-  return React__default.createElement(reactMotion.Motion, {
-    style: {
-      x: reactMotion.spring(x, springConfig),
-      y: reactMotion.spring(y, springConfig),
-      size: reactMotion.spring(size, springConfig)
-    }
-  }, function (interpolated) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("circle", {
-      cx: interpolated.x,
-      cy: interpolated.y,
-      r: interpolated.size / 2,
-      style: _objectSpread$5({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("circle", {
-      cx: interpolated.x,
-      cy: interpolated.y,
-      r: interpolated.size / 2,
-      style: theme.annotations.symbol
-    }));
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x,
+    y: y,
+    radius: size / 2,
+    config: springConfig,
+    immediate: !animate
   });
+  return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: animatedProps.radius,
+    style: _objectSpread2(_objectSpread2({}, theme.annotations.outline), {}, {
+      fill: 'none',
+      strokeWidth: theme.annotations.outline.outlineWidth * 2,
+      stroke: theme.annotations.outline.outlineColor
+    })
+  }), React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: animatedProps.radius,
+    style: theme.annotations.symbol
+  }));
 });
 DotAnnotationOutline.displayName = 'DotAnnotationOutline';
-DotAnnotationOutline.propTypes = {
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired
-};
 DotAnnotationOutline.defaultProps = {
   size: 4
 };
 
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var RectAnnotationOutline = React.memo(function (_ref) {
   var x = _ref.x,
       y = _ref.y,
@@ -431,60 +491,34 @@ var RectAnnotationOutline = React.memo(function (_ref) {
   var theme = core.useTheme();
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (!animate) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("rect", {
-      x: x - width / 2,
-      y: y - height / 2,
-      width: width,
-      height: height,
-      style: _objectSpread$6({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("rect", {
-      x: x - width / 2,
-      y: y - height / 2,
-      width: width,
-      height: height,
-      style: theme.annotations.outline
-    }));
-  }
-  return React__default.createElement(reactMotion.Motion, {
-    style: {
-      x: reactMotion.spring(x - width / 2, springConfig),
-      y: reactMotion.spring(y - height / 2, springConfig),
-      width: reactMotion.spring(width, springConfig),
-      height: reactMotion.spring(height, springConfig)
-    }
-  }, function (interpolated) {
-    return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement("rect", {
-      x: interpolated.x,
-      y: interpolated.y,
-      width: interpolated.width,
-      height: interpolated.height,
-      style: _objectSpread$6({}, theme.annotations.outline, {
-        fill: 'none',
-        strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
-        stroke: theme.annotations.outline.outlineColor
-      })
-    }), React__default.createElement("rect", {
-      x: interpolated.x,
-      y: interpolated.y,
-      width: interpolated.width,
-      height: interpolated.height,
-      style: theme.annotations.outline
-    }));
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x - width / 2,
+    y: y - height / 2,
+    width: width,
+    height: height,
+    config: springConfig,
+    immediate: !animate
   });
+  return React__default.createElement(React__default.Fragment, null, theme.annotations.outline.outlineWidth > 0 && React__default.createElement(reactSpring.animated.rect, {
+    x: animatedProps.x,
+    y: animatedProps.y,
+    width: animatedProps.width,
+    height: animatedProps.height,
+    style: _objectSpread2(_objectSpread2({}, theme.annotations.outline), {}, {
+      fill: 'none',
+      strokeWidth: theme.annotations.outline.strokeWidth + theme.annotations.outline.outlineWidth * 2,
+      stroke: theme.annotations.outline.outlineColor
+    })
+  }), React__default.createElement(reactSpring.animated.rect, {
+    x: animatedProps.x,
+    y: animatedProps.y,
+    width: animatedProps.width,
+    height: animatedProps.height,
+    style: theme.annotations.outline
+  }));
 });
 RectAnnotationOutline.displayName = 'RectAnnotationOutline';
-RectAnnotationOutline.propTypes = {
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired
-};
 
 var Annotation = React.memo(function (_ref) {
   var datum = _ref.datum,
@@ -501,9 +535,6 @@ var Annotation = React.memo(function (_ref) {
       noteWidth = _ref.noteWidth,
       noteTextOffset = _ref.noteTextOffset,
       note = _ref.note;
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
   var computed = useComputedAnnotation({
     type: type,
     containerWidth: containerWidth,
@@ -536,54 +567,19 @@ var Annotation = React.memo(function (_ref) {
     height: height
   }), React__default.createElement(AnnotationLink, {
     points: computed.points
-  }), !animate && React__default.createElement(AnnotationNote, {
+  }), React__default.createElement(AnnotationNote, {
+    datum: datum,
     x: computed.text[0],
     y: computed.text[1],
     note: note
-  }), animate && React__default.createElement(reactMotion.Motion, {
-    style: {
-      x: reactMotion.spring(computed.text[0], springConfig),
-      y: reactMotion.spring(computed.text[1], springConfig)
-    }
-  }, function (interpolated) {
-    return React__default.createElement(AnnotationNote, {
-      datum: datum,
-      x: interpolated.x,
-      y: interpolated.y,
-      note: note
-    });
   }));
 });
 Annotation.displayName = 'Annotation';
-Annotation.propTypes = {
-  datum: PropTypes.object.isRequired,
-  type: PropTypes.oneOf(['circle', 'rect', 'dot']).isRequired,
-  containerWidth: PropTypes.number.isRequired,
-  containerHeight: PropTypes.number.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number,
-  width: PropTypes.number,
-  height: PropTypes.number,
-  noteX: PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
-    abs: PropTypes.number.isRequired
-  })]).isRequired,
-  noteY: PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
-    abs: PropTypes.number.isRequired
-  })]).isRequired,
-  noteWidth: PropTypes.number.isRequired,
-  noteTextOffset: PropTypes.number.isRequired,
-  note: PropTypes.oneOfType([PropTypes.node, PropTypes.func]).isRequired
-};
 Annotation.defaultProps = {
   noteWidth: defaultProps.noteWidth,
   noteTextOffset: defaultProps.noteTextOffset
 };
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var drawPoints = function drawPoints(ctx, points) {
   points.forEach(function (_ref, index) {
     var _ref2 = _slicedToArray(_ref, 2),
@@ -690,3 +686,4 @@ exports.renderAnnotationsToCanvas = renderAnnotationsToCanvas;
 exports.useAnnotations = useAnnotations;
 exports.useComputedAnnotation = useComputedAnnotation;
 exports.useComputedAnnotations = useComputedAnnotations;
+//# sourceMappingURL=nivo-annotations.cjs.js.map

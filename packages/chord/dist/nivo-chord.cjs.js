@@ -16,6 +16,49 @@ var d3Chord = require('d3-chord');
 var mapValues = _interopDefault(require('lodash/mapValues'));
 var reactMotion = require('react-motion');
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var ChordArcTooltip = React.memo(function (_ref) {
   var arc = _ref.arc;
   return React__default.createElement(tooltip.BasicTooltip, {
@@ -26,9 +69,6 @@ var ChordArcTooltip = React.memo(function (_ref) {
   });
 });
 ChordArcTooltip.displayName = 'ChordArcTooltip';
-ChordArcTooltip.propTypes = {
-  arc: PropTypes.object.isRequired
-};
 
 var ChordRibbonTooltip = React.memo(function (_ref) {
   var ribbon = _ref.ribbon;
@@ -49,12 +89,7 @@ var ChordRibbonTooltip = React.memo(function (_ref) {
   });
 });
 ChordRibbonTooltip.displayName = 'ChordRibbonTooltip';
-ChordRibbonTooltip.propTypes = {
-  ribbon: PropTypes.object.isRequired
-};
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   keys: PropTypes.arrayOf(PropTypes.string).isRequired,
   matrix: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
@@ -93,8 +128,10 @@ var commonPropTypes = {
   isInteractive: PropTypes.bool.isRequired,
   legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired
 };
-var ChordPropTypes = _objectSpread({}, commonPropTypes, core.motionPropTypes);
-var ChordCanvasPropTypes = _objectSpread({
+var ChordPropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, commonPropTypes), core.motionPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
+var ChordCanvasPropTypes = _objectSpread2({
   pixelRatio: PropTypes.number.isRequired
 }, commonPropTypes);
 var commonDefaultProps = {
@@ -135,14 +172,68 @@ var commonDefaultProps = {
   legends: [],
   isInteractive: true
 };
-var ChordDefaultProps = _objectSpread({}, commonDefaultProps, {
+var ChordDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   animate: true,
   motionStiffness: 90,
-  motionDamping: 15
+  motionDamping: 15,
+  role: 'img'
 });
-var ChordCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var ChordCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
 
 var computeChordLayout = function computeChordLayout(_ref) {
   var padAngle = _ref.padAngle;
@@ -199,12 +290,6 @@ var computeChordArcsAndRibbons = function computeChordArcsAndRibbons(_ref3) {
   };
 };
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var useChordLayout = function useChordLayout(_ref) {
   var padAngle = _ref.padAngle;
   return React.useMemo(function () {
@@ -348,13 +433,13 @@ var useChordSelection = function useChordSelection(_ref5) {
       return selection.selectedRibbonIds.includes(ribbon.id) ? ribbonHoverOpacity : ribbonHoverOthersOpacity;
     };
   }, [selection.selectedRibbonIds, ribbonOpacity, ribbonHoverOpacity, ribbonHoverOthersOpacity]);
-  return _objectSpread$1({
+  return _objectSpread2(_objectSpread2({
     currentArc: currentArc,
     setCurrentArc: setCurrentArc,
     currentRibbon: currentRibbon,
     setCurrentRibbon: setCurrentRibbon,
     hasSelection: hasSelection
-  }, selection, {
+  }, selection), {}, {
     getArcOpacity: getArcOpacity,
     getRibbonOpacity: getRibbonOpacity
   });
@@ -378,8 +463,6 @@ var useChordLayerContext = function useChordLayerContext(_ref6) {
   }, [center, radius, arcs, arcGenerator, ribbons, ribbonGenerator]);
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var ChordRibbon = React.memo(function (_ref) {
   var ribbon = _ref.ribbon,
       ribbonGenerator = _ref.ribbonGenerator,
@@ -449,7 +532,7 @@ var ChordRibbon = React.memo(function (_ref) {
     fill: color,
     fillOpacity: opacity,
     strokeWidth: borderWidth,
-    stroke: getBorderColor(_objectSpread$2({}, ribbon, {
+    stroke: getBorderColor(_objectSpread2(_objectSpread2({}, ribbon), {}, {
       color: color
     })),
     strokeOpacity: opacity,
@@ -463,29 +546,7 @@ var ChordRibbon = React.memo(function (_ref) {
   });
 });
 ChordRibbon.displayName = 'ChordRibbon';
-ChordRibbon.propTypes = {
-  ribbon: PropTypes.object.isRequired,
-  ribbonGenerator: PropTypes.func.isRequired,
-  sourceStartAngle: PropTypes.number.isRequired,
-  sourceEndAngle: PropTypes.number.isRequired,
-  targetStartAngle: PropTypes.number.isRequired,
-  targetEndAngle: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
-};
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var getRibbonAngles = function getRibbonAngles(_ref, useMiddleAngle, springConfig) {
   var source = _ref.source,
       target = _ref.target;
@@ -523,14 +584,14 @@ var getRibbonAngles = function getRibbonAngles(_ref, useMiddleAngle, springConfi
 };
 var ribbonWillEnter = function ribbonWillEnter(_ref2) {
   var ribbon = _ref2.data;
-  return _objectSpread$3({}, getRibbonAngles(ribbon, true), {
+  return _objectSpread2(_objectSpread2({}, getRibbonAngles(ribbon, true)), {}, {
     opacity: 0
   }, colors.interpolateColor(ribbon.source.color));
 };
 var ribbonWillLeave = function ribbonWillLeave(springConfig) {
   return function (_ref3) {
     var ribbon = _ref3.data;
-    return _objectSpread$3({}, getRibbonAngles(ribbon, true, springConfig), {
+    return _objectSpread2(_objectSpread2({}, getRibbonAngles(ribbon, true, springConfig)), {}, {
       opacity: 0
     }, colors.interpolateColor(ribbon.source.color, springConfig));
   };
@@ -577,7 +638,7 @@ var ChordRibbons = React.memo(function (_ref4) {
       });
     }));
   }
-  var springConfig = _objectSpread$3({}, _springConfig, {
+  var springConfig = _objectSpread2(_objectSpread2({}, _springConfig), {}, {
     precision: 0.001
   });
   return React__default.createElement(reactMotion.TransitionMotion, {
@@ -587,7 +648,7 @@ var ChordRibbons = React.memo(function (_ref4) {
       return {
         key: ribbon.id,
         data: ribbon,
-        style: _objectSpread$3({}, getRibbonAngles(ribbon, false, springConfig), {
+        style: _objectSpread2(_objectSpread2({}, getRibbonAngles(ribbon, false, springConfig)), {}, {
           opacity: reactMotion.spring(getOpacity(ribbon), springConfig)
         }, colors.interpolateColor(ribbon.source.color, springConfig))
       };
@@ -623,21 +684,6 @@ var ChordRibbons = React.memo(function (_ref4) {
   });
 });
 ChordRibbons.displayName = 'ChordRibbons';
-ChordRibbons.propTypes = {
-  ribbons: PropTypes.array.isRequired,
-  ribbonGenerator: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  getOpacity: PropTypes.func.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
 
 var ChordArc = React.memo(function (_ref) {
   var arc = _ref.arc,
@@ -707,25 +753,7 @@ var ChordArc = React.memo(function (_ref) {
   });
 });
 ChordArc.displayName = 'ChordArc';
-ChordArc.propTypes = {
-  arc: PropTypes.object.isRequired,
-  startAngle: PropTypes.number.isRequired,
-  endAngle: PropTypes.number.isRequired,
-  arcGenerator: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  opacity: PropTypes.number.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
-};
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var ChordArcs = React.memo(function (_ref) {
   var arcs = _ref.arcs,
       borderWidth = _ref.borderWidth,
@@ -765,7 +793,7 @@ var ChordArcs = React.memo(function (_ref) {
       });
     });
   }
-  var springConfig = _objectSpread$4({}, _springConfig, {
+  var springConfig = _objectSpread2(_objectSpread2({}, _springConfig), {}, {
     precision: 0.001
   });
   return React__default.createElement(reactMotion.TransitionMotion, {
@@ -773,7 +801,7 @@ var ChordArcs = React.memo(function (_ref) {
       return {
         key: arc.id,
         data: arc,
-        style: _objectSpread$4({
+        style: _objectSpread2({
           startAngle: reactMotion.spring(arc.startAngle, springConfig),
           endAngle: reactMotion.spring(arc.endAngle, springConfig),
           opacity: reactMotion.spring(getOpacity(arc), springConfig)
@@ -809,23 +837,7 @@ var ChordArcs = React.memo(function (_ref) {
   });
 });
 ChordArcs.displayName = 'ChordArcs';
-ChordArcs.propTypes = {
-  arcs: PropTypes.array.isRequired,
-  arcGenerator: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  getOpacity: PropTypes.func.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
-};
 
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var ChordLabels = function ChordLabels(_ref) {
   var arcs = _ref.arcs,
       radius = _ref.radius,
@@ -843,7 +855,7 @@ var ChordLabels = function ChordLabels(_ref) {
       return React__default.createElement("text", {
         key: arc.id,
         transform: "translate(".concat(textProps.x, ", ").concat(textProps.y, ") rotate(").concat(textProps.rotate, ")"),
-        style: _objectSpread$5({}, theme.labels.text, {
+        style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
           pointerEvents: 'none',
           fill: color
         }),
@@ -873,7 +885,7 @@ var ChordLabels = function ChordLabels(_ref) {
       return React__default.createElement("text", {
         key: key,
         transform: "translate(".concat(textProps.x, ", ").concat(textProps.y, ") rotate(").concat(textProps.rotate, ")"),
-        style: _objectSpread$5({}, theme.labels.text, {
+        style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
           pointerEvents: 'none',
           fill: color
         }),
@@ -883,14 +895,7 @@ var ChordLabels = function ChordLabels(_ref) {
     }));
   });
 };
-ChordLabels.propTypes = {
-  arcs: PropTypes.array.isRequired,
-  radius: PropTypes.number.isRequired,
-  rotation: PropTypes.number.isRequired,
-  getColor: PropTypes.func.isRequired
-};
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var Chord = function Chord(_ref) {
   var partialMargin = _ref.margin,
       width = _ref.width,
@@ -930,7 +935,8 @@ var Chord = function Chord(_ref) {
       onRibbonMouseMove = _ref.onRibbonMouseMove,
       onRibbonMouseLeave = _ref.onRibbonMouseLeave,
       onRibbonClick = _ref.onRibbonClick,
-      legends$1 = _ref.legends;
+      legends$1 = _ref.legends,
+      role = _ref.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       innerWidth = _useDimensions.innerWidth,
@@ -1029,7 +1035,7 @@ var Chord = function Chord(_ref) {
     legends: React__default.createElement(React.Fragment, {
       key: "legends"
     }, legends$1.map(function (legend, i) {
-      return React__default.createElement(legends.BoxLegendSvg, _extends({
+      return React__default.createElement(legends.BoxLegendSvg, Object.assign({
         key: i
       }, legend, {
         containerWidth: innerWidth,
@@ -1054,7 +1060,8 @@ var Chord = function Chord(_ref) {
     width: outerWidth,
     height: outerHeight,
     margin: margin,
-    theme: theme
+    theme: theme,
+    role: role
   }, layers.map(function (layer, i) {
     if (layerById[layer] !== undefined) {
       return layerById[layer];
@@ -1067,16 +1074,9 @@ var Chord = function Chord(_ref) {
     return null;
   }));
 };
-Chord.propTypes = ChordPropTypes;
 Chord.defaultProps = ChordDefaultProps;
 var Chord$1 = core.withContainer(Chord);
 
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
 var getArcFromMouseEvent = function getArcFromMouseEvent(_ref) {
   var event = _ref.event,
       canvasEl = _ref.canvasEl,
@@ -1086,7 +1086,7 @@ var getArcFromMouseEvent = function getArcFromMouseEvent(_ref) {
       innerRadius = _ref.innerRadius,
       arcs = _ref.arcs;
   var _getRelativeCursor = core.getRelativeCursor(canvasEl, event),
-      _getRelativeCursor2 = _slicedToArray$1(_getRelativeCursor, 2),
+      _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
       x = _getRelativeCursor2[0],
       y = _getRelativeCursor2[1];
   var centerX = margin.left + center[0];
@@ -1201,7 +1201,7 @@ var ChordCanvas = React.memo(function (_ref2) {
           ribbonGenerator(ribbon);
           ctx.fill();
           if (ribbonBorderWidth > 0) {
-            ctx.strokeStyle = getRibbonBorderColor(_objectSpread$6({}, ribbon, {
+            ctx.strokeStyle = getRibbonBorderColor(_objectSpread2(_objectSpread2({}, ribbon), {}, {
               color: ribbon.source.color
             }));
             ctx.lineWidth = ribbonBorderWidth;
@@ -1260,7 +1260,7 @@ var ChordCanvas = React.memo(function (_ref2) {
           };
         });
         legends$1.forEach(function (legend) {
-          legends.renderLegendToCanvas(ctx, _objectSpread$6({}, legend, {
+          legends.renderLegendToCanvas(ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
             data: legendData,
             containerWidth: innerWidth,
             containerHeight: innerHeight,
@@ -1333,28 +1333,25 @@ var ChordCanvas = React.memo(function (_ref2) {
     onClick: isInteractive ? handleClick : undefined
   });
 });
-ChordCanvas.propTypes = ChordCanvasPropTypes;
 ChordCanvas.defaultProps = ChordCanvasDefaultProps;
 var ChordCanvas$1 = core.withContainer(ChordCanvas);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveChord = function ResponsiveChord(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Chord$1, _extends$1({
+    return React__default.createElement(Chord$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveChordCanvas = function ResponsiveChordCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(ChordCanvas$1, _extends$2({
+    return React__default.createElement(ChordCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1378,3 +1375,4 @@ exports.useChordGenerators = useChordGenerators;
 exports.useChordLayerContext = useChordLayerContext;
 exports.useChordLayout = useChordLayout;
 exports.useChordSelection = useChordSelection;
+//# sourceMappingURL=nivo-chord.cjs.js.map

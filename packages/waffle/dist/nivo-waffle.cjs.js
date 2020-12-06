@@ -21,6 +21,153 @@ var withState = _interopDefault(require('recompose/withState'));
 var range = _interopDefault(require('lodash.range'));
 var tooltip = require('@nivo/tooltip');
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+  return _typeof(obj);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  }
+  return _assertThisInitialized(self);
+}
+
+function _createSuper(Derived) {
+  return function () {
+    var Super = _getPrototypeOf(Derived),
+        result;
+    if (_isNativeReflectConstruct()) {
+      var NewTarget = _getPrototypeOf(this).constructor;
+      result = Reflect.construct(Super, arguments, NewTarget);
+    } else {
+      result = Super.apply(this, arguments);
+    }
+    return _possibleConstructorReturn(this, result);
+  };
+}
+
 var WaffleCell = function WaffleCell(_ref) {
   var position = _ref.position,
       size = _ref.size,
@@ -57,21 +204,6 @@ var WaffleCell = function WaffleCell(_ref) {
       }, event);
     }
   });
-};
-WaffleCell.propTypes = {
-  position: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  fill: PropTypes.string,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  data: PropTypes.object.isRequired,
-  onHover: PropTypes.func.isRequired,
-  onLeave: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
 };
 WaffleCell.defaultProps = {
   data: {}
@@ -120,28 +252,12 @@ var WaffleCellHtml = function WaffleCellHtml(_ref) {
     }
   });
 };
-WaffleCellHtml.propTypes = {
-  position: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  data: PropTypes.object.isRequired,
-  onHover: PropTypes.func.isRequired,
-  onLeave: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
-};
 WaffleCellHtml.defaultProps = {
   data: {}
 };
 WaffleCellHtml.displayName = 'WaffleCellHtml';
 var WaffleCellHtml$1 = pure(WaffleCellHtml);
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   total: PropTypes.number.isRequired,
   data: PropTypes.arrayOf(PropTypes.shape({
@@ -170,15 +286,16 @@ var commonPropTypes = {
     y: PropTypes.number.isRequired
   }).isRequired
 };
-var WafflePropTypes = _objectSpread({}, commonPropTypes, {
-  cellComponent: PropTypes.func.isRequired
-}, core.defsPropTypes, {
+var WafflePropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  cellComponent: PropTypes.func.isRequired,
+  role: PropTypes.string.isRequired
+}, core.defsPropTypes), {}, {
   legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired
 });
-var WaffleHtmlPropTypes = _objectSpread({}, commonPropTypes, {
+var WaffleHtmlPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   cellComponent: PropTypes.func.isRequired
 });
-var WaffleCanvasPropTypes = _objectSpread({}, commonPropTypes, {
+var WaffleCanvasPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   pixelRatio: PropTypes.number.isRequired,
   legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired
 });
@@ -201,32 +318,31 @@ var commonDefaultProps = {
   isInteractive: true,
   onClick: core.noop
 };
-var WaffleDefaultProps = _objectSpread({}, commonDefaultProps, {
+var WaffleDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   cellComponent: WaffleCell$1,
+  role: 'img',
   defs: [],
   fill: [],
   legends: []
 });
-var WaffleHtmlDefaultProps = _objectSpread({}, commonDefaultProps, {
+var WaffleHtmlDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   cellComponent: WaffleCellHtml$1
 });
-var WaffleCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var WaffleCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   legends: [],
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
 var props = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    WafflePropTypes: WafflePropTypes,
-    WaffleHtmlPropTypes: WaffleHtmlPropTypes,
-    WaffleCanvasPropTypes: WaffleCanvasPropTypes,
-    WaffleDefaultProps: WaffleDefaultProps,
-    WaffleHtmlDefaultProps: WaffleHtmlDefaultProps,
-    WaffleCanvasDefaultProps: WaffleCanvasDefaultProps
+  __proto__: null,
+  WafflePropTypes: WafflePropTypes,
+  WaffleHtmlPropTypes: WaffleHtmlPropTypes,
+  WaffleCanvasPropTypes: WaffleCanvasPropTypes,
+  WaffleDefaultProps: WaffleDefaultProps,
+  WaffleHtmlDefaultProps: WaffleHtmlDefaultProps,
+  WaffleCanvasDefaultProps: WaffleCanvasDefaultProps
 });
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var computeCellSize = function computeCellSize(width, height, rows, columns, padding) {
   var sizeX = (width - (columns - 1) * padding) / columns;
   var sizeY = (height - (rows - 1) * padding) / rows;
@@ -303,7 +419,7 @@ var computeGrid = function computeGrid(width, height, rows, columns, fillDirecti
 };
 var applyDataToGrid = function applyDataToGrid(_cells, data) {
   var cells = _cells.map(function (cell) {
-    return _objectSpread$1({}, cell);
+    return _objectSpread2({}, cell);
   });
   data.forEach(function (datum) {
     range(datum.startAt, datum.endAt).forEach(function (position) {
@@ -318,8 +434,6 @@ var applyDataToGrid = function applyDataToGrid(_cells, data) {
   return cells;
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonEnhancers = [core.withDimensions(), core.withTheme(), core.withMotion(), withPropsOnChange(['colors'], function (_ref) {
   var colors$1 = _ref.colors;
   return {
@@ -355,7 +469,7 @@ var commonEnhancers = [core.withDimensions(), core.withTheme(), core.withMotion(
   return {
     computedData: data.map(function (datum, groupIndex) {
       if (!hiddenIds.includes(datum.id)) {
-        var enhancedDatum = _objectSpread$2({}, datum, {
+        var enhancedDatum = _objectSpread2(_objectSpread2({}, datum), {}, {
           groupIndex: groupIndex,
           startAt: currentPosition,
           endAt: currentPosition + Math.round(datum.value / unit),
@@ -364,7 +478,7 @@ var commonEnhancers = [core.withDimensions(), core.withTheme(), core.withMotion(
         currentPosition = enhancedDatum.endAt;
         return enhancedDatum;
       }
-      return _objectSpread$2({}, datum, {
+      return _objectSpread2(_objectSpread2({}, datum), {}, {
         groupIndex: groupIndex,
         startAt: currentPosition,
         endAt: currentPosition,
@@ -407,8 +521,6 @@ var enhance = (function (Component) {
   return Component;
 });
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var WaffleCellTooltip = function WaffleCellTooltip(_ref) {
   var position = _ref.position,
       row = _ref.row,
@@ -425,7 +537,7 @@ var WaffleCellTooltip = function WaffleCellTooltip(_ref) {
     color: color,
     theme: theme,
     format: tooltipFormat,
-    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$3({
+    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({
       position: position,
       row: row,
       column: column,
@@ -434,41 +546,18 @@ var WaffleCellTooltip = function WaffleCellTooltip(_ref) {
   });
 };
 WaffleCellTooltip.displayName = 'WaffleCellTooltip';
-WaffleCellTooltip.propTypes = {
-  position: PropTypes.number.isRequired,
-  row: PropTypes.number.isRequired,
-  column: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  data: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-  tooltip: PropTypes.func
-};
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var Waffle =
-function (_Component) {
+var Waffle = function (_Component) {
   _inherits(Waffle, _Component);
+  var _super = _createSuper(Waffle);
   function Waffle() {
-    var _getPrototypeOf2;
     var _this;
     _classCallCheck(this, Waffle);
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Waffle)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$4(_assertThisInitialized(_this), "handleCellHover", function (showTooltip, cell, event) {
+    _this = _super.call.apply(_super, [this].concat(args));
+    _this.handleCellHover = function (showTooltip, cell, event) {
       var _this$props = _this.props,
           setCurrentCell = _this$props.setCurrentCell,
           theme = _this$props.theme,
@@ -486,11 +575,11 @@ function (_Component) {
         tooltipFormat: tooltipFormat,
         tooltip: tooltip
       }), event);
-    });
-    _defineProperty$4(_assertThisInitialized(_this), "handleCellLeave", function (hideTooltip) {
+    };
+    _this.handleCellLeave = function (hideTooltip) {
       _this.props.setCurrentCell(null);
       hideTooltip();
-    });
+    };
     return _this;
   }
   _createClass(Waffle, [{
@@ -521,11 +610,12 @@ function (_Component) {
           origin = _this$props2.origin,
           computedData = _this$props2.computedData,
           legendData = _this$props2.legendData,
-          legends$1 = _this$props2.legends;
+          legends$1 = _this$props2.legends,
+          role = _this$props2.role;
       cells.forEach(function (cell) {
         cell.color = emptyColor;
       });
-      return React__default.createElement(core.Container, {
+      return React__default.createElement(core.LegacyContainer, {
         isInteractive: isInteractive,
         theme: theme,
         animate: animate,
@@ -555,7 +645,7 @@ function (_Component) {
             })
           }, function (interpolatedStyles) {
             var computedCells = applyDataToGrid(cells, interpolatedStyles.map(function (s) {
-              return _objectSpread$4({}, s.data, {
+              return _objectSpread2(_objectSpread2({}, s.data), {}, {
                 startAt: Math.round(s.style.startAt),
                 endAt: Math.round(s.style.endAt)
               });
@@ -605,11 +695,12 @@ function (_Component) {
           height: outerHeight,
           margin: margin,
           defs: defs,
-          theme: theme
+          theme: theme,
+          role: role
         }, React__default.createElement("g", {
           transform: "translate(".concat(origin.x, ", ").concat(origin.y, ")")
         }, cellsRender), legends$1.map(function (legend, i) {
-          return React__default.createElement(legends.BoxLegendSvg, _extends({
+          return React__default.createElement(legends.BoxLegendSvg, Object.assign({
             key: i
           }, legend, {
             containerWidth: width,
@@ -623,45 +714,31 @@ function (_Component) {
   }]);
   return Waffle;
 }(React.Component);
-_defineProperty$4(Waffle, "propTypes", WafflePropTypes);
 Waffle.displayName = 'Waffle';
 var Waffle$1 = setDisplayName(Waffle.displayName)(enhance(Waffle));
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveWaffle = function ResponsiveWaffle(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Waffle$1, _extends$1({
+    return React__default.createElement(Waffle$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _typeof$1(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof$1 = function _typeof(obj) { return typeof obj; }; } else { _typeof$1 = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof$1(obj); }
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties$1(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass$1(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties$1(Constructor.prototype, protoProps); if (staticProps) _defineProperties$1(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn$1(self, call) { if (call && (_typeof$1(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized$1(self); }
-function _getPrototypeOf$1(o) { _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf$1(o); }
-function _assertThisInitialized$1(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits$1(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf$1(subClass, superClass); }
-function _setPrototypeOf$1(o, p) { _setPrototypeOf$1 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$1(o, p); }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var WaffleHtml =
-function (_Component) {
-  _inherits$1(WaffleHtml, _Component);
+var WaffleHtml = function (_Component) {
+  _inherits(WaffleHtml, _Component);
+  var _super = _createSuper(WaffleHtml);
   function WaffleHtml() {
-    var _getPrototypeOf2;
     var _this;
-    _classCallCheck$1(this, WaffleHtml);
+    _classCallCheck(this, WaffleHtml);
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-    _this = _possibleConstructorReturn$1(this, (_getPrototypeOf2 = _getPrototypeOf$1(WaffleHtml)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$5(_assertThisInitialized$1(_this), "handleCellHover", function (showTooltip, cell, event) {
+    _this = _super.call.apply(_super, [this].concat(args));
+    _this.handleCellHover = function (showTooltip, cell, event) {
       var _this$props = _this.props,
           setCurrentCell = _this$props.setCurrentCell,
           theme = _this$props.theme,
@@ -679,14 +756,14 @@ function (_Component) {
         tooltipFormat: tooltipFormat,
         tooltip: tooltip
       }), event);
-    });
-    _defineProperty$5(_assertThisInitialized$1(_this), "handleCellLeave", function (hideTooltip) {
+    };
+    _this.handleCellLeave = function (hideTooltip) {
       _this.props.setCurrentCell(null);
       hideTooltip();
-    });
+    };
     return _this;
   }
-  _createClass$1(WaffleHtml, [{
+  _createClass(WaffleHtml, [{
     key: "render",
     value: function render() {
       var _this2 = this;
@@ -712,7 +789,7 @@ function (_Component) {
       cells.forEach(function (cell) {
         cell.color = emptyColor;
       });
-      return React__default.createElement(core.Container, {
+      return React__default.createElement(core.LegacyContainer, {
         isInteractive: isInteractive,
         theme: theme,
         animate: animate,
@@ -742,7 +819,7 @@ function (_Component) {
             })
           }, function (interpolatedStyles) {
             var computedCells = applyDataToGrid(cells, interpolatedStyles.map(function (s) {
-              return _objectSpread$5({}, s.data, {
+              return _objectSpread2(_objectSpread2({}, s.data), {}, {
                 startAt: Math.round(s.style.startAt),
                 endAt: Math.round(s.style.endAt)
               });
@@ -805,54 +882,89 @@ function (_Component) {
   }]);
   return WaffleHtml;
 }(React.Component);
-_defineProperty$5(WaffleHtml, "propTypes", WaffleHtmlPropTypes);
 WaffleHtml.displayName = 'WaffleHtml';
 var WaffleHtml$1 = setDisplayName(WaffleHtml.displayName)(enhance(WaffleHtml));
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveWaffleHtml = function ResponsiveWaffleHtml(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(WaffleHtml$1, _extends$2({
+    return React__default.createElement(WaffleHtml$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _typeof$2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof$2 = function _typeof(obj) { return typeof obj; }; } else { _typeof$2 = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof$2(obj); }
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _classCallCheck$2(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties$2(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass$2(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties$2(Constructor.prototype, protoProps); if (staticProps) _defineProperties$2(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn$2(self, call) { if (call && (_typeof$2(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized$2(self); }
-function _getPrototypeOf$2(o) { _getPrototypeOf$2 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf$2(o); }
-function _assertThisInitialized$2(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits$2(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf$2(subClass, superClass); }
-function _setPrototypeOf$2(o, p) { _setPrototypeOf$2 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$2(o, p); }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var findCellUnderCursor = function findCellUnderCursor(cells, cellSize, origin, margin, x, y) {
   return cells.find(function (cell) {
     return core.isCursorInRect(cell.x + origin.x + margin.left, cell.y + origin.y + margin.top, cellSize, cellSize, x, y);
   });
 };
-var WaffleCanvas =
-function (_Component) {
-  _inherits$2(WaffleCanvas, _Component);
+var WaffleCanvas = function (_Component) {
+  _inherits(WaffleCanvas, _Component);
+  var _super = _createSuper(WaffleCanvas);
   function WaffleCanvas() {
-    var _getPrototypeOf2;
     var _this;
-    _classCallCheck$2(this, WaffleCanvas);
+    _classCallCheck(this, WaffleCanvas);
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
-    _this = _possibleConstructorReturn$2(this, (_getPrototypeOf2 = _getPrototypeOf$2(WaffleCanvas)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$6(_assertThisInitialized$2(_this), "handleMouseHover", function (showTooltip, hideTooltip) {
+    _this = _super.call.apply(_super, [this].concat(args));
+    _this.handleMouseHover = function (showTooltip, hideTooltip) {
       return function (event) {
         var _this$props = _this.props,
             isInteractive = _this$props.isInteractive,
@@ -884,14 +996,14 @@ function (_Component) {
           hideTooltip();
         }
       };
-    });
-    _defineProperty$6(_assertThisInitialized$2(_this), "handleMouseLeave", function (hideTooltip) {
+    };
+    _this.handleMouseLeave = function (hideTooltip) {
       return function () {
         if (_this.props.isInteractive !== true) return;
         hideTooltip();
       };
-    });
-    _defineProperty$6(_assertThisInitialized$2(_this), "handleClick", function (event) {
+    };
+    _this.handleClick = function (event) {
       var _this$props2 = _this.props,
           isInteractive = _this$props2.isInteractive,
           margin = _this$props2.margin,
@@ -906,10 +1018,10 @@ function (_Component) {
           y = _getRelativeCursor4[1];
       var cell = findCellUnderCursor(cells, cellSize, origin, margin, x, y);
       if (cell !== undefined) onClick(cell, event);
-    });
+    };
     return _this;
   }
-  _createClass$2(WaffleCanvas, [{
+  _createClass(WaffleCanvas, [{
     key: "componentDidMount",
     value: function componentDidMount() {
       this.ctx = this.surface.getContext('2d');
@@ -975,7 +1087,7 @@ function (_Component) {
         _this2.ctx.restore();
       });
       legends$1.forEach(function (legend) {
-        legends.renderLegendToCanvas(_this2.ctx, _objectSpread$6({}, legend, {
+        legends.renderLegendToCanvas(_this2.ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
           data: legendData,
           containerWidth: width,
           containerHeight: height,
@@ -993,7 +1105,7 @@ function (_Component) {
           pixelRatio = _this$props3.pixelRatio,
           isInteractive = _this$props3.isInteractive,
           theme = _this$props3.theme;
-      return React__default.createElement(core.Container, {
+      return React__default.createElement(core.LegacyContainer, {
         isInteractive: isInteractive,
         theme: theme,
         animate: false
@@ -1020,16 +1132,14 @@ function (_Component) {
   }]);
   return WaffleCanvas;
 }(React.Component);
-_defineProperty$6(WaffleCanvas, "propTypes", WaffleCanvasPropTypes);
 WaffleCanvas.displayName = 'WaffleCanvas';
 var WaffleCanvas$1 = setDisplayName(WaffleCanvas.displayName)(enhance(WaffleCanvas));
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveWaffleCanvas = function ResponsiveWaffleCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(WaffleCanvas$1, _extends$3({
+    return React__default.createElement(WaffleCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1048,3 +1158,4 @@ exports.WaffleHtml = WaffleHtml$1;
 exports.WaffleHtmlDefaultProps = WaffleHtmlDefaultProps;
 exports.WaffleHtmlPropTypes = WaffleHtmlPropTypes;
 exports.WafflePropTypes = WafflePropTypes;
+//# sourceMappingURL=nivo-waffle.cjs.js.map

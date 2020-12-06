@@ -13,11 +13,104 @@ var colors = require('@nivo/colors');
 var tooltip = require('@nivo/tooltip');
 var d3Scale = require('d3-scale');
 var PropTypes = _interopDefault(require('prop-types'));
-var reactMotion = require('react-motion');
-var sortBy = _interopDefault(require('lodash/sortBy'));
+var reactSpring = require('react-spring');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var computeSeries = function computeSeries(_ref) {
   var width = _ref.width,
       height = _ref.height,
@@ -40,7 +133,7 @@ var computeSeries = function computeSeries(_ref) {
   })).range([0, height]).padding(yOuterPadding);
   var linePointPadding = xScale.step() * Math.min(xPadding * 0.5, 0.5);
   var series = data.map(function (rawSerie) {
-    var serie = _objectSpread({}, rawSerie, {
+    var serie = _objectSpread2(_objectSpread2({}, rawSerie), {}, {
       points: [],
       linePoints: []
     });
@@ -87,8 +180,6 @@ var computeSeries = function computeSeries(_ref) {
   };
 };
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var useLineGenerator = function useLineGenerator(interpolation) {
   return React.useMemo(function () {
     return d3Shape.line().curve(interpolation === 'smooth' ? d3Shape.curveBasis : d3Shape.curveLinear).defined(function (d) {
@@ -252,9 +343,10 @@ var useBump = function useBump(_ref3) {
   });
   var series = React.useMemo(function () {
     return rawSeries.map(function (serie) {
-      serie.color = getColor(serie);
-      serie.style = getSerieStyle(serie);
-      return serie;
+      var nextSerie = _objectSpread2({}, serie);
+      nextSerie.color = getColor(nextSerie);
+      nextSerie.style = getSerieStyle(nextSerie);
+      return nextSerie;
     });
   }, [rawSeries, getColor, getSerieStyle]);
   var theme = core.useTheme();
@@ -274,7 +366,7 @@ var useBump = function useBump(_ref3) {
     var pts = [];
     series.forEach(function (serie) {
       serie.points.forEach(function (rawPoint) {
-        var point = _objectSpread$1({}, rawPoint, {
+        var point = _objectSpread2(_objectSpread2({}, rawPoint), {}, {
           serie: serie,
           serieId: serie.id,
           isActive: currentSerie === serie.id,
@@ -282,7 +374,7 @@ var useBump = function useBump(_ref3) {
         });
         point.color = getPointColor(point);
         point.borderColor = getPointBorderColor(point);
-        point.style = getPointStyle(_objectSpread$1({}, point, {
+        point.style = getPointStyle(_objectSpread2(_objectSpread2({}, point), {}, {
           serie: serie
         }));
         pts.push(point);
@@ -392,12 +484,6 @@ var LineTooltip = function LineTooltip(_ref) {
     color: serie.color
   });
 };
-LineTooltip.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
-  })
-};
 var LineTooltip$1 = React.memo(LineTooltip);
 
 var pointStyle = {
@@ -410,31 +496,32 @@ var Point = function Point(_ref) {
       color = _ref.color,
       borderColor = _ref.borderColor,
       borderWidth = _ref.borderWidth;
-  return React__default.createElement("circle", {
-    cx: x,
-    cy: y,
-    r: size / 2,
-    fill: color,
-    strokeWidth: borderWidth,
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x,
+    y: y,
+    radius: size / 2,
+    color: color,
+    borderWidth: borderWidth,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: reactSpring.to(animatedProps.radius, function (v) {
+      return Math.max(v, 0);
+    }),
+    fill: animatedProps.color,
+    strokeWidth: animatedProps.borderWidth,
     stroke: borderColor,
     style: pointStyle
   });
 };
-Point.propTypes = {
-  data: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  isActive: PropTypes.bool.isRequired,
-  isInactive: PropTypes.bool.isRequired,
-  size: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired
-};
 var Point$1 = React.memo(Point);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -483,7 +570,9 @@ var commonPropTypes = {
   onClick: PropTypes.func,
   tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
 };
-var BumpPropTypes = _objectSpread$2({}, commonPropTypes, core.motionPropTypes);
+var BumpPropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, commonPropTypes), core.motionPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
 var commonDefaultProps = {
   layers: ['grid', 'axes', 'labels', 'lines', 'points'],
   interpolation: 'smooth',
@@ -530,135 +619,12 @@ var commonDefaultProps = {
   isInteractive: true,
   tooltip: LineTooltip$1
 };
-var BumpDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var BumpDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pointComponent: Point$1,
   animate: true,
-  motionStiffness: 90,
-  motionDamping: 15
+  motionConfig: 'gentle',
+  role: 'img'
 });
-
-var AnimatedLine = function AnimatedLine(_ref) {
-  var serie = _ref.serie,
-      lineGenerator = _ref.lineGenerator,
-      yStep = _ref.yStep,
-      isInteractive = _ref.isInteractive,
-      onMouseEnter = _ref.onMouseEnter,
-      onMouseMove = _ref.onMouseMove,
-      onMouseLeave = _ref.onMouseLeave,
-      onClick = _ref.onClick;
-  var _useMotionConfig = core.useMotionConfig(),
-      springConfig = _useMotionConfig.springConfig;
-  var path = React.useMemo(function () {
-    return lineGenerator(serie.linePoints);
-  }, [lineGenerator, serie.linePoints]);
-  return React__default.createElement(core.SmartMotion, {
-    style: function style(spring) {
-      return {
-        d: spring(path, springConfig),
-        stroke: spring(serie.color, springConfig),
-        opacity: spring(serie.style.opacity, springConfig),
-        strokeWidth: spring(serie.style.lineWidth, springConfig)
-      };
-    }
-  }, function (interpolated) {
-    return React__default.createElement(React__default.Fragment, null, React__default.createElement("path", {
-      fill: "none",
-      d: interpolated.d,
-      stroke: interpolated.stroke,
-      strokeWidth: interpolated.strokeWidth,
-      strokeLinecap: "round",
-      strokeOpacity: interpolated.opacity,
-      style: {
-        pointerEvents: 'none'
-      }
-    }), isInteractive && React__default.createElement("path", {
-      fill: "none",
-      stroke: "red",
-      strokeOpacity: 0,
-      strokeWidth: yStep,
-      d: path,
-      strokeLinecap: "butt",
-      onMouseEnter: onMouseEnter,
-      onMouseMove: onMouseMove,
-      onMouseLeave: onMouseLeave,
-      onClick: onClick
-    }));
-  });
-};
-AnimatedLine.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    linePoints: PropTypes.array.isRequired,
-    style: PropTypes.shape({
-      lineWidth: PropTypes.number.isRequired,
-      opacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  lineGenerator: PropTypes.func.isRequired,
-  yStep: PropTypes.number.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
-var AnimatedLine$1 = React.memo(AnimatedLine);
-
-var StaticLine = function StaticLine(_ref) {
-  var serie = _ref.serie,
-      lineGenerator = _ref.lineGenerator,
-      yStep = _ref.yStep,
-      isInteractive = _ref.isInteractive,
-      onMouseEnter = _ref.onMouseEnter,
-      onMouseMove = _ref.onMouseMove,
-      onMouseLeave = _ref.onMouseLeave,
-      onClick = _ref.onClick;
-  var path = React.useMemo(function () {
-    return lineGenerator(serie.linePoints);
-  }, [lineGenerator, serie.linePoints]);
-  return React__default.createElement(React__default.Fragment, null, React__default.createElement("path", {
-    fill: "none",
-    d: path,
-    stroke: serie.color,
-    strokeWidth: serie.style.lineWidth,
-    strokeLinecap: "round",
-    strokeOpacity: serie.style.opacity,
-    style: {
-      pointerEvents: 'none'
-    }
-  }), isInteractive && React__default.createElement("path", {
-    fill: "none",
-    stroke: "red",
-    strokeOpacity: 0,
-    strokeWidth: yStep,
-    d: path,
-    strokeLinecap: "butt",
-    onMouseEnter: onMouseEnter,
-    onMouseMove: onMouseMove,
-    onMouseLeave: onMouseLeave,
-    onClick: onClick
-  }));
-};
-StaticLine.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    linePoints: PropTypes.array.isRequired,
-    style: PropTypes.shape({
-      lineWidth: PropTypes.number.isRequired,
-      opacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  lineGenerator: PropTypes.func.isRequired,
-  yStep: PropTypes.number.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
-var StaticLine$1 = React.memo(StaticLine);
 
 var Line = function Line(_ref) {
   var serie = _ref.serie,
@@ -682,42 +648,42 @@ var Line = function Line(_ref) {
     tooltip: tooltip
   });
   var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate;
-  var LineComponent = animate ? AnimatedLine$1 : StaticLine$1;
-  return React__default.createElement(LineComponent, {
-    serie: serie,
-    lineGenerator: lineGenerator,
-    yStep: yStep,
-    isInteractive: isInteractive,
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var linePath = lineGenerator(serie.linePoints);
+  var animatedPath = core.useAnimatedPath(linePath);
+  var animatedProps = reactSpring.useSpring({
+    color: serie.color,
+    opacity: serie.style.opacity,
+    lineWidth: serie.style.lineWidth,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(React__default.Fragment, null, React__default.createElement(reactSpring.animated.path, {
+    fill: "none",
+    d: animatedPath,
+    stroke: animatedProps.color,
+    strokeWidth: animatedProps.lineWidth,
+    strokeLinecap: "round",
+    strokeOpacity: animatedProps.opacity,
+    style: {
+      pointerEvents: 'none'
+    }
+  }), isInteractive && React__default.createElement("path", {
+    fill: "none",
+    stroke: "red",
+    strokeOpacity: 0,
+    strokeWidth: yStep,
+    d: linePath,
+    strokeLinecap: "butt",
     onMouseEnter: handlers.onMouseEnter,
     onMouseMove: handlers.onMouseMove,
     onMouseLeave: handlers.onMouseLeave,
     onClick: handlers.onClick
-  });
-};
-Line.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    style: PropTypes.shape({
-      lineWidth: PropTypes.number.isRequired,
-      opacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  lineGenerator: PropTypes.func.isRequired,
-  yStep: PropTypes.number.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  setCurrentSerie: PropTypes.func.isRequired,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
+  }));
 };
 var Line$1 = React.memo(Line);
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var LinesLabels = function LinesLabels(_ref) {
   var series = _ref.series,
       getLabel = _ref.getLabel,
@@ -727,7 +693,7 @@ var LinesLabels = function LinesLabels(_ref) {
   var theme = core.useTheme();
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
+      springConfig = _useMotionConfig.config;
   var labels = useSeriesLabels({
     series: series,
     getLabel: getLabel,
@@ -735,145 +701,52 @@ var LinesLabels = function LinesLabels(_ref) {
     padding: padding,
     color: color
   });
-  if (!animate) {
-    return labels.map(function (label) {
-      return React__default.createElement("text", {
-        key: label.id,
-        x: label.x,
-        y: label.y,
-        textAnchor: label.textAnchor,
-        dominantBaseline: "central",
-        opacity: label.opacity,
-        style: _objectSpread$3({}, theme.labels.text, {
-          fill: label.color
-        })
-      }, label.label);
-    });
-  }
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: labels.map(function (label) {
-      return {
-        key: label.id,
-        data: label,
-        style: {
-          x: reactMotion.spring(label.x, springConfig),
-          y: reactMotion.spring(label.y, springConfig),
-          opacity: reactMotion.spring(label.opacity, springConfig)
-        }
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement(React__default.Fragment, null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          label = _ref2.data;
-      return React__default.createElement("text", {
-        key: key,
-        x: style.x,
-        y: style.y,
-        textAnchor: label.textAnchor,
-        dominantBaseline: "central",
-        opacity: style.opacity,
-        style: _objectSpread$3({}, theme.labels.text, {
-          fill: label.color
-        })
-      }, label.label);
-    }));
+  var springs = reactSpring.useSprings(labels.length, labels.map(function (label) {
+    return {
+      x: label.x,
+      y: label.y,
+      opacity: label.opacity,
+      config: springConfig,
+      immediate: !animate
+    };
+  }));
+  return springs.map(function (animatedProps, index) {
+    var label = labels[index];
+    return React__default.createElement(reactSpring.animated.text, {
+      key: label.id,
+      x: animatedProps.x,
+      y: animatedProps.y,
+      textAnchor: label.textAnchor,
+      dominantBaseline: "central",
+      opacity: animatedProps.opacity,
+      style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+        fill: label.color
+      })
+    }, label.label);
   });
-};
-LinesLabels.propTypes = {
-  series: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    data: PropTypes.arrayOf(PropTypes.shape({
-      x: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      y: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-    })).isRequired
-  })).isRequired,
-  getLabel: PropTypes.oneOfType([PropTypes.oneOf([false]), PropTypes.string, PropTypes.func]).isRequired,
-  position: PropTypes.oneOf(['start', 'end']).isRequired,
-  padding: PropTypes.number.isRequired,
-  color: colors.inheritedColorPropType.isRequired
 };
 var LinesLabels$1 = React.memo(LinesLabels);
 
 var Points = function Points(_ref) {
   var pointComponent = _ref.pointComponent,
       points = _ref.points;
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (!animate) {
-    return points.map(function (point) {
-      return React__default.createElement(pointComponent, {
-        key: point.id,
-        data: point.data,
-        x: point.x,
-        y: point.y,
-        isActive: point.isActive,
-        isInactive: point.isInactive,
-        size: point.style.size,
-        color: point.color,
-        borderColor: point.borderColor,
-        borderWidth: point.style.borderWidth
-      });
+  return points.map(function (point) {
+    return React__default.createElement(pointComponent, {
+      key: point.id,
+      data: point.data,
+      x: point.x,
+      y: point.y,
+      isActive: point.isActive,
+      isInactive: point.isInactive,
+      size: point.style.size,
+      color: point.color,
+      borderColor: point.borderColor,
+      borderWidth: point.style.borderWidth
     });
-  }
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: points.map(function (point) {
-      return {
-        key: point.id,
-        data: point,
-        style: {
-          x: reactMotion.spring(point.x, springConfig),
-          y: reactMotion.spring(point.y, springConfig),
-          size: reactMotion.spring(point.style.size, springConfig),
-          borderWidth: reactMotion.spring(point.style.borderWidth, springConfig)
-        }
-      };
-    })
-  }, function (interpolated) {
-    return React__default.createElement(React__default.Fragment, null, interpolated.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          point = _ref2.data;
-      return React__default.createElement(pointComponent, {
-        key: key,
-        data: point.data,
-        x: style.x,
-        y: style.y,
-        isActive: point.isActive,
-        isInactive: point.isInactive,
-        size: Math.max(style.size, 0),
-        color: point.color,
-        borderColor: point.borderColor,
-        borderWidth: Math.max(style.borderWidth, 0)
-      });
-    }));
   });
-};
-Points.propTypes = {
-  pointComponent: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  points: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    data: PropTypes.object.isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    isActive: PropTypes.bool.isRequired,
-    isInactive: PropTypes.bool.isRequired,
-    color: PropTypes.string.isRequired,
-    borderColor: PropTypes.string.isRequired,
-    style: PropTypes.shape({
-      size: PropTypes.number.isRequired,
-      borderWidth: PropTypes.number.isRequired
-    }).isRequired
-  })).isRequired
 };
 var Points$1 = React.memo(Points);
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var Bump = function Bump(props) {
   var data = props.data,
       width = props.width,
@@ -917,7 +790,8 @@ var Bump = function Bump(props) {
       onMouseMove = props.onMouseMove,
       onMouseLeave = props.onMouseLeave,
       onClick = props.onClick,
-      tooltip = props.tooltip;
+      tooltip = props.tooltip,
+      role = props.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       innerWidth = _useDimensions.innerWidth,
@@ -1029,7 +903,8 @@ var Bump = function Bump(props) {
   return React__default.createElement(core.SvgWrapper, {
     width: outerWidth,
     height: outerHeight,
-    margin: margin
+    margin: margin,
+    role: role
   }, layers.map(function (layer, i) {
     if (typeof layer === 'function') {
       return React__default.createElement(React.Fragment, {
@@ -1044,16 +919,14 @@ var Bump = function Bump(props) {
     return layerById[layer];
   }));
 };
-Bump.propTypes = BumpPropTypes;
 Bump.defaultProps = BumpDefaultProps;
 var Bump$1 = React.memo(core.withContainer(Bump));
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var ResponsiveBump = function ResponsiveBump(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Bump$1, _extends({
+    return React__default.createElement(Bump$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1068,16 +941,8 @@ var AreaTooltip = function AreaTooltip(_ref) {
     color: serie.color
   });
 };
-AreaTooltip.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
-  })
-};
 var AreaTooltip$1 = React.memo(AreaTooltip);
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes$1 = {
   data: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -1096,6 +961,13 @@ var commonPropTypes$1 = {
   fillOpacity: PropTypes.number.isRequired,
   activeFillOpacity: PropTypes.number.isRequired,
   inactiveFillOpacity: PropTypes.number.isRequired,
+  defs: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired
+  })).isRequired,
+  fill: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    match: PropTypes.oneOfType([PropTypes.oneOf(['*']), PropTypes.object, PropTypes.func]).isRequired
+  })).isRequired,
   borderWidth: PropTypes.number.isRequired,
   activeBorderWidth: PropTypes.number.isRequired,
   inactiveBorderWidth: PropTypes.number.isRequired,
@@ -1119,7 +991,9 @@ var commonPropTypes$1 = {
   onClick: PropTypes.func,
   tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
 };
-var AreaBumpPropTypes = _objectSpread$4({}, commonPropTypes$1, core.motionPropTypes);
+var AreaBumpPropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, commonPropTypes$1), core.motionPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
 var commonDefaultProps$1 = {
   align: 'middle',
   layers: ['grid', 'axes', 'labels', 'areas'],
@@ -1133,6 +1007,8 @@ var commonDefaultProps$1 = {
   fillOpacity: 0.8,
   activeFillOpacity: 1,
   inactiveFillOpacity: 0.15,
+  defs: [],
+  fill: [],
   borderWidth: 1,
   activeBorderWidth: 1,
   inactiveBorderWidth: 0,
@@ -1161,14 +1037,12 @@ var commonDefaultProps$1 = {
   isInteractive: true,
   tooltip: AreaTooltip$1
 };
-var AreaBumpDefaultProps = _objectSpread$4({}, commonDefaultProps$1, {
+var AreaBumpDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps$1), {}, {
   animate: true,
-  motionStiffness: 90,
-  motionDamping: 15
+  motionConfig: 'gentle',
+  role: 'img'
 });
 
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var computeSeries$1 = function computeSeries(_ref) {
   var data = _ref.data,
       width = _ref.width,
@@ -1212,7 +1086,9 @@ var computeSeries$1 = function computeSeries(_ref) {
     } else if (align === 'end') {
       offset = height - sliceHeight;
     }
-    sortBy(Array.from(slice.values.values()), 'value').reverse().forEach(function (value, position, all) {
+    Array.from(slice.values.values()).sort(function (a, b) {
+      return b.value - a.value;
+    }).forEach(function (value, position, all) {
       var previousValues = all.filter(function (i, pos) {
         return pos < position;
       });
@@ -1227,7 +1103,7 @@ var computeSeries$1 = function computeSeries(_ref) {
   });
   var areaPointPadding = xScale.step() * Math.min(xPadding * 0.5, 0.5);
   var series = data.map(function (serie) {
-    var serieCopy = _objectSpread$5({}, serie);
+    var serieCopy = _objectSpread2({}, serie);
     serieCopy.points = [];
     serieCopy.areaPoints = [];
     serie.data.forEach(function (datum, i) {
@@ -1243,7 +1119,7 @@ var computeSeries$1 = function computeSeries(_ref) {
         x: x,
         y: y,
         height: height,
-        data: _objectSpread$5({}, datum)
+        data: _objectSpread2({}, datum)
       });
       if (i > 0) {
         serieCopy.areaPoints.push({
@@ -1424,9 +1300,10 @@ var useAreaBump = function useAreaBump(_ref3) {
   });
   var series = React.useMemo(function () {
     return rawSeries.map(function (serie) {
-      serie.color = getColor(serie);
-      serie.style = getSerieStyle(serie);
-      return serie;
+      var nextSerie = _objectSpread2({}, serie);
+      nextSerie.color = getColor(nextSerie);
+      nextSerie.style = getSerieStyle(nextSerie);
+      return nextSerie;
     });
   }, [rawSeries, getColor, getSerieStyle]);
   return {
@@ -1511,110 +1388,6 @@ var useSeriesLabels$1 = function useSeriesLabels(_ref5) {
   }, [series, position, padding, getColor]);
 };
 
-var AnimatedArea = function AnimatedArea(_ref) {
-  var serie = _ref.serie,
-      areaGenerator = _ref.areaGenerator,
-      blendMode = _ref.blendMode,
-      onMouseEnter = _ref.onMouseEnter,
-      onMouseMove = _ref.onMouseMove,
-      onMouseLeave = _ref.onMouseLeave,
-      onClick = _ref.onClick;
-  var _useMotionConfig = core.useMotionConfig(),
-      springConfig = _useMotionConfig.springConfig;
-  return React__default.createElement(core.SmartMotion, {
-    style: function style(spring) {
-      return {
-        d: spring(areaGenerator(serie.areaPoints), springConfig),
-        fill: spring(serie.color, springConfig),
-        fillOpacity: spring(serie.style.fillOpacity, springConfig),
-        stroke: spring(serie.style.borderColor, springConfig),
-        strokeOpacity: spring(serie.style.borderOpacity, springConfig)
-      };
-    }
-  }, function (interpolated) {
-    return React__default.createElement("path", {
-      d: interpolated.d,
-      fill: interpolated.fill,
-      fillOpacity: interpolated.fillOpacity,
-      stroke: interpolated.stroke,
-      strokeWidth: serie.style.borderWidth,
-      strokeOpacity: interpolated.strokeOpacity,
-      style: {
-        mixBlendMode: blendMode
-      },
-      onMouseEnter: onMouseEnter,
-      onMouseMove: onMouseMove,
-      onMouseLeave: onMouseLeave,
-      onClick: onClick
-    });
-  });
-};
-AnimatedArea.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    areaPoints: PropTypes.array.isRequired,
-    style: PropTypes.shape({
-      fillOpacity: PropTypes.number.isRequired,
-      borderWidth: PropTypes.number.isRequired,
-      borderColor: PropTypes.string.isRequired,
-      borderOpacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  areaGenerator: PropTypes.func.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
-var AnimatedArea$1 = React.memo(AnimatedArea);
-
-var StaticArea = function StaticArea(_ref) {
-  var serie = _ref.serie,
-      areaGenerator = _ref.areaGenerator,
-      blendMode = _ref.blendMode,
-      onMouseEnter = _ref.onMouseEnter,
-      onMouseMove = _ref.onMouseMove,
-      onMouseLeave = _ref.onMouseLeave,
-      onClick = _ref.onClick;
-  return React__default.createElement("path", {
-    d: areaGenerator(serie.areaPoints),
-    fill: serie.color,
-    fillOpacity: serie.style.fillOpacity,
-    stroke: serie.style.borderColor,
-    strokeWidth: serie.style.borderWidth,
-    strokeOpacity: serie.style.borderOpacity,
-    style: {
-      mixBlendMode: blendMode
-    },
-    onMouseEnter: onMouseEnter,
-    onMouseMove: onMouseMove,
-    onMouseLeave: onMouseLeave,
-    onClick: onClick
-  });
-};
-StaticArea.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    areaPoints: PropTypes.array.isRequired,
-    style: PropTypes.shape({
-      fillOpacity: PropTypes.number.isRequired,
-      borderWidth: PropTypes.number.isRequired,
-      borderColor: PropTypes.string.isRequired,
-      borderOpacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  areaGenerator: PropTypes.func.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
-};
-var StaticArea$1 = React.memo(StaticArea);
-
 var Area = function Area(_ref) {
   var serie = _ref.serie,
       areaGenerator = _ref.areaGenerator,
@@ -1637,42 +1410,35 @@ var Area = function Area(_ref) {
     tooltip: tooltip
   });
   var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate;
-  var AreaComponent = animate ? AnimatedArea$1 : StaticArea$1;
-  return React__default.createElement(AreaComponent, {
-    serie: serie,
-    areaGenerator: areaGenerator,
-    blendMode: blendMode,
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedPath = core.useAnimatedPath(areaGenerator(serie.areaPoints));
+  var animatedProps = reactSpring.useSpring({
+    color: serie.color,
+    fillOpacity: serie.style.fillOpacity,
+    stroke: serie.style.borderColor,
+    strokeOpacity: serie.style.borderOpacity,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.path, {
+    d: animatedPath,
+    fill: serie.fill ? serie.fill : animatedProps.color,
+    fillOpacity: animatedProps.fillOpacity,
+    stroke: animatedProps.stroke,
+    strokeWidth: serie.style.borderWidth,
+    strokeOpacity: animatedProps.strokeOpacity,
+    style: {
+      mixBlendMode: blendMode
+    },
     onMouseEnter: handlers.onMouseEnter,
     onMouseMove: handlers.onMouseMove,
     onMouseLeave: handlers.onMouseLeave,
     onClick: handlers.onClick
   });
 };
-Area.propTypes = {
-  serie: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired,
-    style: PropTypes.shape({
-      fillOpacity: PropTypes.number.isRequired,
-      borderWidth: PropTypes.number.isRequired,
-      borderOpacity: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired,
-  areaGenerator: PropTypes.func.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  isInteractive: PropTypes.bool.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  setCurrentSerie: PropTypes.func.isRequired,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired
-};
 var Area$1 = React.memo(Area);
 
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var AreasLabels = function AreasLabels(_ref) {
   var series = _ref.series,
       position = _ref.position,
@@ -1681,79 +1447,39 @@ var AreasLabels = function AreasLabels(_ref) {
   var theme = core.useTheme();
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
+      springConfig = _useMotionConfig.config;
   var labels = useSeriesLabels$1({
     series: series,
     position: position,
     padding: padding,
     color: color
   });
-  if (!animate) {
-    return labels.map(function (label) {
-      return React__default.createElement("text", {
-        key: label.id,
-        x: label.x,
-        y: label.y,
-        textAnchor: label.textAnchor,
-        dominantBaseline: "central",
-        opacity: label.opacity,
-        style: _objectSpread$6({}, theme.labels.text, {
-          fill: label.color
-        })
-      }, label.id);
-    });
-  }
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: labels.map(function (label) {
-      return {
-        key: label.id,
-        data: label,
-        style: {
-          x: reactMotion.spring(label.x, springConfig),
-          y: reactMotion.spring(label.y, springConfig),
-          opacity: reactMotion.spring(label.opacity, springConfig)
-        }
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement(React__default.Fragment, null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          label = _ref2.data;
-      return React__default.createElement("text", {
-        key: key,
-        x: style.x,
-        y: style.y,
-        textAnchor: label.textAnchor,
-        dominantBaseline: "central",
-        opacity: style.opacity,
-        style: _objectSpread$6({}, theme.labels.text, {
-          fill: label.color
-        })
-      }, label.id);
-    }));
+  var springs = reactSpring.useSprings(labels.length, labels.map(function (label) {
+    return {
+      x: label.x,
+      y: label.y,
+      opacity: label.opacity,
+      config: springConfig,
+      immediate: !animate
+    };
+  }));
+  return springs.map(function (animatedProps, index) {
+    var label = labels[index];
+    return React__default.createElement(reactSpring.animated.text, {
+      key: label.id,
+      x: animatedProps.x,
+      y: animatedProps.y,
+      textAnchor: label.textAnchor,
+      dominantBaseline: "central",
+      opacity: animatedProps.opacity,
+      style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+        fill: label.color
+      })
+    }, label.id);
   });
-};
-AreasLabels.propTypes = {
-  series: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    data: PropTypes.arrayOf(PropTypes.shape({
-      x: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      y: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired
-    })).isRequired
-  })).isRequired,
-  position: PropTypes.oneOf(['start', 'end']).isRequired,
-  padding: PropTypes.number.isRequired,
-  color: colors.inheritedColorPropType.isRequired
 };
 var AreasLabels$1 = React.memo(AreasLabels);
 
-function _objectSpread$7(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$7(target, key, source[key]); }); } return target; }
-function _defineProperty$7(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
 var AreaBump = function AreaBump(props) {
   var data = props.data,
       align = props.align,
@@ -1769,6 +1495,8 @@ var AreaBump = function AreaBump(props) {
       fillOpacity = props.fillOpacity,
       activeFillOpacity = props.activeFillOpacity,
       inactiveFillOpacity = props.inactiveFillOpacity,
+      defs = props.defs,
+      fill = props.fill,
       borderWidth = props.borderWidth,
       activeBorderWidth = props.activeBorderWidth,
       inactiveBorderWidth = props.inactiveBorderWidth,
@@ -1790,9 +1518,10 @@ var AreaBump = function AreaBump(props) {
       onMouseMove = props.onMouseMove,
       onMouseLeave = props.onMouseLeave,
       onClick = props.onClick,
-      tooltip = props.tooltip;
+      tooltip = props.tooltip,
+      role = props.role;
   var _useState = React.useState(null),
-      _useState2 = _slicedToArray$1(_useState, 2),
+      _useState2 = _slicedToArray(_useState, 2),
       currentSerie = _useState2[0],
       setCurrentSerie = _useState2[1];
   var _useDimensions = core.useDimensions(width, height, partialMargin),
@@ -1826,6 +1555,11 @@ var AreaBump = function AreaBump(props) {
       series = _useAreaBump.series,
       xScale = _useAreaBump.xScale,
       areaGenerator = _useAreaBump.areaGenerator;
+  var boundDefs = React.useMemo(function () {
+    return core.bindDefs(defs, series, fill, {
+      targetKey: 'fill'
+    });
+  }, [defs, series, fill]);
   var layerById = {
     grid: enableGridX && React__default.createElement(axes.Grid, {
       key: "grid",
@@ -1879,14 +1613,16 @@ var AreaBump = function AreaBump(props) {
     }));
   }
   return React__default.createElement(core.SvgWrapper, {
+    defs: boundDefs,
     width: outerWidth,
     height: outerHeight,
-    margin: margin
+    margin: margin,
+    role: role
   }, layers.map(function (layer, i) {
     if (typeof layer === 'function') {
       return React__default.createElement(React.Fragment, {
         key: i
-      }, layer(_objectSpread$7({}, props, {
+      }, layer(_objectSpread2(_objectSpread2({}, props), {}, {
         innerWidth: innerWidth,
         innerHeight: innerHeight,
         outerWidth: outerWidth,
@@ -1899,16 +1635,14 @@ var AreaBump = function AreaBump(props) {
     return layerById[layer];
   }));
 };
-AreaBump.propTypes = AreaBumpPropTypes;
 AreaBump.defaultProps = AreaBumpDefaultProps;
 var AreaBump$1 = React.memo(core.withContainer(AreaBump));
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveAreaBump = function ResponsiveAreaBump(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(AreaBump$1, _extends$1({
+    return React__default.createElement(AreaBump$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1923,3 +1657,4 @@ exports.BumpDefaultProps = BumpDefaultProps;
 exports.BumpPropTypes = BumpPropTypes;
 exports.ResponsiveAreaBump = ResponsiveAreaBump;
 exports.ResponsiveBump = ResponsiveBump;
+//# sourceMappingURL=nivo-bump.cjs.js.map

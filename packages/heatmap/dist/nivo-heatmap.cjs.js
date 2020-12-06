@@ -6,28 +6,60 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var partial = _interopDefault(require('lodash/partial'));
-var reactMotion = require('react-motion');
 var core = require('@nivo/core');
-var colors = require('@nivo/colors');
 var axes = require('@nivo/axes');
-var setDisplayName = _interopDefault(require('recompose/setDisplayName'));
-var PropTypes = _interopDefault(require('prop-types'));
-var min = _interopDefault(require('lodash/min'));
-var max = _interopDefault(require('lodash/max'));
-var isEqual = _interopDefault(require('lodash/isEqual'));
-var compose = _interopDefault(require('recompose/compose'));
-var defaultProps = _interopDefault(require('recompose/defaultProps'));
-var withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
-var withState = _interopDefault(require('recompose/withState'));
-var pure = _interopDefault(require('recompose/pure'));
-var d3Scale = require('d3-scale');
 var tooltip = require('@nivo/tooltip');
+var PropTypes = _interopDefault(require('prop-types'));
+var colors = require('@nivo/colors');
+var d3Scale = require('d3-scale');
+var reactSpring = require('react-spring');
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
 
 var HeatMapPropTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   indexBy: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
-  getIndex: PropTypes.func.isRequired,
   keys: PropTypes.arrayOf(PropTypes.string).isRequired,
   minValue: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number]).isRequired,
   maxValue: PropTypes.oneOfType([PropTypes.oneOf(['auto']), PropTypes.number]).isRequired,
@@ -38,7 +70,6 @@ var HeatMapPropTypes = {
   cellOpacity: PropTypes.number.isRequired,
   cellBorderWidth: PropTypes.number.isRequired,
   cellBorderColor: colors.inheritedColorPropType.isRequired,
-  getCellBorderColor: PropTypes.func.isRequired,
   axisTop: axes.axisPropType,
   axisRight: axes.axisPropType,
   axisBottom: axes.axisPropType,
@@ -47,9 +78,7 @@ var HeatMapPropTypes = {
   enableGridY: PropTypes.bool.isRequired,
   enableLabels: PropTypes.bool.isRequired,
   labelTextColor: colors.inheritedColorPropType.isRequired,
-  getLabelTextColor: PropTypes.func.isRequired,
   colors: core.quantizeColorScalePropType.isRequired,
-  colorScale: PropTypes.func.isRequired,
   nanColor: PropTypes.string,
   isInteractive: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
@@ -60,6 +89,9 @@ var HeatMapPropTypes = {
   tooltip: PropTypes.func,
   pixelRatio: PropTypes.number.isRequired
 };
+var HeatMapSvgPropTypes = _objectSpread2(_objectSpread2({}, HeatMapPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
 var HeatMapDefaultProps = {
   indexBy: 'id',
   minValue: 'auto',
@@ -91,22 +123,100 @@ var HeatMapDefaultProps = {
   cellHoverOthersOpacity: 0.35,
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 };
+var HeatMapSvgDefaultProps = _objectSpread2(_objectSpread2({}, HeatMapDefaultProps), {}, {
+  role: 'img'
+});
 
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+var computeX = function computeX(column, cellWidth, padding) {
+  return column * cellWidth + cellWidth * 0.5 + padding * column + padding;
+};
+var computeY = function computeY(row, cellHeight, padding) {
+  return row * cellHeight + cellHeight * 0.5 + padding * row + padding;
+};
 var isHoverTargetByType = {
-  cell: function cell(node, current) {
-    return node.xKey === current.xKey && node.yKey === current.yKey;
+  cell: function cell(_cell, current) {
+    return _cell.xKey === current.xKey && _cell.yKey === current.yKey;
   },
-  row: function row(node, current) {
-    return node.yKey === current.yKey;
+  row: function row(cell, current) {
+    return cell.yKey === current.yKey;
   },
-  column: function column(node, current) {
-    return node.xKey === current.xKey;
+  column: function column(cell, current) {
+    return cell.xKey === current.xKey;
   },
-  rowColumn: function rowColumn(node, current) {
-    return node.xKey === current.xKey || node.yKey === current.yKey;
+  rowColumn: function rowColumn(cell, current) {
+    return cell.xKey === current.xKey || cell.yKey === current.yKey;
   }
 };
-var computeNodes = (function (_ref) {
+var computeCells = function computeCells(_ref) {
   var data = _ref.data,
       keys = _ref.keys,
       getIndex = _ref.getIndex,
@@ -118,64 +228,65 @@ var computeNodes = (function (_ref) {
       cellHeight = _ref.cellHeight,
       colorScale = _ref.colorScale,
       nanColor = _ref.nanColor,
-      getLabelTextColor = _ref.getLabelTextColor,
-      currentNode = _ref.currentNode,
-      hoverTarget = _ref.hoverTarget,
-      cellHoverOpacity = _ref.cellHoverOpacity,
-      cellHoverOthersOpacity = _ref.cellHoverOthersOpacity;
-  var isHoverTarget = isHoverTargetByType[hoverTarget];
-  return data.reduce(function (acc, d) {
+      getLabelTextColor = _ref.getLabelTextColor;
+  var cells = [];
+  data.forEach(function (datum) {
     keys.forEach(function (key) {
-      var width = sizeScale ? Math.min(sizeScale(d[key]) * cellWidth, cellWidth) : cellWidth;
-      var height = sizeScale ? Math.min(sizeScale(d[key]) * cellHeight, cellHeight) : cellHeight;
-      var node = {
-        key: "".concat(key, ".").concat(getIndex(d)),
+      var value = datum[key];
+      var index = getIndex(datum);
+      var sizeMultiplier = sizeScale ? sizeScale(value) : 1;
+      var width = sizeMultiplier * cellWidth;
+      var height = sizeMultiplier * cellHeight;
+      var cell = {
+        id: "".concat(key, ".").concat(index),
         xKey: key,
-        yKey: getIndex(d),
+        yKey: index,
         x: xScale(key),
-        y: yScale(getIndex(d)),
+        y: yScale(index),
         width: width,
         height: height,
-        value: d[key],
-        color: isNaN(d[key]) ? nanColor : colorScale(d[key])
+        value: value,
+        color: isNaN(value) ? nanColor : colorScale(value),
+        opacity: cellOpacity
       };
-      var opacity = cellOpacity;
-      if (currentNode) {
-        opacity = isHoverTarget(node, currentNode) ? cellHoverOpacity : cellHoverOthersOpacity;
-      }
-      acc.push(Object.assign(node, {
-        labelTextColor: getLabelTextColor(node),
-        opacity: opacity
-      }));
+      cell.labelTextColor = getLabelTextColor(cell);
+      cells.push(cell);
     });
-    return acc;
-  }, []);
-});
-
-var computeX = function computeX(column, cellWidth, padding) {
-  return column * cellWidth + cellWidth * 0.5 + padding * column + padding;
+  });
+  return cells;
 };
-var computeY = function computeY(row, cellHeight, padding) {
-  return row * cellHeight + cellHeight * 0.5 + padding * row + padding;
-};
-var enhance = (function (Component) {
-  return compose(defaultProps(HeatMapDefaultProps), withState('currentNode', 'setCurrentNode', null), core.withTheme(), core.withDimensions(), core.withMotion(), withPropsOnChange(['colors'], function (_ref) {
-    var colors = _ref.colors;
-    return {
-      colorScale: core.guessQuantizeColorScale(colors)
-    };
-  }), withPropsOnChange(['indexBy'], function (_ref2) {
-    var indexBy = _ref2.indexBy;
-    return {
-      getIndex: core.getAccessorFor(indexBy)
-    };
-  }), withPropsOnChange(['data', 'keys', 'width', 'height', 'padding', 'forceSquare'], function (_ref3) {
-    var data = _ref3.data,
-        keys = _ref3.keys,
-        width = _ref3.width,
-        height = _ref3.height,
-        padding = _ref3.padding,
-        forceSquare = _ref3.forceSquare;
+var useHeatMap = function useHeatMap(_ref2) {
+  var data = _ref2.data,
+      keys = _ref2.keys,
+      indexBy = _ref2.indexBy,
+      _ref2$minValue = _ref2.minValue,
+      _minValue = _ref2$minValue === void 0 ? 'auto' : _ref2$minValue,
+      _ref2$maxValue = _ref2.maxValue,
+      _maxValue = _ref2$maxValue === void 0 ? 'auto' : _ref2$maxValue,
+      width = _ref2.width,
+      height = _ref2.height,
+      padding = _ref2.padding,
+      forceSquare = _ref2.forceSquare,
+      sizeVariation = _ref2.sizeVariation,
+      colors$1 = _ref2.colors,
+      nanColor = _ref2.nanColor,
+      cellOpacity = _ref2.cellOpacity,
+      cellBorderColor = _ref2.cellBorderColor,
+      labelTextColor = _ref2.labelTextColor,
+      hoverTarget = _ref2.hoverTarget,
+      cellHoverOpacity = _ref2.cellHoverOpacity,
+      cellHoverOthersOpacity = _ref2.cellHoverOthersOpacity;
+  var _useState = React.useState(null),
+      _useState2 = _slicedToArray(_useState, 2),
+      currentCellId = _useState2[0],
+      setCurrentCellId = _useState2[1];
+  var getIndex = React.useMemo(function () {
+    return core.getAccessorFor(indexBy);
+  }, [indexBy]);
+  var indices = React.useMemo(function () {
+    return data.map(getIndex);
+  }, [data, getIndex]);
+  var layoutConfig = React.useMemo(function () {
     var columns = keys.length;
     var rows = data.length;
     var cellWidth = Math.max((width - padding * (columns + 1)) / columns, 0);
@@ -195,33 +306,18 @@ var enhance = (function (Component) {
       offsetX: offsetX,
       offsetY: offsetY
     };
-  }), withPropsOnChange(['data', 'getIndex'], function (_ref4) {
-    var data = _ref4.data,
-        getIndex = _ref4.getIndex;
+  }, [data, keys, width, height, padding, forceSquare]);
+  var scales = React.useMemo(function () {
     return {
-      indices: data.map(getIndex)
-    };
-  }), withPropsOnChange(function (prev, next) {
-    return prev.keys !== next.keys || prev.cellWidth !== next.cellWidth || prev.cellHeight !== next.cellHeight || prev.padding !== next.padding || !isEqual(prev.indices, next.indices);
-  }, function (_ref5) {
-    var indices = _ref5.indices,
-        keys = _ref5.keys,
-        cellWidth = _ref5.cellWidth,
-        cellHeight = _ref5.cellHeight,
-        padding = _ref5.padding;
-    return {
-      xScale: d3Scale.scaleOrdinal(keys.map(function (key, i) {
-        return computeX(i, cellWidth, padding);
+      x: d3Scale.scaleOrdinal(keys.map(function (key, i) {
+        return computeX(i, layoutConfig.cellWidth, padding);
       })).domain(keys),
-      yScale: d3Scale.scaleOrdinal(indices.map(function (d, i) {
-        return computeY(i, cellHeight, padding);
+      y: d3Scale.scaleOrdinal(indices.map(function (d, i) {
+        return computeY(i, layoutConfig.cellHeight, padding);
       })).domain(indices)
     };
-  }), withPropsOnChange(['data', 'keys', 'minValue', 'maxValue'], function (_ref6) {
-    var data = _ref6.data,
-        keys = _ref6.keys,
-        _minValue = _ref6.minValue,
-        _maxValue = _ref6.maxValue;
+  }, [indices, keys, layoutConfig, padding]);
+  var values = React.useMemo(function () {
     var minValue = _minValue;
     var maxValue = _maxValue;
     if (minValue === 'auto' || maxValue === 'auto') {
@@ -230,51 +326,103 @@ var enhance = (function (Component) {
           return row[key];
         }));
       }, []);
-      if (minValue === 'auto') minValue = min(allValues);
-      if (maxValue === 'auto') maxValue = max(allValues);
+      if (minValue === 'auto') minValue = Math.min.apply(Math, _toConsumableArray(allValues));
+      if (maxValue === 'auto') maxValue = Math.max.apply(Math, _toConsumableArray(allValues));
     }
     return {
-      minValue: Math.min(minValue, maxValue),
-      maxValue: Math.max(maxValue, minValue)
+      min: Math.min(minValue, maxValue),
+      max: Math.max(maxValue, minValue)
     };
-  }), withPropsOnChange(['colorScale', 'minValue', 'maxValue'], function (_ref7) {
-    var colorScale = _ref7.colorScale,
-        minValue = _ref7.minValue,
-        maxValue = _ref7.maxValue;
-    return {
-      colorScale: colorScale.domain([minValue, maxValue])
-    };
-  }), withPropsOnChange(['sizeVariation', 'minValue', 'maxValue'], function (_ref8) {
-    var sizeVariation = _ref8.sizeVariation,
-        minValue = _ref8.minValue,
-        maxValue = _ref8.maxValue;
-    var sizeScale;
+  }, [data, keys, _minValue, _maxValue]);
+  var sizeScale = React.useMemo(function () {
     if (sizeVariation > 0) {
-      sizeScale = d3Scale.scaleLinear().range([1 - sizeVariation, 1]).domain([minValue, maxValue]);
+      return d3Scale.scaleLinear().range([1 - sizeVariation, 1]).domain([values.min, values.max]);
     }
-    return {
-      sizeScale: sizeScale
-    };
-  }), withPropsOnChange(['cellBorderColor', 'theme'], function (_ref9) {
-    var cellBorderColor = _ref9.cellBorderColor,
-        theme = _ref9.theme;
-    return {
-      getCellBorderColor: colors.getInheritedColorGenerator(cellBorderColor, theme)
-    };
-  }), withPropsOnChange(['labelTextColor', 'theme'], function (_ref10) {
-    var labelTextColor = _ref10.labelTextColor,
-        theme = _ref10.theme;
-    return {
-      getLabelTextColor: colors.getInheritedColorGenerator(labelTextColor, theme)
-    };
-  }), pure)(Component);
-});
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var style = {
-  cursor: 'pointer'
+  }, [sizeVariation, values]);
+  var colorScale = React.useMemo(function () {
+    return core.guessQuantizeColorScale(colors$1).domain([values.min, values.max]);
+  }, [colors$1, values]);
+  var theme = core.useTheme();
+  var getCellBorderColor = colors.useInheritedColor(cellBorderColor, theme);
+  var getLabelTextColor = colors.useInheritedColor(labelTextColor, theme);
+  var cells = React.useMemo(function () {
+    return computeCells({
+      data: data,
+      keys: keys,
+      getIndex: getIndex,
+      xScale: scales.x,
+      yScale: scales.y,
+      sizeScale: sizeScale,
+      cellOpacity: cellOpacity,
+      cellWidth: layoutConfig.cellWidth,
+      cellHeight: layoutConfig.cellHeight,
+      colorScale: colorScale,
+      nanColor: nanColor,
+      getLabelTextColor: getLabelTextColor
+    });
+  }, [data, keys, getIndex, scales, sizeScale, cellOpacity, layoutConfig, colorScale, nanColor, getLabelTextColor]);
+  var cellsWithCurrent = React.useMemo(function () {
+    if (currentCellId === null) return cells;
+    var isHoverTarget = isHoverTargetByType[hoverTarget];
+    var currentCell = cells.find(function (cell) {
+      return cell.id === currentCellId;
+    });
+    return cells.map(function (cell) {
+      var opacity = isHoverTarget(cell, currentCell) ? cellHoverOpacity : cellHoverOthersOpacity;
+      if (opacity === cell.opacity) return cell;
+      return _objectSpread2(_objectSpread2({}, cell), {}, {
+        opacity: opacity
+      });
+    });
+  }, [cells, currentCellId, hoverTarget, cellHoverOpacity, cellHoverOthersOpacity]);
+  return _objectSpread2(_objectSpread2({
+    cells: cellsWithCurrent,
+    getIndex: getIndex,
+    xScale: scales.x,
+    yScale: scales.y
+  }, layoutConfig), {}, {
+    sizeScale: sizeScale,
+    setCurrentCellId: setCurrentCellId,
+    colorScale: colorScale,
+    getCellBorderColor: getCellBorderColor,
+    getLabelTextColor: getLabelTextColor
+  });
 };
+
+var HeatMapCells = function HeatMapCells(_ref) {
+  var cells = _ref.cells,
+      cellComponent = _ref.cellComponent,
+      cellBorderWidth = _ref.cellBorderWidth,
+      getCellBorderColor = _ref.getCellBorderColor,
+      enableLabels = _ref.enableLabels,
+      getLabelTextColor = _ref.getLabelTextColor,
+      handleCellHover = _ref.handleCellHover,
+      handleCellLeave = _ref.handleCellLeave,
+      onClick = _ref.onClick;
+  return cells.map(function (cell) {
+    return React__default.createElement(cellComponent, {
+      key: cell.id,
+      data: cell,
+      value: cell.value,
+      x: cell.x,
+      y: cell.y,
+      width: cell.width,
+      height: cell.height,
+      color: cell.color,
+      opacity: cell.opacity,
+      borderWidth: cellBorderWidth,
+      borderColor: getCellBorderColor(cell),
+      enableLabel: enableLabels,
+      textColor: getLabelTextColor(cell),
+      onHover: handleCellHover ? function (event) {
+        return handleCellHover(cell, event);
+      } : undefined,
+      onLeave: handleCellLeave,
+      onClick: onClick
+    });
+  });
+};
+
 var HeatMapCellRect = function HeatMapCellRect(_ref) {
   var data = _ref.data,
       value = _ref.value,
@@ -290,61 +438,57 @@ var HeatMapCellRect = function HeatMapCellRect(_ref) {
       textColor = _ref.textColor,
       onHover = _ref.onHover,
       onLeave = _ref.onLeave,
-      _onClick = _ref.onClick,
-      theme = _ref.theme;
-  return React__default.createElement("g", {
+      onClick = _ref.onClick;
+  var theme = core.useTheme();
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
     transform: "translate(".concat(x, ", ").concat(y, ")"),
+    width: width,
+    height: height,
+    xOffset: width * -0.5,
+    yOffset: height * -0.5,
+    color: color,
+    opacity: opacity,
+    textColor: textColor,
+    borderWidth: borderWidth,
+    borderColor: borderColor,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.g, {
+    transform: animatedProps.transform,
+    style: {
+      cursor: 'pointer'
+    },
     onMouseEnter: onHover,
     onMouseMove: onHover,
     onMouseLeave: onLeave,
-    onClick: function onClick(e) {
-      _onClick(data, e);
-    },
-    style: style
-  }, React__default.createElement("rect", {
-    x: width * -0.5,
-    y: height * -0.5,
-    width: width,
-    height: height,
-    fill: color,
-    fillOpacity: opacity,
-    strokeWidth: borderWidth,
-    stroke: borderColor,
-    strokeOpacity: opacity
-  }), enableLabel && React__default.createElement("text", {
+    onClick: onClick ? function (event) {
+      return onClick(data, event);
+    } : undefined
+  }, React__default.createElement(reactSpring.animated.rect, {
+    x: animatedProps.xOffset,
+    y: animatedProps.yOffset,
+    width: animatedProps.width,
+    height: animatedProps.height,
+    fill: animatedProps.color,
+    fillOpacity: animatedProps.opacity,
+    strokeWidth: animatedProps.borderWidth,
+    stroke: animatedProps.borderColor,
+    strokeOpacity: animatedProps.opacity
+  }), enableLabel && React__default.createElement(reactSpring.animated.text, {
     dominantBaseline: "central",
     textAnchor: "middle",
-    style: _objectSpread({}, theme.labels.text, {
-      fill: textColor
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      fill: animatedProps.textColor
     }),
-    fillOpacity: opacity
+    fillOpacity: animatedProps.opacity
   }, value));
 };
-HeatMapCellRect.propTypes = {
-  data: PropTypes.object.isRequired,
-  value: PropTypes.number.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  enableLabel: PropTypes.bool.isRequired,
-  textColor: PropTypes.string.isRequired,
-  onHover: PropTypes.func.isRequired,
-  onLeave: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
-  theme: core.themePropType.isRequired
-};
-var HeatMapCellRect$1 = pure(HeatMapCellRect);
+var HeatMapCellRect$1 = React.memo(HeatMapCellRect);
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var style$1 = {
-  cursor: 'pointer'
-};
 var HeatMapCellCircle = function HeatMapCellCircle(_ref) {
   var data = _ref.data,
       value = _ref.value,
@@ -360,279 +504,193 @@ var HeatMapCellCircle = function HeatMapCellCircle(_ref) {
       textColor = _ref.textColor,
       onHover = _ref.onHover,
       onLeave = _ref.onLeave,
-      _onClick = _ref.onClick,
-      theme = _ref.theme;
-  return React__default.createElement("g", {
+      onClick = _ref.onClick;
+  var theme = core.useTheme();
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
     transform: "translate(".concat(x, ", ").concat(y, ")"),
-    style: style$1,
+    radius: Math.min(width, height) / 2,
+    color: color,
+    opacity: opacity,
+    textColor: textColor,
+    borderWidth: borderWidth,
+    borderColor: borderColor,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.g, {
+    transform: animatedProps.transform,
+    style: {
+      cursor: 'pointer'
+    },
     onMouseEnter: onHover,
     onMouseMove: onHover,
     onMouseLeave: onLeave,
-    onClick: function onClick(e) {
-      _onClick(data, e);
-    }
-  }, React__default.createElement("circle", {
-    r: Math.min(width, height) / 2,
-    fill: color,
-    fillOpacity: opacity,
-    strokeWidth: borderWidth,
-    stroke: borderColor,
-    strokeOpacity: opacity
-  }), enableLabel && React__default.createElement("text", {
+    onClick: onClick ? function (event) {
+      return onClick(data, event);
+    } : undefined
+  }, React__default.createElement(reactSpring.animated.circle, {
+    r: animatedProps.radius,
+    fill: animatedProps.color,
+    fillOpacity: animatedProps.opacity,
+    strokeWidth: animatedProps.borderWidth,
+    stroke: animatedProps.borderColor,
+    strokeOpacity: animatedProps.opacity
+  }), enableLabel && React__default.createElement(reactSpring.animated.text, {
     dominantBaseline: "central",
     textAnchor: "middle",
-    style: _objectSpread$1({}, theme.labels, {
-      fill: textColor
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      fill: animatedProps.textColor
     }),
-    fillOpacity: opacity
+    fillOpacity: animatedProps.opacity
   }, value));
 };
-HeatMapCellCircle.propTypes = {
-  data: PropTypes.object.isRequired,
-  value: PropTypes.number.isRequired,
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  enableLabel: PropTypes.bool.isRequired,
-  textColor: PropTypes.string.isRequired,
-  onHover: PropTypes.func.isRequired,
-  onLeave: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
-  theme: core.themePropType.isRequired
-};
-var HeatMapCellCircle$1 = pure(HeatMapCellCircle);
+var HeatMapCellCircle$1 = React.memo(HeatMapCellCircle);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var HeatMapCellTooltip = function HeatMapCellTooltip(_ref) {
-  var node = _ref.node,
-      theme = _ref.theme,
+  var cell = _ref.cell,
       format = _ref.format,
       tooltip$1 = _ref.tooltip;
   return React__default.createElement(tooltip.BasicTooltip, {
-    id: "".concat(node.yKey, " - ").concat(node.xKey),
-    value: node.value,
+    id: "".concat(cell.yKey, " - ").concat(cell.xKey),
+    value: cell.value,
     enableChip: true,
-    color: node.color,
-    theme: theme,
+    color: cell.color,
     format: format,
-    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$2({}, node)) : null
+    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({}, cell)) : null
   });
 };
-HeatMapCellTooltip.propTypes = {
-  node: PropTypes.shape({
-    xKey: PropTypes.string.isRequired,
-    yKey: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired
-  }).isRequired,
-  format: PropTypes.func,
-  tooltip: PropTypes.func,
-  theme: PropTypes.shape({
-    tooltip: PropTypes.shape({
-      container: PropTypes.object.isRequired,
-      basic: PropTypes.object.isRequired
-    }).isRequired
-  }).isRequired
-};
-var HeatMapCellTooltip$1 = pure(HeatMapCellTooltip);
+var HeatMapCellTooltip$1 = React.memo(HeatMapCellTooltip);
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var HeatMap =
-function (_Component) {
-  _inherits(HeatMap, _Component);
-  function HeatMap() {
-    var _getPrototypeOf2;
-    var _this;
-    _classCallCheck(this, HeatMap);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(HeatMap)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$3(_assertThisInitialized(_this), "handleNodeHover", function (showTooltip, node, event) {
-      var _this$props = _this.props,
-          setCurrentNode = _this$props.setCurrentNode,
-          theme = _this$props.theme,
-          tooltipFormat = _this$props.tooltipFormat,
-          tooltip = _this$props.tooltip;
-      setCurrentNode(node);
-      showTooltip(React__default.createElement(HeatMapCellTooltip$1, {
-        node: node,
-        theme: theme,
-        format: tooltipFormat,
-        tooltip: tooltip
-      }), event);
-    });
-    _defineProperty$3(_assertThisInitialized(_this), "handleNodeLeave", function (hideTooltip) {
-      _this.props.setCurrentNode(null);
-      hideTooltip();
-    });
-    return _this;
+var HeatMap = function HeatMap(_ref) {
+  var data = _ref.data,
+      keys = _ref.keys,
+      indexBy = _ref.indexBy,
+      minValue = _ref.minValue,
+      maxValue = _ref.maxValue,
+      width = _ref.width,
+      height = _ref.height,
+      partialMargin = _ref.margin,
+      forceSquare = _ref.forceSquare,
+      padding = _ref.padding,
+      sizeVariation = _ref.sizeVariation,
+      cellShape = _ref.cellShape,
+      cellOpacity = _ref.cellOpacity,
+      cellBorderWidth = _ref.cellBorderWidth,
+      cellBorderColor = _ref.cellBorderColor,
+      axisTop = _ref.axisTop,
+      axisRight = _ref.axisRight,
+      axisBottom = _ref.axisBottom,
+      axisLeft = _ref.axisLeft,
+      enableGridX = _ref.enableGridX,
+      enableGridY = _ref.enableGridY,
+      enableLabels = _ref.enableLabels,
+      labelTextColor = _ref.labelTextColor,
+      colors = _ref.colors,
+      nanColor = _ref.nanColor,
+      isInteractive = _ref.isInteractive,
+      onClick = _ref.onClick,
+      hoverTarget = _ref.hoverTarget,
+      cellHoverOpacity = _ref.cellHoverOpacity,
+      cellHoverOthersOpacity = _ref.cellHoverOthersOpacity,
+      tooltipFormat = _ref.tooltipFormat,
+      tooltip$1 = _ref.tooltip,
+      role = _ref.role;
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useHeatMap = useHeatMap({
+    data: data,
+    keys: keys,
+    indexBy: indexBy,
+    minValue: minValue,
+    maxValue: maxValue,
+    width: innerWidth,
+    height: innerHeight,
+    padding: padding,
+    forceSquare: forceSquare,
+    sizeVariation: sizeVariation,
+    colors: colors,
+    nanColor: nanColor,
+    cellOpacity: cellOpacity,
+    cellBorderColor: cellBorderColor,
+    labelTextColor: labelTextColor,
+    hoverTarget: hoverTarget,
+    cellHoverOpacity: cellHoverOpacity,
+    cellHoverOthersOpacity: cellHoverOthersOpacity
+  }),
+      cells = _useHeatMap.cells,
+      xScale = _useHeatMap.xScale,
+      yScale = _useHeatMap.yScale,
+      offsetX = _useHeatMap.offsetX,
+      offsetY = _useHeatMap.offsetY,
+      setCurrentCellId = _useHeatMap.setCurrentCellId,
+      getCellBorderColor = _useHeatMap.getCellBorderColor,
+      getLabelTextColor = _useHeatMap.getLabelTextColor;
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleCellHover = React.useCallback(function (cell, event) {
+    setCurrentCellId(cell.id);
+    showTooltipFromEvent(React__default.createElement(HeatMapCellTooltip$1, {
+      cell: cell,
+      format: tooltipFormat,
+      tooltip: tooltip$1
+    }), event);
+  }, [setCurrentCellId, showTooltipFromEvent, tooltipFormat, tooltip$1]);
+  var handleCellLeave = React.useCallback(function () {
+    setCurrentCellId(null);
+    hideTooltip();
+  }, [setCurrentCellId, hideTooltip]);
+  var cellComponent;
+  if (cellShape === 'rect') {
+    cellComponent = HeatMapCellRect$1;
+  } else if (cellShape === 'circle') {
+    cellComponent = HeatMapCellCircle$1;
+  } else {
+    cellComponent = cellShape;
   }
-  _createClass(HeatMap, [{
-    key: "render",
-    value: function render() {
-      var _this2 = this;
-      var _this$props2 = this.props,
-          xScale = _this$props2.xScale,
-          yScale = _this$props2.yScale,
-          offsetX = _this$props2.offsetX,
-          offsetY = _this$props2.offsetY,
-          margin = _this$props2.margin,
-          width = _this$props2.width,
-          height = _this$props2.height,
-          outerWidth = _this$props2.outerWidth,
-          outerHeight = _this$props2.outerHeight,
-          cellShape = _this$props2.cellShape,
-          cellBorderWidth = _this$props2.cellBorderWidth,
-          getCellBorderColor = _this$props2.getCellBorderColor,
-          axisTop = _this$props2.axisTop,
-          axisRight = _this$props2.axisRight,
-          axisBottom = _this$props2.axisBottom,
-          axisLeft = _this$props2.axisLeft,
-          enableGridX = _this$props2.enableGridX,
-          enableGridY = _this$props2.enableGridY,
-          enableLabels = _this$props2.enableLabels,
-          getLabelTextColor = _this$props2.getLabelTextColor,
-          theme = _this$props2.theme,
-          animate = _this$props2.animate,
-          motionStiffness = _this$props2.motionStiffness,
-          motionDamping = _this$props2.motionDamping,
-          boundSpring = _this$props2.boundSpring,
-          isInteractive = _this$props2.isInteractive,
-          onClick = _this$props2.onClick;
-      var Cell;
-      if (cellShape === 'rect') {
-        Cell = HeatMapCellRect$1;
-      } else if (cellShape === 'circle') {
-        Cell = HeatMapCellCircle$1;
-      } else {
-        Cell = cellShape;
-      }
-      var nodes = computeNodes(this.props);
-      return React__default.createElement(core.Container, {
-        isInteractive: isInteractive,
-        theme: theme,
-        animate: animate,
-        motionDamping: motionDamping,
-        motionStiffness: motionStiffness
-      }, function (_ref) {
-        var showTooltip = _ref.showTooltip,
-            hideTooltip = _ref.hideTooltip;
-        var onHover = partial(_this2.handleNodeHover, showTooltip);
-        var onLeave = partial(_this2.handleNodeLeave, hideTooltip);
-        return React__default.createElement(core.SvgWrapper, {
-          width: outerWidth,
-          height: outerHeight,
-          margin: Object.assign({}, margin, {
-            top: margin.top + offsetY,
-            left: margin.left + offsetX
-          }),
-          theme: theme
-        }, React__default.createElement(axes.Grid, {
-          width: width - offsetX * 2,
-          height: height - offsetY * 2,
-          xScale: enableGridX ? xScale : null,
-          yScale: enableGridY ? yScale : null
-        }), React__default.createElement(axes.Axes, {
-          xScale: xScale,
-          yScale: yScale,
-          width: width,
-          height: height,
-          top: axisTop,
-          right: axisRight,
-          bottom: axisBottom,
-          left: axisLeft
-        }), !animate && nodes.map(function (node) {
-          return React__default.createElement(Cell, {
-            key: node.key,
-            data: node,
-            value: node.value,
-            x: node.x,
-            y: node.y,
-            width: node.width,
-            height: node.height,
-            color: node.color,
-            opacity: node.opacity,
-            borderWidth: cellBorderWidth,
-            borderColor: getCellBorderColor(node),
-            enableLabel: enableLabels,
-            textColor: getLabelTextColor(node),
-            onHover: partial(onHover, node),
-            onLeave: onLeave,
-            onClick: onClick,
-            theme: theme
-          });
-        }), animate === true && React__default.createElement(reactMotion.TransitionMotion, {
-          styles: nodes.map(function (node) {
-            return {
-              key: node.key,
-              data: node,
-              style: _objectSpread$3({
-                x: boundSpring(node.x),
-                y: boundSpring(node.y),
-                width: boundSpring(node.width),
-                height: boundSpring(node.height),
-                opacity: boundSpring(node.opacity)
-              }, colors.interpolateColor(node.color, {
-                damping: motionDamping,
-                stiffness: motionStiffness
-              }))
-            };
-          })
-        }, function (interpolatedStyles) {
-          return React__default.createElement("g", null, interpolatedStyles.map(function (_ref2) {
-            var key = _ref2.key,
-                style = _ref2.style,
-                node = _ref2.data;
-            var color = colors.getInterpolatedColor(style);
-            return React__default.createElement(Cell, {
-              key: key,
-              data: node,
-              value: node.value,
-              x: style.x,
-              y: style.y,
-              width: Math.max(style.width, 0),
-              height: Math.max(style.height, 0),
-              color: color,
-              opacity: style.opacity,
-              borderWidth: cellBorderWidth,
-              borderColor: getCellBorderColor(_objectSpread$3({}, node, {
-                color: color
-              })),
-              enableLabel: enableLabels,
-              textColor: getLabelTextColor(_objectSpread$3({}, node, {
-                color: color
-              })),
-              onHover: partial(onHover, node),
-              onLeave: onLeave,
-              onClick: onClick,
-              theme: theme
-            });
-          }));
-        }));
-      });
-    }
-  }]);
-  return HeatMap;
-}(React.Component);
-_defineProperty$3(HeatMap, "propTypes", HeatMapPropTypes);
-var HeatMap$1 = setDisplayName('HeatMap')(enhance(HeatMap));
+  return React__default.createElement(core.SvgWrapper, {
+    width: outerWidth,
+    height: outerHeight,
+    margin: Object.assign({}, margin, {
+      top: margin.top + offsetY,
+      left: margin.left + offsetX
+    }),
+    role: role
+  }, React__default.createElement(axes.Grid, {
+    width: innerWidth - offsetX * 2,
+    height: innerHeight - offsetY * 2,
+    xScale: enableGridX ? xScale : null,
+    yScale: enableGridY ? yScale : null
+  }), React__default.createElement(axes.Axes, {
+    xScale: xScale,
+    yScale: yScale,
+    width: innerWidth - offsetX * 2,
+    height: innerHeight - offsetY * 2,
+    top: axisTop,
+    right: axisRight,
+    bottom: axisBottom,
+    left: axisLeft
+  }), React__default.createElement(HeatMapCells, {
+    cells: cells,
+    cellComponent: cellComponent,
+    cellBorderWidth: cellBorderWidth,
+    getCellBorderColor: getCellBorderColor,
+    enableLabels: enableLabels,
+    getLabelTextColor: getLabelTextColor,
+    handleCellHover: isInteractive ? handleCellHover : undefined,
+    handleCellLeave: isInteractive ? handleCellLeave : undefined,
+    onClick: isInteractive ? onClick : undefined
+  }));
+};
+var WrappedHeatMap = core.withContainer(HeatMap);
+WrappedHeatMap.defaultProps = HeatMapSvgDefaultProps;
 
 var renderRect = function renderRect(ctx, _ref, _ref2) {
   var enableLabels = _ref.enableLabels,
@@ -682,213 +740,186 @@ var renderCircle = function renderCircle(ctx, _ref3, _ref4) {
   ctx.restore();
 };
 
-function _typeof$1(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof$1 = function _typeof(obj) { return typeof obj; }; } else { _typeof$1 = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof$1(obj); }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties$1(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass$1(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties$1(Constructor.prototype, protoProps); if (staticProps) _defineProperties$1(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn$1(self, call) { if (call && (_typeof$1(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized$1(self); }
-function _getPrototypeOf$1(o) { _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf$1(o); }
-function _assertThisInitialized$1(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits$1(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf$1(subClass, superClass); }
-function _setPrototypeOf$1(o, p) { _setPrototypeOf$1 = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf$1(o, p); }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var HeatMapCanvas =
-function (_Component) {
-  _inherits$1(HeatMapCanvas, _Component);
-  function HeatMapCanvas() {
-    var _getPrototypeOf2;
-    var _this;
-    _classCallCheck$1(this, HeatMapCanvas);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    _this = _possibleConstructorReturn$1(this, (_getPrototypeOf2 = _getPrototypeOf$1(HeatMapCanvas)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$4(_assertThisInitialized$1(_this), "handleMouseHover", function (showTooltip, hideTooltip, event) {
-      if (!_this.nodes) return;
-      var _getRelativeCursor = core.getRelativeCursor(_this.surface, event),
-          _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
-          x = _getRelativeCursor2[0],
-          y = _getRelativeCursor2[1];
-      var _this$props = _this.props,
-          margin = _this$props.margin,
-          offsetX = _this$props.offsetX,
-          offsetY = _this$props.offsetY,
-          theme = _this$props.theme,
-          setCurrentNode = _this$props.setCurrentNode,
-          tooltip = _this$props.tooltip;
-      var node = _this.nodes.find(function (node) {
-        return core.isCursorInRect(node.x + margin.left + offsetX - node.width / 2, node.y + margin.top + offsetY - node.height / 2, node.width, node.height, x, y);
-      });
-      if (node !== undefined) {
-        setCurrentNode(node);
-        showTooltip(React__default.createElement(HeatMapCellTooltip$1, {
-          node: node,
-          theme: theme,
-          tooltip: tooltip
-        }), event);
-      } else {
-        setCurrentNode(null);
-        hideTooltip();
-      }
+var HeatMapCanvas = function HeatMapCanvas(_ref) {
+  var data = _ref.data,
+      keys = _ref.keys,
+      indexBy = _ref.indexBy,
+      minValue = _ref.minValue,
+      maxValue = _ref.maxValue,
+      width = _ref.width,
+      height = _ref.height,
+      partialMargin = _ref.margin,
+      forceSquare = _ref.forceSquare,
+      padding = _ref.padding,
+      sizeVariation = _ref.sizeVariation,
+      cellShape = _ref.cellShape,
+      cellOpacity = _ref.cellOpacity,
+      cellBorderColor = _ref.cellBorderColor,
+      axisTop = _ref.axisTop,
+      axisRight = _ref.axisRight,
+      axisBottom = _ref.axisBottom,
+      axisLeft = _ref.axisLeft,
+      enableLabels = _ref.enableLabels,
+      labelTextColor = _ref.labelTextColor,
+      colors = _ref.colors,
+      nanColor = _ref.nanColor,
+      isInteractive = _ref.isInteractive,
+      onClick = _ref.onClick,
+      hoverTarget = _ref.hoverTarget,
+      cellHoverOpacity = _ref.cellHoverOpacity,
+      cellHoverOthersOpacity = _ref.cellHoverOthersOpacity,
+      tooltipFormat = _ref.tooltipFormat,
+      tooltip$1 = _ref.tooltip,
+      pixelRatio = _ref.pixelRatio;
+  var canvasEl = React.useRef(null);
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useHeatMap = useHeatMap({
+    data: data,
+    keys: keys,
+    indexBy: indexBy,
+    minValue: minValue,
+    maxValue: maxValue,
+    width: innerWidth,
+    height: innerHeight,
+    padding: padding,
+    forceSquare: forceSquare,
+    sizeVariation: sizeVariation,
+    colors: colors,
+    nanColor: nanColor,
+    cellOpacity: cellOpacity,
+    cellBorderColor: cellBorderColor,
+    labelTextColor: labelTextColor,
+    hoverTarget: hoverTarget,
+    cellHoverOpacity: cellHoverOpacity,
+    cellHoverOthersOpacity: cellHoverOthersOpacity
+  }),
+      cells = _useHeatMap.cells,
+      xScale = _useHeatMap.xScale,
+      yScale = _useHeatMap.yScale,
+      offsetX = _useHeatMap.offsetX,
+      offsetY = _useHeatMap.offsetY,
+      currentCellId = _useHeatMap.currentCellId,
+      setCurrentCellId = _useHeatMap.setCurrentCellId;
+  var theme = core.useTheme();
+  React.useEffect(function () {
+    canvasEl.current.width = outerWidth * pixelRatio;
+    canvasEl.current.height = outerHeight * pixelRatio;
+    var ctx = canvasEl.current.getContext('2d');
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.fillStyle = theme.background;
+    ctx.fillRect(0, 0, outerWidth, outerHeight);
+    ctx.translate(margin.left + offsetX, margin.top + offsetY);
+    axes.renderAxesToCanvas(ctx, {
+      xScale: xScale,
+      yScale: yScale,
+      width: innerWidth - offsetX * 2,
+      height: innerHeight - offsetY * 2,
+      top: axisTop,
+      right: axisRight,
+      bottom: axisBottom,
+      left: axisLeft,
+      theme: theme
     });
-    _defineProperty$4(_assertThisInitialized$1(_this), "handleMouseLeave", function (hideTooltip) {
-      _this.props.setCurrentNode(null);
-      hideTooltip();
-    });
-    _defineProperty$4(_assertThisInitialized$1(_this), "handleClick", function (event) {
-      if (!_this.props.currentNode) return;
-      _this.props.onClick(_this.props.currentNode, event);
-    });
-    return _this;
-  }
-  _createClass$1(HeatMapCanvas, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var renderCell;
+    if (cellShape === 'rect') {
+      renderCell = renderRect;
+    } else {
+      renderCell = renderCircle;
     }
-  }, {
-    key: "shouldComponentUpdate",
-    value: function shouldComponentUpdate(props) {
-      if (this.props.outerWidth !== props.outerWidth || this.props.outerHeight !== props.outerHeight || this.props.isInteractive !== props.isInteractive || this.props.theme !== props.theme) {
-        return true;
-      } else {
-        this.draw(props);
-        return false;
-      }
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
-    }
-  }, {
-    key: "draw",
-    value: function draw(props) {
-      var width = props.width,
-          height = props.height,
-          outerWidth = props.outerWidth,
-          outerHeight = props.outerHeight,
-          pixelRatio = props.pixelRatio,
-          margin = props.margin,
-          offsetX = props.offsetX,
-          offsetY = props.offsetY,
-          xScale = props.xScale,
-          yScale = props.yScale,
-          axisTop = props.axisTop,
-          axisRight = props.axisRight,
-          axisBottom = props.axisBottom,
-          axisLeft = props.axisLeft,
-          cellShape = props.cellShape,
-          enableLabels = props.enableLabels,
-          theme = props.theme;
-      this.surface.width = outerWidth * pixelRatio;
-      this.surface.height = outerHeight * pixelRatio;
-      this.ctx.scale(pixelRatio, pixelRatio);
-      var renderNode;
-      if (cellShape === 'rect') {
-        renderNode = partial(renderRect, this.ctx, {
-          enableLabels: enableLabels,
-          theme: theme
-        });
-      } else {
-        renderNode = partial(renderCircle, this.ctx, {
-          enableLabels: enableLabels,
-          theme: theme
-        });
-      }
-      var nodes = computeNodes(props);
-      this.ctx.fillStyle = theme.background;
-      this.ctx.fillRect(0, 0, outerWidth, outerHeight);
-      this.ctx.translate(margin.left + offsetX, margin.top + offsetY);
-      axes.renderAxesToCanvas(this.ctx, {
-        xScale: xScale,
-        yScale: yScale,
-        width: width - offsetX * 2,
-        height: height - offsetY * 2,
-        top: axisTop,
-        right: axisRight,
-        bottom: axisBottom,
-        left: axisLeft,
+    cells.forEach(function (cell) {
+      renderCell(ctx, {
+        enableLabels: enableLabels,
         theme: theme
-      });
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      nodes.forEach(renderNode);
-      this.nodes = nodes;
+      }, cell);
+    });
+  }, [canvasEl, cells, outerWidth, outerHeight, innerWidth, innerHeight, margin, offsetX, offsetY, cellShape, axisTop, axisRight, axisBottom, axisLeft, theme, enableLabels, pixelRatio]);
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleMouseHover = React.useCallback(function (event) {
+    var _getRelativeCursor = core.getRelativeCursor(canvasEl.current, event),
+        _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
+        x = _getRelativeCursor2[0],
+        y = _getRelativeCursor2[1];
+    var cell = cells.find(function (c) {
+      return core.isCursorInRect(c.x + margin.left + offsetX - c.width / 2, c.y + margin.top + offsetY - c.height / 2, c.width, c.height, x, y);
+    });
+    if (cell !== undefined) {
+      setCurrentCellId(cell.id);
+      showTooltipFromEvent(React__default.createElement(HeatMapCellTooltip$1, {
+        cell: cell,
+        tooltip: tooltip$1,
+        format: tooltipFormat
+      }), event);
+    } else {
+      setCurrentCellId(null);
+      hideTooltip();
     }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this2 = this;
-      var _this$props2 = this.props,
-          outerWidth = _this$props2.outerWidth,
-          outerHeight = _this$props2.outerHeight,
-          pixelRatio = _this$props2.pixelRatio,
-          isInteractive = _this$props2.isInteractive,
-          theme = _this$props2.theme;
-      return React__default.createElement(core.Container, {
-        isInteractive: isInteractive,
-        theme: theme,
-        animate: false
-      }, function (_ref) {
-        var showTooltip = _ref.showTooltip,
-            hideTooltip = _ref.hideTooltip;
-        return React__default.createElement("canvas", {
-          ref: function ref(surface) {
-            _this2.surface = surface;
-          },
-          width: outerWidth * pixelRatio,
-          height: outerHeight * pixelRatio,
-          style: {
-            width: outerWidth,
-            height: outerHeight
-          },
-          onMouseEnter: partial(_this2.handleMouseHover, showTooltip, hideTooltip),
-          onMouseMove: partial(_this2.handleMouseHover, showTooltip, hideTooltip),
-          onMouseLeave: partial(_this2.handleMouseLeave, hideTooltip),
-          onClick: _this2.handleClick
-        });
-      });
-    }
-  }]);
-  return HeatMapCanvas;
-}(React.Component);
-HeatMapCanvas.propTypes = HeatMapPropTypes;
-var HeatMapCanvas$1 = enhance(HeatMapCanvas);
+  }, [canvasEl, cells, margin, offsetX, offsetY, setCurrentCellId, showTooltipFromEvent, hideTooltip, tooltip$1]);
+  var handleMouseLeave = React.useCallback(function () {
+    setCurrentCellId(null);
+    hideTooltip();
+  }, [setCurrentCellId, hideTooltip]);
+  var handleClick = React.useCallback(function (event) {
+    if (currentCellId === null) return;
+    var currentCell = cells.find(function (cell) {
+      return cell.id === currentCellId;
+    });
+    currentCell && onClick(currentCell, event);
+  }, [cells, currentCellId, onClick]);
+  return React__default.createElement("canvas", {
+    ref: canvasEl,
+    width: outerWidth * pixelRatio,
+    height: outerHeight * pixelRatio,
+    style: {
+      width: outerWidth,
+      height: outerHeight
+    },
+    onMouseEnter: isInteractive ? handleMouseHover : undefined,
+    onMouseMove: isInteractive ? handleMouseHover : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined
+  });
+};
+var WrappedHeatMapCanvas = core.withContainer(HeatMapCanvas);
+WrappedHeatMapCanvas.defaultProps = HeatMapDefaultProps;
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var ResponsiveHeatMap = function ResponsiveHeatMap(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(HeatMap$1, _extends({
+    return React__default.createElement(WrappedHeatMap, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveHeatMapCanvas = function ResponsiveHeatMapCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(HeatMapCanvas$1, _extends$1({
+    return React__default.createElement(WrappedHeatMapCanvas, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-exports.HeatMap = HeatMap$1;
-exports.HeatMapCanvas = HeatMapCanvas$1;
+exports.HeatMap = WrappedHeatMap;
+exports.HeatMapCanvas = WrappedHeatMapCanvas;
 exports.HeatMapDefaultProps = HeatMapDefaultProps;
 exports.HeatMapPropTypes = HeatMapPropTypes;
+exports.HeatMapSvgDefaultProps = HeatMapSvgDefaultProps;
+exports.HeatMapSvgPropTypes = HeatMapSvgPropTypes;
 exports.ResponsiveHeatMap = ResponsiveHeatMap;
 exports.ResponsiveHeatMapCanvas = ResponsiveHeatMapCanvas;
+exports.useHeatMap = useHeatMap;
+//# sourceMappingURL=nivo-heatmap.cjs.js.map

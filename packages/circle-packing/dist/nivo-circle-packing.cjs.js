@@ -19,8 +19,49 @@ var pure = _interopDefault(require('recompose/pure'));
 var PropTypes = _interopDefault(require('prop-types'));
 var tooltip = require('@nivo/tooltip');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var computeNodePath = function computeNodePath(node, getIdentity) {
   return node.ancestors().map(function (ancestor) {
     return getIdentity(ancestor.data);
@@ -39,7 +80,7 @@ var computeNodes = function computeNodes(_ref) {
   pack(root);
   var nodes = leavesOnly ? root.leaves() : root.descendants();
   nodes = nodes.map(function (node) {
-    node.color = getColor(_objectSpread({}, node.data, {
+    node.color = getColor(_objectSpread2(_objectSpread2({}, node.data), {}, {
       depth: node.depth
     }));
     node.label = false;
@@ -57,7 +98,7 @@ var computeZoom = function computeZoom(nodes, currentNodePath, width, height) {
   var offsetX = width / 2 - currentNode.x * ratio;
   var offsetY = height / 2 - currentNode.y * ratio;
   return nodes.map(function (node) {
-    return _objectSpread({}, node, {
+    return _objectSpread2(_objectSpread2({}, node), {}, {
       r: node.r * ratio,
       x: node.x * ratio + offsetX,
       y: node.y * ratio + offsetY
@@ -65,9 +106,6 @@ var computeZoom = function computeZoom(nodes, currentNodePath, width, height) {
   });
 };
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var BubbleNode = function BubbleNode(_ref) {
   var node = _ref.node,
       style = _ref.style,
@@ -76,7 +114,7 @@ var BubbleNode = function BubbleNode(_ref) {
   if (style.r <= 0) return null;
   return React__default.createElement("g", {
     transform: "translate(".concat(style.x, ",").concat(style.y, ")")
-  }, React__default.createElement("circle", _extends({
+  }, React__default.createElement("circle", Object.assign({
     r: style.r
   }, handlers, {
     fill: style.fill ? style.fill : style.color,
@@ -85,37 +123,20 @@ var BubbleNode = function BubbleNode(_ref) {
   })), node.label !== false && React__default.createElement("text", {
     textAnchor: "middle",
     dominantBaseline: "central",
-    style: _objectSpread$1({}, theme.labels.text, {
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
       fill: style.labelTextColor,
       pointerEvents: 'none'
     })
   }, node.label));
 };
-BubbleNode.propTypes = {
-  node: PropTypes.object.isRequired,
-  style: PropTypes.shape({
-    r: PropTypes.number.isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired,
-    fill: PropTypes.string,
-    borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.string.isRequired,
-    labelTextColor: PropTypes.string.isRequired
-  }).isRequired,
-  handlers: PropTypes.object.isRequired,
-  theme: core.themePropType.isRequired
-};
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var BubbleHtmlNode = function BubbleHtmlNode(_ref) {
   var node = _ref.node,
       style = _ref.style,
       handlers = _ref.handlers;
   if (style.r <= 0) return null;
-  return React__default.createElement("div", _extends$1({
-    id: (node.data && node.data.id ? node.data.id :
-    node.id).replace(/[^\w]/gi, '-'),
+  return React__default.createElement("div", Object.assign({
+    id: (node.data && node.data.id ? node.data.id : node.id).replace(/[^\w]/gi, '-'),
     style: {
       position: 'absolute',
       display: 'flex',
@@ -134,23 +155,7 @@ var BubbleHtmlNode = function BubbleHtmlNode(_ref) {
     }
   }, handlers), node.label !== false && node.label);
 };
-BubbleHtmlNode.propTypes = {
-  node: PropTypes.object.isRequired,
-  style: PropTypes.shape({
-    r: PropTypes.number.isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired,
-    fill: PropTypes.string,
-    borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.string.isRequired,
-    labelTextColor: PropTypes.string.isRequired
-  }).isRequired,
-  handlers: PropTypes.object.isRequired
-};
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   identity: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
   colors: colors.ordinalColorsPropType.isRequired,
@@ -170,13 +175,14 @@ var commonPropTypes = {
   tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   tooltip: PropTypes.func
 };
-var BubblePropTypes = _objectSpread$2({}, commonPropTypes, {
-  nodeComponent: PropTypes.func.isRequired
+var BubblePropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  nodeComponent: PropTypes.func.isRequired,
+  role: PropTypes.string.isRequired
 }, core.defsPropTypes);
-var BubbleHtmlPropTypes = _objectSpread$2({}, commonPropTypes, {
+var BubbleHtmlPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   nodeComponent: PropTypes.func.isRequired
 });
-var BubbleCanvasPropTypes = _objectSpread$2({}, commonPropTypes, {
+var BubbleCanvasPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   pixelRatio: PropTypes.number.isRequired
 });
 var commonDefaultProps = {
@@ -202,30 +208,29 @@ var commonDefaultProps = {
   onClick: core.noop,
   isZoomable: true
 };
-var BubbleDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var BubbleDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   nodeComponent: BubbleNode,
+  role: 'img',
   defs: [],
   fill: []
 });
-var BubbleHtmlDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var BubbleHtmlDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   nodeComponent: BubbleHtmlNode
 });
-var BubbleCanvasDefaultProps = _objectSpread$2({}, commonDefaultProps, {
+var BubbleCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
 var props = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    BubblePropTypes: BubblePropTypes,
-    BubbleHtmlPropTypes: BubbleHtmlPropTypes,
-    BubbleCanvasPropTypes: BubbleCanvasPropTypes,
-    BubbleDefaultProps: BubbleDefaultProps,
-    BubbleHtmlDefaultProps: BubbleHtmlDefaultProps,
-    BubbleCanvasDefaultProps: BubbleCanvasDefaultProps
+  __proto__: null,
+  BubblePropTypes: BubblePropTypes,
+  BubbleHtmlPropTypes: BubbleHtmlPropTypes,
+  BubbleCanvasPropTypes: BubbleCanvasPropTypes,
+  BubbleDefaultProps: BubbleDefaultProps,
+  BubbleHtmlDefaultProps: BubbleHtmlDefaultProps,
+  BubbleCanvasDefaultProps: BubbleCanvasDefaultProps
 });
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonEnhancers = [core.withHierarchy(), core.withDimensions(), core.withTheme(), withPropsOnChange(['colors', 'colorBy'], function (_ref) {
   var colors$1 = _ref.colors,
       colorBy = _ref.colorBy;
@@ -244,15 +249,13 @@ var commonEnhancers = [core.withHierarchy(), core.withDimensions(), core.withThe
   return {
     getIdentity: core.getAccessorFor(identity)
   };
-}),
-withPropsOnChange(['borderColor', 'theme'], function (_ref4) {
+}), withPropsOnChange(['borderColor', 'theme'], function (_ref4) {
   var borderColor = _ref4.borderColor,
       theme = _ref4.theme;
   return {
     getBorderColor: colors.getInheritedColorGenerator(borderColor, theme)
   };
-}),
-withPropsOnChange(['label', 'labelFormat'], function (_ref5) {
+}), withPropsOnChange(['label', 'labelFormat'], function (_ref5) {
   var label = _ref5.label,
       labelFormat = _ref5.labelFormat;
   return {
@@ -264,8 +267,7 @@ withPropsOnChange(['label', 'labelFormat'], function (_ref5) {
   return {
     getLabelTextColor: colors.getInheritedColorGenerator(labelTextColor, theme)
   };
-}),
-withStateHandlers(function (_ref7) {
+}), withStateHandlers(function (_ref7) {
   var _ref7$currentNodePath = _ref7.currentNodePath,
       currentNodePath = _ref7$currentNodePath === void 0 ? null : _ref7$currentNodePath;
   return {
@@ -307,7 +309,7 @@ withStateHandlers(function (_ref7) {
   if (!enableLabel) return;
   var nodesWithLabel = nodes.map(function (node) {
     if (node.height !== 0 || labelSkipRadius > 0 && node.r < labelSkipRadius) return node;
-    return _objectSpread$3({}, node, {
+    return _objectSpread2(_objectSpread2({}, node), {}, {
       label: getLabel(node)
     });
   });
@@ -351,11 +353,9 @@ var enhance = (function (Component) {
   return Component;
 });
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var nodeWillEnter = function nodeWillEnter(_ref) {
   var data = _ref.data;
-  return _objectSpread$4({
+  return _objectSpread2({
     scale: 0,
     r: 0,
     x: data.x,
@@ -365,7 +365,7 @@ var nodeWillEnter = function nodeWillEnter(_ref) {
 var nodeWillLeave = function nodeWillLeave(springConfig) {
   return function (_ref2) {
     var data = _ref2.data;
-    return _objectSpread$4({
+    return _objectSpread2({
       scale: reactMotion.spring(0, springConfig),
       r: reactMotion.spring(0, springConfig),
       x: reactMotion.spring(data.x, springConfig),
@@ -374,8 +374,6 @@ var nodeWillLeave = function nodeWillLeave(springConfig) {
   };
 };
 
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var getNodeHandlers = function getNodeHandlers(node, _ref) {
   var isInteractive = _ref.isInteractive,
       onClick = _ref.onClick,
@@ -395,7 +393,7 @@ var getNodeHandlers = function getNodeHandlers(node, _ref) {
       color: node.color,
       theme: theme,
       format: tooltipFormat,
-      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$5({
+      renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread2({
         node: node
       }, node)) : null
     }), e);
@@ -419,8 +417,6 @@ var getNodeHandlers = function getNodeHandlers(node, _ref) {
   };
 };
 
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var Bubble = function Bubble(_ref) {
   var nodes = _ref.nodes,
       nodeComponent = _ref.nodeComponent,
@@ -440,7 +436,8 @@ var Bubble = function Bubble(_ref) {
       tooltipFormat = _ref.tooltipFormat,
       tooltip = _ref.tooltip,
       isZoomable = _ref.isZoomable,
-      zoomToNode = _ref.zoomToNode;
+      zoomToNode = _ref.zoomToNode,
+      role = _ref.role;
   var springConfig = {
     stiffness: motionStiffness,
     damping: motionDamping
@@ -458,7 +455,7 @@ var Bubble = function Bubble(_ref) {
       tooltip: tooltip
     });
   };
-  return React__default.createElement(core.Container, {
+  return React__default.createElement(core.LegacyContainer, {
     isInteractive: isInteractive,
     theme: theme,
     animate: animate,
@@ -472,12 +469,13 @@ var Bubble = function Bubble(_ref) {
       height: outerHeight,
       margin: margin,
       defs: defs,
-      theme: theme
+      theme: theme,
+      role: role
     }, !animate && React__default.createElement("g", null, nodes.map(function (node) {
       return React__default.createElement(nodeComponent, {
         key: node.path,
         node: node,
-        style: _objectSpread$6({}, pick(node, ['scale', 'r', 'x', 'y', 'color']), {
+        style: _objectSpread2(_objectSpread2({}, pick(node, ['scale', 'r', 'x', 'y', 'color'])), {}, {
           fill: node.fill,
           borderWidth: borderWidth,
           borderColor: getBorderColor(node),
@@ -493,7 +491,7 @@ var Bubble = function Bubble(_ref) {
         return {
           key: node.path,
           data: node,
-          style: _objectSpread$6({
+          style: _objectSpread2({
             scale: reactMotion.spring(1, springConfig),
             r: reactMotion.spring(node.r, springConfig),
             x: reactMotion.spring(node.x, springConfig),
@@ -510,7 +508,7 @@ var Bubble = function Bubble(_ref) {
         return React__default.createElement(nodeComponent, {
           key: node.path,
           node: node,
-          style: _objectSpread$6({}, style, {
+          style: _objectSpread2(_objectSpread2({}, style), {}, {
             fill: node.fill,
             borderWidth: borderWidth,
             borderColor: getBorderColor(style),
@@ -527,20 +525,17 @@ Bubble.displayName = 'Bubble';
 var enhancedBubble = enhance(Bubble);
 enhancedBubble.displayName = 'Bubble';
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveBubble = function ResponsiveBubble(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedBubble, _extends$2({
+    return React__default.createElement(enhancedBubble, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$7(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$7(target, key, source[key]); }); } return target; }
-function _defineProperty$7(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var BubbleHtml = function BubbleHtml(_ref) {
   var nodes = _ref.nodes,
       nodeComponent = _ref.nodeComponent,
@@ -577,7 +572,7 @@ var BubbleHtml = function BubbleHtml(_ref) {
       tooltip: tooltip
     });
   };
-  return React__default.createElement(core.Container, {
+  return React__default.createElement(core.LegacyContainer, {
     isInteractive: isInteractive,
     theme: theme,
     animate: animate,
@@ -602,7 +597,7 @@ var BubbleHtml = function BubbleHtml(_ref) {
       return React__default.createElement(nodeComponent, {
         key: node.path,
         node: node,
-        style: _objectSpread$7({}, pick(node, ['scale', 'r', 'x', 'y', 'color']), {
+        style: _objectSpread2(_objectSpread2({}, pick(node, ['scale', 'r', 'x', 'y', 'color'])), {}, {
           borderWidth: borderWidth,
           borderColor: getBorderColor(node),
           labelTextColor: getLabelTextColor(node)
@@ -616,7 +611,7 @@ var BubbleHtml = function BubbleHtml(_ref) {
         return {
           key: node.path,
           data: node,
-          style: _objectSpread$7({
+          style: _objectSpread2({
             scale: reactMotion.spring(1, springConfig),
             r: reactMotion.spring(node.r, springConfig),
             x: reactMotion.spring(node.x, springConfig),
@@ -639,7 +634,7 @@ var BubbleHtml = function BubbleHtml(_ref) {
         return React__default.createElement(nodeComponent, {
           key: node.path,
           node: node,
-          style: _objectSpread$7({}, style, {
+          style: _objectSpread2(_objectSpread2({}, style), {}, {
             borderWidth: borderWidth,
             borderColor: getBorderColor(style),
             labelTextColor: getLabelTextColor(style)
@@ -654,33 +649,127 @@ BubbleHtml.displayName = 'BubbleHtml';
 var enhancedBubbleHtml = enhance(BubbleHtml);
 enhancedBubbleHtml.displayName = 'BubbleHtml';
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveBubbleHtml = function ResponsiveBubbleHtml(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedBubbleHtml, _extends$3({
+    return React__default.createElement(enhancedBubbleHtml, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-var BubbleCanvas =
-function (_Component) {
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+  return _typeof(obj);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  }
+  return _assertThisInitialized(self);
+}
+
+function _createSuper(Derived) {
+  return function () {
+    var Super = _getPrototypeOf(Derived),
+        result;
+    if (_isNativeReflectConstruct()) {
+      var NewTarget = _getPrototypeOf(this).constructor;
+      result = Reflect.construct(Super, arguments, NewTarget);
+    } else {
+      result = Super.apply(this, arguments);
+    }
+    return _possibleConstructorReturn(this, result);
+  };
+}
+
+var BubbleCanvas = function (_Component) {
   _inherits(BubbleCanvas, _Component);
+  var _super = _createSuper(BubbleCanvas);
   function BubbleCanvas() {
     _classCallCheck(this, BubbleCanvas);
-    return _possibleConstructorReturn(this, _getPrototypeOf(BubbleCanvas).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
   _createClass(BubbleCanvas, [{
     key: "componentDidMount",
@@ -755,7 +844,7 @@ function (_Component) {
           pixelRatio = _this$props.pixelRatio,
           isInteractive = _this$props.isInteractive,
           theme = _this$props.theme;
-      return React__default.createElement(core.Container, {
+      return React__default.createElement(core.LegacyContainer, {
         isInteractive: isInteractive,
         theme: theme,
         animate: false
@@ -780,12 +869,11 @@ BubbleCanvas.displayName = 'BubbleCanvas';
 var enhancedBubbleCanvas = enhance(BubbleCanvas);
 enhancedBubbleCanvas.displayName = 'BubbleCanvas';
 
-function _extends$4() { _extends$4 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$4.apply(this, arguments); }
 var ResponsiveBubbleCanvas = function ResponsiveBubbleCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedBubbleCanvas, _extends$4({
+    return React__default.createElement(enhancedBubbleCanvas, Object.assign({
       width: width,
       height: height
     }, props));
@@ -804,3 +892,4 @@ exports.BubblePropTypes = BubblePropTypes;
 exports.ResponsiveBubble = ResponsiveBubble;
 exports.ResponsiveBubbleCanvas = ResponsiveBubbleCanvas;
 exports.ResponsiveBubbleHtml = ResponsiveBubbleHtml;
+//# sourceMappingURL=nivo-circle-packing.cjs.js.map

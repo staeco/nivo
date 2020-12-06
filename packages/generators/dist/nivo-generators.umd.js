@@ -4,9 +4,9 @@
     (global = global || self, factory(global.nivo = global.nivo || {}, global['lodash/range'], global['lodash/random'], global['lodash/shuffle'], global.d3, global.d3));
 }(this, (function (exports, range, random, shuffle, d3Time, d3TimeFormat) { 'use strict';
 
-    range = range && range.hasOwnProperty('default') ? range['default'] : range;
-    random = random && random.hasOwnProperty('default') ? random['default'] : random;
-    shuffle = shuffle && shuffle.hasOwnProperty('default') ? shuffle['default'] : shuffle;
+    range = range && Object.prototype.hasOwnProperty.call(range, 'default') ? range['default'] : range;
+    random = random && Object.prototype.hasOwnProperty.call(random, 'default') ? random['default'] : random;
+    shuffle = shuffle && Object.prototype.hasOwnProperty.call(shuffle, 'default') ? shuffle['default'] : shuffle;
 
     var randColor = function randColor() {
       return "hsl(".concat(Math.round(Math.random() * 360), ", 70%, 50%)");
@@ -18,8 +18,6 @@
 
     var programmingLanguages = ['php', 'make', 'javascript', 'go', 'erlang', 'elixir', 'lisp', 'haskell', 'python', 'ruby', 'hack', 'scala', 'java', 'rust', 'c', 'css', 'sass', 'stylus'];
 
-
-
     var index = /*#__PURE__*/Object.freeze({
         __proto__: null,
         countryCodes: countryCodes,
@@ -27,10 +25,39 @@
         programmingLanguages: programmingLanguages
     });
 
-    function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-    function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-    function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-    function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+    function _arrayLikeToArray(arr, len) {
+      if (len == null || len > arr.length) len = arr.length;
+      for (var i = 0, arr2 = new Array(len); i < len; i++) {
+        arr2[i] = arr[i];
+      }
+      return arr2;
+    }
+
+    function _arrayWithoutHoles(arr) {
+      if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+    }
+
+    function _iterableToArray(iter) {
+      if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+    }
+
+    function _unsupportedIterableToArray(o, minLen) {
+      if (!o) return;
+      if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+      var n = Object.prototype.toString.call(o).slice(8, -1);
+      if (n === "Object" && o.constructor) n = o.constructor.name;
+      if (n === "Map" || n === "Set") return Array.from(n);
+      if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+    }
+
+    function _nonIterableSpread() {
+      throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+
+    function _toConsumableArray(arr) {
+      return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+    }
+
     var generateBulletData = function generateBulletData(id, max) {
       var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
           title = _ref.title,
@@ -41,15 +68,15 @@
           measureCount = _ref$measureCount === void 0 ? 1 : _ref$measureCount,
           _ref$markerCount = _ref.markerCount,
           markerCount = _ref$markerCount === void 0 ? 1 : _ref$markerCount,
-          _ref$float = _ref.float,
-          float = _ref$float === void 0 ? false : _ref$float;
+          _ref$float = _ref["float"],
+          _float = _ref$float === void 0 ? false : _ref$float;
       var ranges = range(rangeCount - 1).reduce(function (acc) {
         var remaining = max - acc[0];
-        return [random(remaining, float)].concat(_toConsumableArray(acc));
+        return [random(remaining, _float)].concat(_toConsumableArray(acc));
       }, [max]);
       var measures = range(measureCount).reduce(function (acc) {
-        if (acc.length === 0) return [random(max, float)];
-        return [random(acc[0], float)].concat(_toConsumableArray(acc));
+        if (acc.length === 0) return [random(max, _float)];
+        return [random(acc[0], _float)].concat(_toConsumableArray(acc));
       }, []);
       var markers = range(markerCount).map(function () {
         return max * 0.6 + random(max * 0.4);
@@ -88,12 +115,122 @@
       };
     };
 
-    function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-    function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _toConsumableArray$1(arr) { return _arrayWithoutHoles$1(arr) || _iterableToArray$1(arr) || _nonIterableSpread$1(); }
-    function _nonIterableSpread$1() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-    function _iterableToArray$1(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-    function _arrayWithoutHoles$1(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+    var generateNetworkData = function generateNetworkData() {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref$rootNodeRadius = _ref.rootNodeRadius,
+          rootNodeRadius = _ref$rootNodeRadius === void 0 ? 12 : _ref$rootNodeRadius,
+          _ref$minMidNodes = _ref.minMidNodes,
+          minMidNodes = _ref$minMidNodes === void 0 ? 6 : _ref$minMidNodes,
+          _ref$maxMidNodes = _ref.maxMidNodes,
+          maxMidNodes = _ref$maxMidNodes === void 0 ? 16 : _ref$maxMidNodes,
+          _ref$midNodeRadius = _ref.midNodeRadius,
+          midNodeRadius = _ref$midNodeRadius === void 0 ? 8 : _ref$midNodeRadius,
+          _ref$minLeaves = _ref.minLeaves,
+          minLeaves = _ref$minLeaves === void 0 ? 4 : _ref$minLeaves,
+          _ref$maxLeaves = _ref.maxLeaves,
+          maxLeaves = _ref$maxLeaves === void 0 ? 16 : _ref$maxLeaves,
+          _ref$leafRadius = _ref.leafRadius,
+          leafRadius = _ref$leafRadius === void 0 ? 4 : _ref$leafRadius;
+      var rootNode = {
+        id: '0',
+        radius: rootNodeRadius,
+        depth: 0,
+        color: 'rgb(244, 117, 96)'
+      };
+      var nodes = Array.from({
+        length: random(minMidNodes, maxMidNodes)
+      }, function (v, k) {
+        return {
+          id: "".concat(k + 1),
+          radius: midNodeRadius,
+          depth: 1,
+          color: 'rgb(97, 205, 187)'
+        };
+      });
+      var links = [];
+      var extraNodes = [];
+      nodes.forEach(function (source) {
+        links.push({
+          source: '0',
+          target: source.id,
+          distance: 50
+        });
+        nodes.forEach(function (target) {
+          if (Math.random() < 0.04) {
+            links.push({
+              source: source.id,
+              target: target.id,
+              distance: 70
+            });
+          }
+        });
+        Array.from({
+          length: random(minLeaves, maxLeaves)
+        }, function (v, k) {
+          extraNodes.push({
+            id: "".concat(source.id, ".").concat(k),
+            radius: leafRadius,
+            depth: 2,
+            color: 'rgb(232, 193, 160)'
+          });
+          links.push({
+            source: source.id,
+            target: "".concat(source.id, ".").concat(k),
+            distance: 30
+          });
+        });
+      });
+      nodes.push(rootNode);
+      nodes = nodes.concat(extraNodes);
+      return {
+        nodes: nodes,
+        links: links
+      };
+    };
+
+    function _defineProperty(obj, key, value) {
+      if (key in obj) {
+        Object.defineProperty(obj, key, {
+          value: value,
+          enumerable: true,
+          configurable: true,
+          writable: true
+        });
+      } else {
+        obj[key] = value;
+      }
+      return obj;
+    }
+
+    function ownKeys(object, enumerableOnly) {
+      var keys = Object.keys(object);
+      if (Object.getOwnPropertySymbols) {
+        var symbols = Object.getOwnPropertySymbols(object);
+        if (enumerableOnly) symbols = symbols.filter(function (sym) {
+          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+        });
+        keys.push.apply(keys, symbols);
+      }
+      return keys;
+    }
+    function _objectSpread2(target) {
+      for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i] != null ? arguments[i] : {};
+        if (i % 2) {
+          ownKeys(Object(source), true).forEach(function (key) {
+            _defineProperty(target, key, source[key]);
+          });
+        } else if (Object.getOwnPropertyDescriptors) {
+          Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+        } else {
+          ownKeys(Object(source)).forEach(function (key) {
+            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+          });
+        }
+      }
+      return target;
+    }
+
     var generateParallelCoordinatesData = function generateParallelCoordinatesData() {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           _ref$size = _ref.size,
@@ -119,20 +256,16 @@
         return keys.reduce(function (acc, key) {
           var value;
           if (key.random !== undefined) {
-            value = random.apply(void 0, _toConsumableArray$1(key.random));
+            value = random.apply(void 0, _toConsumableArray(key.random));
           } else if (key.shuffle !== undefined) {
             value = shuffle(key.shuffle)[0];
           }
-          return _objectSpread({}, acc, _defineProperty({}, key.key, value));
+          return _objectSpread2(_objectSpread2({}, acc), {}, _defineProperty({}, key.key, value));
         }, {});
       };
       return range(size).map(datumGenerator);
     };
 
-    function _toConsumableArray$2(arr) { return _arrayWithoutHoles$2(arr) || _iterableToArray$2(arr) || _nonIterableSpread$2(); }
-    function _nonIterableSpread$2() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-    function _iterableToArray$2(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-    function _arrayWithoutHoles$2(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
     var availableNodes = names.map(function (name) {
       return {
         id: name
@@ -153,7 +286,7 @@
         return target;
       });
       return targets.reduce(function (acc, targetId) {
-        return acc.concat(getNodeTargets(targetId, links, currentPath ? [].concat(_toConsumableArray$2(currentPath), [targetId]) : [id, targetId]));
+        return acc.concat(getNodeTargets(targetId, links, currentPath ? [].concat(_toConsumableArray(currentPath), [targetId]) : [id, targetId]));
       }, targets);
     };
     var getNodesTargets = function getNodesTargets(links) {
@@ -199,12 +332,6 @@
       };
     };
 
-    function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-    function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _toConsumableArray$3(arr) { return _arrayWithoutHoles$3(arr) || _iterableToArray$3(arr) || _nonIterableSpread$3(); }
-    function _nonIterableSpread$3() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-    function _iterableToArray$3(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-    function _arrayWithoutHoles$3(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
     var randomPrice = function randomPrice() {
       return random(0, 500);
     };
@@ -224,7 +351,7 @@
       return {
         groups: groups,
         data: groups.reduce(function (acc, group, groupIndex) {
-          return [].concat(_toConsumableArray$3(acc), _toConsumableArray$3(range(random(min, max)).map(function () {
+          return [].concat(_toConsumableArray(acc), _toConsumableArray(range(random(min, max)).map(function () {
             return randomPrice();
           }).map(function (price, index) {
             var datum = {
@@ -245,7 +372,7 @@
       return {
         groups: previousData.groups,
         data: previousData.data.map(function (d) {
-          var datum = _objectSpread$1({}, d, {
+          var datum = _objectSpread2(_objectSpread2({}, d), {}, {
             group: shuffle(previousData.groups)[0],
             price: randomPrice(),
             volume: randomVolume()
@@ -396,7 +523,7 @@
         return d;
       });
     };
-    var libTreeItems = [['viz', [['stack', [['chart'], ['xAxis'], ['yAxis'], ['layers']]], ['pie', [['chart', [['pie', [['outline'], ['slices'], ['bbox']]], ['donut'], ['gauge']]], ['legends']]]]], ['colors', [['rgb'], ['hsl']]], ['utils', [['randomize'], ['resetClock'], ['noop'], ['tick'], ['forceGC'], ['stackTrace'], ['dbg']]], ['generators', [['address'], ['city'], ['animal'], ['movie'], ['user']]], ['set', [['clone'], ['intersect'], ['merge'], ['reverse'], ['toArray'], ['toObject'], ['fromCSV'], ['slice'], ['append'], ['prepend'], ['shuffle'], ['pick'], ['plouc']]], ['text', [['trim'], ['slugify'], ['snakeCase'], ['camelCase'], ['repeat'], ['padLeft'], ['padRight'], ['sanitize'], ['ploucify']]], ['misc', [['greetings', [['hey'], ['HOWDY'], ['aloha'], ['AHOY']]], ['other'], ['path', [['pathA'], ['pathB', [['pathB1'], ['pathB2'], ['pathB3'], ['pathB4']]], ['pathC', [['pathC1'], ['pathC2'], ['pathC3'], ['pathC4'], ['pathC5'], ['pathC6'], ['pathC7'], ['pathC8'], ['pathC9']]]]]]]];
+    var libTreeItems = [['viz', [['stack', [['cchart'], ['xAxis'], ['yAxis'], ['layers']]], ['ppie', [['chart', [['pie', [['outline'], ['slices'], ['bbox']]], ['donut'], ['gauge']]], ['legends']]]]], ['colors', [['rgb'], ['hsl']]], ['utils', [['randomize'], ['resetClock'], ['noop'], ['tick'], ['forceGC'], ['stackTrace'], ['dbg']]], ['generators', [['address'], ['city'], ['animal'], ['movie'], ['user']]], ['set', [['clone'], ['intersect'], ['merge'], ['reverse'], ['toArray'], ['toObject'], ['fromCSV'], ['slice'], ['append'], ['prepend'], ['shuffle'], ['pick'], ['plouc']]], ['text', [['trim'], ['slugify'], ['snakeCase'], ['camelCase'], ['repeat'], ['padLeft'], ['padRight'], ['sanitize'], ['ploucify']]], ['misc', [['greetings', [['hey'], ['HOWDY'], ['aloha'], ['AHOY']]], ['other'], ['path', [['pathA'], ['pathB', [['pathB1'], ['pathB2'], ['pathB3'], ['pathB4']]], ['pathC', [['pathC1'], ['pathC2'], ['pathC3'], ['pathC4'], ['pathC5'], ['pathC6'], ['pathC7'], ['pathC8'], ['pathC9']]]]]]]];
     var generateLibTree = function generateLibTree() {
       var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'nivo';
       var limit = arguments.length > 1 ? arguments[1] : undefined;
@@ -449,6 +576,7 @@
     exports.generateDayCounts = generateDayCounts;
     exports.generateDrinkStats = generateDrinkStats;
     exports.generateLibTree = generateLibTree;
+    exports.generateNetworkData = generateNetworkData;
     exports.generateParallelCoordinatesData = generateParallelCoordinatesData;
     exports.generateProgrammingLanguageStats = generateProgrammingLanguageStats;
     exports.generateSankeyData = generateSankeyData;
@@ -466,3 +594,4 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+//# sourceMappingURL=nivo-generators.umd.js.map

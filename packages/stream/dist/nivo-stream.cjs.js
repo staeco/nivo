@@ -6,114 +6,118 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var range = _interopDefault(require('lodash/range'));
-var sortBy = _interopDefault(require('lodash/sortBy'));
 var core = require('@nivo/core');
 var axes = require('@nivo/axes');
 var legends = require('@nivo/legends');
-var PropTypes = _interopDefault(require('prop-types'));
+var reactSpring = require('react-spring');
 var tooltip = require('@nivo/tooltip');
-var compose = _interopDefault(require('recompose/compose'));
-var pure = _interopDefault(require('recompose/pure'));
-var reactMotion = require('react-motion');
-var withState = _interopDefault(require('recompose/withState'));
-var withHandlers = _interopDefault(require('recompose/withHandlers'));
-var withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
+var PropTypes = _interopDefault(require('prop-types'));
 var colors = require('@nivo/colors');
 var d3Shape = require('d3-shape');
 var d3Scale = require('d3-scale');
-var d3Format = require('d3-format');
-var defaultProps = _interopDefault(require('recompose/defaultProps'));
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+var StreamLayer = function StreamLayer(_ref) {
+  var layer = _ref.layer,
+      fillOpacity = _ref.fillOpacity,
+      borderWidth = _ref.borderWidth,
+      getBorderColor = _ref.getBorderColor,
+      getTooltipLabel = _ref.getTooltipLabel,
+      isInteractive = _ref.isInteractive;
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleMouseHover = React.useCallback(function (event) {
+    showTooltipFromEvent(React__default.createElement(tooltip.BasicTooltip, {
+      id: getTooltipLabel(layer),
+      enableChip: true,
+      color: layer.color
+    }), event, 'left');
+  }, [showTooltipFromEvent, getTooltipLabel, layer]);
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedPath = core.useAnimatedPath(layer.path);
+  var animatedProps = reactSpring.useSpring({
+    color: layer.color,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.path, {
+    d: animatedPath,
+    fill: layer.fill ? layer.fill : animatedProps.color,
+    fillOpacity: fillOpacity,
+    stroke: getBorderColor(layer),
+    strokeWidth: borderWidth,
+    onMouseMove: isInteractive ? handleMouseHover : undefined,
+    onMouseEnter: isInteractive ? handleMouseHover : undefined,
+    onMouseLeave: isInteractive ? hideTooltip : undefined
+  });
+};
+var StreamLayer$1 = React.memo(StreamLayer);
+
 var StreamLayers = function StreamLayers(_ref) {
   var layers = _ref.layers,
       fillOpacity = _ref.fillOpacity,
       borderWidth = _ref.borderWidth,
       getBorderColor = _ref.getBorderColor,
-      theme = _ref.theme,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
       getTooltipLabel = _ref.getTooltipLabel,
-      animate = _ref.animate,
-      motionStiffness = _ref.motionStiffness,
-      motionDamping = _ref.motionDamping;
-  if (animate !== true) {
-    return React__default.createElement("g", null, layers.map(function (layer, i) {
-      var path = layer.path,
-          color = layer.color;
-      var handleTooltip = function handleTooltip(e) {
-        return showTooltip(React__default.createElement(tooltip.BasicTooltip, {
-          id: getTooltipLabel(layer),
-          enableChip: true,
-          color: color,
-          theme: theme
-        }), e);
-      };
-      return React__default.createElement("path", {
-        key: i,
-        onMouseMove: handleTooltip,
-        onMouseEnter: handleTooltip,
-        onMouseLeave: hideTooltip,
-        d: path,
-        fill: layer.fill ? layer.fill : layer.color,
-        fillOpacity: fillOpacity,
-        stroke: getBorderColor(layer),
-        strokeWidth: borderWidth
-      });
-    }));
-  }
-  var springConfig = {
-    stiffness: motionStiffness,
-    damping: motionDamping
-  };
+      isInteractive = _ref.isInteractive;
   return React__default.createElement("g", null, layers.map(function (layer, i) {
-    var path = layer.path,
-        color = layer.color;
-    var handleTooltip = function handleTooltip(e) {
-      return showTooltip(React__default.createElement(tooltip.BasicTooltip, {
-        id: getTooltipLabel(layer),
-        enableChip: true,
-        color: color,
-        theme: theme
-      }), e);
-    };
-    return React__default.createElement(core.SmartMotion, {
+    return React__default.createElement(StreamLayer$1, {
       key: i,
-      style: function style(spring) {
-        return {
-          d: spring(path, springConfig),
-          fill: spring(color, springConfig),
-          fillOpacity: spring(fillOpacity, springConfig)
-        };
-      }
-    }, function (style) {
-      return React__default.createElement("path", _extends({
-        onMouseMove: handleTooltip,
-        onMouseEnter: handleTooltip,
-        onMouseLeave: hideTooltip
-      }, style, {
-        fill: layer.fill ? layer.fill : style.fill,
-        stroke: getBorderColor(layer),
-        strokeWidth: borderWidth
-      }));
+      layer: layer,
+      getBorderColor: getBorderColor,
+      borderWidth: borderWidth,
+      fillOpacity: fillOpacity,
+      getTooltipLabel: getTooltipLabel,
+      isInteractive: isInteractive
     });
   }));
 };
-StreamLayers.propTypes = _objectSpread({
-  fillOpacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  getTooltipLabel: PropTypes.func.isRequired
-}, core.motionPropTypes);
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var getDotY = function getDotY(datum, position) {
   var y = datum.y2;
   if (position === 'center') {
@@ -127,97 +131,114 @@ var StreamDots = function StreamDots(_ref) {
   var id = _ref.id,
       color = _ref.color,
       data = _ref.data,
-      renderDot = _ref.renderDot,
+      dotComponent = _ref.dotComponent,
       position = _ref.position,
       getSize = _ref.getSize,
       getColor = _ref.getColor,
       getBorderWidth = _ref.getBorderWidth,
-      getBorderColor = _ref.getBorderColor,
-      animate = _ref.animate,
-      motionStiffness = _ref.motionStiffness,
-      motionDamping = _ref.motionDamping;
-  if (animate !== true) {
-    return data.map(function (d, i) {
-      var datum = _objectSpread$1({}, d, {
-        key: id,
-        color: color
-      });
-      return React__default.createElement(React.Fragment, {
-        key: i
-      }, renderDot({
-        data: datum,
-        x: datum.x,
-        y: getDotY(datum, position),
-        size: getSize(datum),
-        color: getColor(datum),
-        borderWidth: getBorderWidth(datum)
-      }));
+      getBorderColor = _ref.getBorderColor;
+  return data.map(function (d, i) {
+    var datum = _objectSpread2(_objectSpread2({}, d), {}, {
+      key: id,
+      color: color
     });
-  }
-  var springConfig = {
-    stiffness: motionStiffness,
-    damping: motionDamping
-  };
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: data.map(function (d, i) {
-      var datum = _objectSpread$1({}, d, {
-        key: id,
-        color: color
-      });
-      return {
-        key: "".concat(i),
-        data: datum,
-        style: {
-          x: reactMotion.spring(datum.x, springConfig),
-          y: reactMotion.spring(getDotY(datum, position), springConfig),
-          size: reactMotion.spring(getSize(datum), springConfig),
-          borderWidth: reactMotion.spring(getBorderWidth(datum), springConfig)
-        }
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement(React.Fragment, null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          datum = _ref2.data;
-      return React__default.createElement(React.Fragment, {
-        key: key
-      }, renderDot({
-        data: datum,
-        x: style.x,
-        y: style.y,
-        size: style.size,
-        color: getColor(datum),
-        borderWidth: style.borderWidth,
-        borderColor: getBorderColor(datum)
-      }));
-    }));
+    return React__default.createElement(dotComponent, {
+      key: i,
+      datum: datum,
+      x: datum.x,
+      y: getDotY(datum, position),
+      size: getSize(datum),
+      color: getColor(datum),
+      borderWidth: getBorderWidth(datum),
+      borderColor: getBorderColor(datum)
+    });
   });
 };
-StreamDots.propTypes = _objectSpread$1({
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  color: PropTypes.string.isRequired,
-  data: PropTypes.arrayOf(PropTypes.shape({
-    x: PropTypes.number.isRequired,
-    y1: PropTypes.number.isRequired,
-    y2: PropTypes.number.isRequired
-  })).isRequired,
-  renderDot: PropTypes.func.isRequired,
-  position: PropTypes.oneOf(['start', 'center', 'end']).isRequired,
-  getSize: PropTypes.func.isRequired,
-  getColor: PropTypes.func.isRequired,
-  getBorderWidth: PropTypes.func.isRequired,
-  getBorderColor: PropTypes.func.isRequired
-}, core.motionPropTypes);
-var enhance = compose(pure);
-var StreamDots$1 = enhance(StreamDots);
+var StreamDots$1 = React.memo(StreamDots);
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
 
 var StreamSlicesItem = function StreamSlicesItem(_ref) {
   var slice = _ref.slice,
       height = _ref.height,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
-      isHover = _ref.isHover;
+      getTooltipLabel = _ref.getTooltipLabel,
+      getTooltipValue = _ref.getTooltipValue;
+  var _useState = React.useState(false),
+      _useState2 = _slicedToArray(_useState, 2),
+      isHover = _useState2[0],
+      setIsHover = _useState2[1];
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var rows = React.useMemo(function () {
+    return slice.stack.map(function (p) {
+      return [React__default.createElement(tooltip.Chip, {
+        key: p.id,
+        color: p.color
+      }), getTooltipLabel(p), getTooltipValue(p.value)];
+    });
+  }, [slice, getTooltipLabel, getTooltipValue]);
+  var handleMouseHover = React.useCallback(function (event) {
+    setIsHover(true);
+    showTooltipFromEvent(React__default.createElement(tooltip.TableTooltip, {
+      rows: rows
+    }), event, 'left');
+  }, [setIsHover, showTooltipFromEvent, rows]);
+  var handleMouseLeave = React.useCallback(function () {
+    setIsHover(false);
+    hideTooltip();
+  }, [setIsHover, hideTooltip]);
   return React__default.createElement("g", {
     transform: "translate(".concat(slice.x, ", 0)")
   }, isHover && React__default.createElement("line", {
@@ -234,64 +255,16 @@ var StreamSlicesItem = function StreamSlicesItem(_ref) {
     height: height,
     fill: "#000",
     fillOpacity: 0,
-    onMouseEnter: showTooltip,
-    onMouseMove: showTooltip,
-    onMouseLeave: hideTooltip
+    onMouseEnter: handleMouseHover,
+    onMouseMove: handleMouseHover,
+    onMouseLeave: handleMouseLeave
   }));
 };
-StreamSlicesItem.propTypes = {
-  slice: PropTypes.object.isRequired,
-  height: PropTypes.number.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  getTooltipLabel: PropTypes.func.isRequired,
-  getTooltipValue: PropTypes.func.isRequired,
-  isHover: PropTypes.bool.isRequired,
-  theme: PropTypes.object.isRequired
-};
-var enhance$1 = compose(withState('isHover', 'setIsHover', false), withPropsOnChange(['slice', 'theme', 'getTooltipLabel', 'getTooltipValue'], function (_ref2) {
-  var slice = _ref2.slice,
-      theme = _ref2.theme,
-      getTooltipLabel = _ref2.getTooltipLabel,
-      getTooltipValue = _ref2.getTooltipValue;
-  return {
-    tooltip: React__default.createElement(tooltip.TableTooltip, {
-      theme: theme,
-      rows: slice.stack.map(function (p) {
-        return [React__default.createElement(tooltip.Chip, {
-          key: p.id,
-          color: p.color
-        }), getTooltipLabel(p), getTooltipValue(p)];
-      })
-    })
-  };
-}), withHandlers({
-  showTooltip: function showTooltip(_ref3) {
-    var _showTooltip = _ref3.showTooltip,
-        setIsHover = _ref3.setIsHover,
-        tooltip = _ref3.tooltip;
-    return function (e) {
-      setIsHover(true);
-      _showTooltip(tooltip, e);
-    };
-  },
-  hideTooltip: function hideTooltip(_ref4) {
-    var _hideTooltip = _ref4.hideTooltip,
-        setIsHover = _ref4.setIsHover;
-    return function () {
-      setIsHover(false);
-      _hideTooltip();
-    };
-  }
-}), pure);
-var StreamSlicesItem$1 = enhance$1(StreamSlicesItem);
+var StreamSlicesItem$1 = React.memo(StreamSlicesItem);
 
 var StreamSlices = function StreamSlices(_ref) {
   var slices = _ref.slices,
       height = _ref.height,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
-      theme = _ref.theme,
       getTooltipLabel = _ref.getTooltipLabel,
       getTooltipValue = _ref.getTooltipValue;
   return React__default.createElement("g", null, slices.map(function (slice) {
@@ -299,32 +272,12 @@ var StreamSlices = function StreamSlices(_ref) {
       key: slice.index,
       slice: slice,
       height: height,
-      showTooltip: showTooltip,
-      hideTooltip: hideTooltip,
-      theme: theme,
       getTooltipLabel: getTooltipLabel,
       getTooltipValue: getTooltipValue
     });
   }));
 };
-StreamSlices.propTypes = {
-  slices: PropTypes.arrayOf(PropTypes.shape({
-    index: PropTypes.number.isRequired,
-    x: PropTypes.number.isRequired,
-    stack: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-      color: PropTypes.string.isRequired
-    })).isRequired
-  })).isRequired,
-  height: PropTypes.number.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  getTooltipLabel: PropTypes.func.isRequired,
-  getTooltipValue: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired
-};
-var StreamSlices$1 = pure(StreamSlices);
+var StreamSlices$1 = React.memo(StreamSlices);
 
 var StreamDotsItem = function StreamDotsItem(_ref) {
   var x = _ref.x,
@@ -333,34 +286,34 @@ var StreamDotsItem = function StreamDotsItem(_ref) {
       color = _ref.color,
       borderWidth = _ref.borderWidth,
       borderColor = _ref.borderColor;
-  return React__default.createElement("circle", {
-    cx: x,
-    cy: y,
-    r: size * 0.5,
-    fill: color,
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
+    x: x,
+    y: y,
+    radius: size * 0.5,
+    color: color,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.circle, {
+    cx: animatedProps.x,
+    cy: animatedProps.y,
+    r: animatedProps.radius,
+    fill: animatedProps.color,
     strokeWidth: borderWidth,
     stroke: borderColor
   });
 };
-StreamDotsItem.propTypes = {
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired
-};
+var StreamDotsItem$1 = React.memo(StreamDotsItem);
 
 var StreamPropTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   keys: PropTypes.array.isRequired,
-  stack: PropTypes.func.isRequired,
-  xScale: PropTypes.func.isRequired,
-  yScale: PropTypes.func.isRequired,
   order: core.stackOrderPropType.isRequired,
   offsetType: core.stackOffsetPropType.isRequired,
   curve: core.areaCurvePropType.isRequired,
-  areaGenerator: PropTypes.func.isRequired,
   axisTop: PropTypes.object,
   axisRight: PropTypes.object,
   axisBottom: PropTypes.object,
@@ -369,7 +322,6 @@ var StreamPropTypes = {
   enableGridY: PropTypes.bool.isRequired,
   colors: colors.ordinalColorsPropType.isRequired,
   fillOpacity: PropTypes.number.isRequired,
-  getColor: PropTypes.func.isRequired,
   defs: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired
   })).isRequired,
@@ -379,23 +331,19 @@ var StreamPropTypes = {
   })).isRequired,
   borderWidth: PropTypes.number.isRequired,
   borderColor: colors.inheritedColorPropType.isRequired,
-  getBorderColor: PropTypes.func.isRequired,
   enableDots: PropTypes.bool.isRequired,
-  renderDot: PropTypes.func.isRequired,
+  dotComponent: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
   dotPosition: PropTypes.oneOf(['start', 'center', 'end']).isRequired,
   dotSize: PropTypes.oneOfType([PropTypes.number, PropTypes.func]).isRequired,
-  getDotSize: PropTypes.func.isRequired,
   dotColor: colors.inheritedColorPropType.isRequired,
   dotBorderWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.func]).isRequired,
-  getDotBorderWidth: PropTypes.func.isRequired,
   dotBorderColor: colors.inheritedColorPropType.isRequired,
   isInteractive: PropTypes.bool,
   tooltipLabel: PropTypes.func,
-  getTooltipLabel: PropTypes.func.isRequired,
   tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-  getTooltipValue: PropTypes.func.isRequired,
   enableStackTooltip: PropTypes.bool.isRequired,
-  legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired
+  legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired,
+  role: PropTypes.string.isRequired
 };
 var StreamDefaultProps = {
   order: 'none',
@@ -417,7 +365,7 @@ var StreamDefaultProps = {
   fill: [],
   enableDots: false,
   dotPosition: 'center',
-  renderDot: StreamDotsItem,
+  dotComponent: StreamDotsItem$1,
   dotSize: 6,
   dotColor: {
     from: 'color'
@@ -428,13 +376,28 @@ var StreamDefaultProps = {
   },
   isInteractive: true,
   enableStackTooltip: true,
-  legends: []
+  legends: [],
+  role: 'img',
+  animate: true,
+  motionConfig: 'gentle'
 };
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+
 var stackMin = function stackMin(layers) {
   return Math.min.apply(Math, _toConsumableArray(layers.reduce(function (acc, layer) {
     return [].concat(_toConsumableArray(acc), _toConsumableArray(layer.map(function (d) {
@@ -449,44 +412,38 @@ var stackMax = function stackMax(layers) {
     })));
   }, [])));
 };
-var enhance$2 = (function (Component) {
-  return compose(defaultProps(StreamDefaultProps), core.withTheme(), core.withCurve(), core.withDimensions(), core.withMotion(), withPropsOnChange(['curveInterpolator'], function (_ref) {
-    var curveInterpolator = _ref.curveInterpolator;
-    return {
-      areaGenerator: d3Shape.area().x(function (_ref2) {
-        var x = _ref2.x;
-        return x;
-      }).y0(function (_ref3) {
-        var y1 = _ref3.y1;
-        return y1;
-      }).y1(function (_ref4) {
-        var y2 = _ref4.y2;
-        return y2;
-      }).curve(curveInterpolator)
-    };
-  }), withPropsOnChange(['colors'], function (_ref5) {
-    var colors$1 = _ref5.colors;
-    return {
-      getColor: colors.getOrdinalColorScale(colors$1, 'index')
-    };
-  }), withPropsOnChange(['borderColor', 'theme'], function (_ref6) {
-    var borderColor = _ref6.borderColor,
-        theme = _ref6.theme;
-    return {
-      getBorderColor: colors.getInheritedColorGenerator(borderColor, theme)
-    };
-  }), withPropsOnChange(['keys', 'offsetType', 'order'], function (_ref7) {
-    var keys = _ref7.keys,
-        offsetType = _ref7.offsetType,
-        order = _ref7.order;
-    return {
-      stack: d3Shape.stack().keys(keys).offset(core.stackOffsetFromProp(offsetType)).order(core.stackOrderFromProp(order))
-    };
-  }), withPropsOnChange(['stack', 'data', 'width', 'height'], function (_ref8) {
-    var stack = _ref8.stack,
-        data = _ref8.data,
-        width = _ref8.width,
-        height = _ref8.height;
+var useStream = function useStream(_ref) {
+  var width = _ref.width,
+      height = _ref.height,
+      data = _ref.data,
+      keys = _ref.keys,
+      offsetType = _ref.offsetType,
+      order = _ref.order,
+      curve = _ref.curve,
+      colors$1 = _ref.colors,
+      borderColor = _ref.borderColor,
+      dotSize = _ref.dotSize,
+      dotColor = _ref.dotColor,
+      dotBorderWidth = _ref.dotBorderWidth,
+      dotBorderColor = _ref.dotBorderColor,
+      tooltipLabel = _ref.tooltipLabel,
+      tooltipFormat = _ref.tooltipFormat;
+  var areaGenerator = React.useMemo(function () {
+    return d3Shape.area().x(function (_ref2) {
+      var x = _ref2.x;
+      return x;
+    }).y0(function (_ref3) {
+      var y1 = _ref3.y1;
+      return y1;
+    }).y1(function (_ref4) {
+      var y2 = _ref4.y2;
+      return y2;
+    }).curve(core.curveFromProp(curve));
+  }, [curve]);
+  var stack = React.useMemo(function () {
+    return d3Shape.stack().keys(keys).offset(core.stackOffsetFromProp(offsetType)).order(core.stackOrderFromProp(order));
+  }, [keys, offsetType, order]);
+  var _useMemo = React.useMemo(function () {
     var layers = stack(data);
     layers.forEach(function (layer) {
       layer.forEach(function (point) {
@@ -495,234 +452,233 @@ var enhance$2 = (function (Component) {
     });
     var minValue = stackMin(layers);
     var maxValue = stackMax(layers);
-    return {
-      layers: layers,
-      xScale: d3Scale.scalePoint().domain(range(data.length)).range([0, width]),
-      yScale: d3Scale.scaleLinear().domain([minValue, maxValue]).range([height, 0])
+    return [layers, d3Scale.scalePoint().domain(Array.from({
+      length: data.length
+    }, function (_, i) {
+      return i;
+    })).range([0, width]), d3Scale.scaleLinear().domain([minValue, maxValue]).range([height, 0])];
+  }, [stack, data, width, height]),
+      _useMemo2 = _slicedToArray(_useMemo, 3),
+      layers = _useMemo2[0],
+      xScale = _useMemo2[1],
+      yScale = _useMemo2[2];
+  var theme = core.useTheme();
+  var getColor = colors.useOrdinalColorScale(colors$1, 'index');
+  var getBorderColor = colors.useInheritedColor(borderColor, theme);
+  var getDotSize = React.useMemo(function () {
+    return typeof dotSize === 'function' ? dotSize : function () {
+      return dotSize;
     };
-  }), withPropsOnChange(['dotSize'], function (_ref9) {
-    var dotSize = _ref9.dotSize;
-    return {
-      getDotSize: typeof dotSize === 'function' ? dotSize : function () {
-        return dotSize;
-      }
+  }, [dotSize]);
+  var getDotColor = colors.useInheritedColor(dotColor, theme);
+  var getDotBorderWidth = React.useMemo(function () {
+    return typeof dotBorderWidth === 'function' ? dotBorderWidth : function () {
+      return dotBorderWidth;
     };
-  }), withPropsOnChange(['dotColor', 'theme'], function (_ref10) {
-    var dotColor = _ref10.dotColor,
-        theme = _ref10.theme;
-    return {
-      getDotColor: colors.getInheritedColorGenerator(dotColor, theme)
-    };
-  }), withPropsOnChange(['dotBorderWidth'], function (_ref11) {
-    var dotBorderWidth = _ref11.dotBorderWidth;
-    return {
-      getDotBorderWidth: typeof dotBorderWidth === 'function' ? dotBorderWidth : function () {
-        return dotBorderWidth;
-      }
-    };
-  }), withPropsOnChange(['dotBorderColor', 'theme'], function (_ref12) {
-    var dotBorderColor = _ref12.dotBorderColor,
-        theme = _ref12.theme;
-    return {
-      getDotBorderColor: colors.getInheritedColorGenerator(dotBorderColor, theme)
-    };
-  }), withPropsOnChange(['tooltipLabel', 'tooltipFormat'], function (_ref13) {
-    var tooltipLabel = _ref13.tooltipLabel,
-        tooltipFormat = _ref13.tooltipFormat;
-    var getTooltipLabel = function getTooltipLabel(d) {
+  }, [dotBorderWidth]);
+  var getDotBorderColor = colors.useInheritedColor(dotBorderColor, theme);
+  var enhancedLayers = React.useMemo(function () {
+    return layers.map(function (points, layerIndex) {
+      var layer = points.map(function (point, i) {
+        return {
+          index: i,
+          x: xScale(i),
+          value: point.value,
+          y1: yScale(point[0]),
+          y2: yScale(point[1])
+        };
+      });
+      return {
+        id: keys[layerIndex],
+        layer: layer,
+        path: areaGenerator(layer),
+        color: getColor({
+          index: layerIndex
+        })
+      };
+    });
+  }, [layers, keys, areaGenerator, getColor]);
+  var slices = React.useMemo(function () {
+    return Array.from({
+      length: data.length
+    }, function (_, i) {
+      var sliceStack = enhancedLayers.map(function (layer) {
+        return _objectSpread2({
+          id: layer.id,
+          color: layer.color
+        }, layer.layer[i]);
+      }).sort(function (a, b) {
+        return a.y2 - b.y2;
+      });
+      return {
+        index: i,
+        x: enhancedLayers[0].layer[i].x,
+        stack: sliceStack
+      };
+    });
+  }, [data.length, enhancedLayers]);
+  var getTooltipLabel = React.useMemo(function () {
+    if (typeof tooltipLabel === 'function') return tooltipLabel;
+    return function (d) {
       return d.id;
     };
-    if (typeof tooltipLabel === 'function') {
-      getTooltipLabel = tooltipLabel;
-    }
-    var getTooltipValue = function getTooltipValue(d) {
-      return d.value;
-    };
-    if (typeof tooltipFormat === 'function') {
-      getTooltipValue = tooltipFormat;
-    } else if (typeof tooltipFormat === 'string' || tooltipFormat instanceof String) {
-      var formatter = d3Format.format(tooltipFormat);
-      getTooltipValue = function getTooltipValue(d) {
-        return formatter(d.value);
-      };
-    }
-    return {
-      getTooltipValue: getTooltipValue,
-      getTooltipLabel: getTooltipLabel
-    };
-  }), pure)(Component);
-});
+  }, [tooltipLabel]);
+  var getTooltipValue = core.useValueFormatter(tooltipFormat);
+  return {
+    xScale: xScale,
+    yScale: yScale,
+    layers: enhancedLayers,
+    slices: slices,
+    getBorderColor: getBorderColor,
+    getDotSize: getDotSize,
+    getDotColor: getDotColor,
+    getDotBorderWidth: getDotBorderWidth,
+    getDotBorderColor: getDotBorderColor,
+    getTooltipLabel: getTooltipLabel,
+    getTooltipValue: getTooltipValue
+  };
+};
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var Stream = function Stream(_ref) {
   var data = _ref.data,
       keys = _ref.keys,
-      xScale = _ref.xScale,
-      yScale = _ref.yScale,
-      layers = _ref.layers,
-      areaGenerator = _ref.areaGenerator,
-      margin = _ref.margin,
+      offsetType = _ref.offsetType,
+      order = _ref.order,
+      curve = _ref.curve,
       width = _ref.width,
       height = _ref.height,
-      outerWidth = _ref.outerWidth,
-      outerHeight = _ref.outerHeight,
+      partialMargin = _ref.margin,
       axisTop = _ref.axisTop,
       axisRight = _ref.axisRight,
       axisBottom = _ref.axisBottom,
       axisLeft = _ref.axisLeft,
       enableGridX = _ref.enableGridX,
       enableGridY = _ref.enableGridY,
-      theme = _ref.theme,
-      getColor = _ref.getColor,
+      colors = _ref.colors,
       fillOpacity = _ref.fillOpacity,
       borderWidth = _ref.borderWidth,
-      getBorderColor = _ref.getBorderColor,
+      borderColor = _ref.borderColor,
       defs = _ref.defs,
       fill = _ref.fill,
       enableDots = _ref.enableDots,
       dotPosition = _ref.dotPosition,
-      renderDot = _ref.renderDot,
-      getDotSize = _ref.getDotSize,
-      getDotColor = _ref.getDotColor,
-      getDotBorderWidth = _ref.getDotBorderWidth,
-      getDotBorderColor = _ref.getDotBorderColor,
-      animate = _ref.animate,
-      motionStiffness = _ref.motionStiffness,
-      motionDamping = _ref.motionDamping,
+      dotComponent = _ref.dotComponent,
+      dotSize = _ref.dotSize,
+      dotColor = _ref.dotColor,
+      dotBorderWidth = _ref.dotBorderWidth,
+      dotBorderColor = _ref.dotBorderColor,
       isInteractive = _ref.isInteractive,
-      getTooltipValue = _ref.getTooltipValue,
-      getTooltipLabel = _ref.getTooltipLabel,
+      tooltipLabel = _ref.tooltipLabel,
+      tooltipFormat = _ref.tooltipFormat,
       enableStackTooltip = _ref.enableStackTooltip,
-      legends$1 = _ref.legends;
-  var enhancedLayers = layers.map(function (points, layerIndex) {
-    var layer = points.map(function (point, i) {
-      return {
-        index: i,
-        x: xScale(i),
-        value: point.value,
-        y1: yScale(point[0]),
-        y2: yScale(point[1])
-      };
+      legends$1 = _ref.legends,
+      role = _ref.role;
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useStream = useStream({
+    width: innerWidth,
+    height: innerHeight,
+    data: data,
+    keys: keys,
+    offsetType: offsetType,
+    order: order,
+    curve: curve,
+    colors: colors,
+    borderColor: borderColor,
+    dotSize: dotSize,
+    dotColor: dotColor,
+    dotBorderWidth: dotBorderWidth,
+    dotBorderColor: dotBorderColor,
+    tooltipLabel: tooltipLabel,
+    tooltipFormat: tooltipFormat
+  }),
+      xScale = _useStream.xScale,
+      yScale = _useStream.yScale,
+      layers = _useStream.layers,
+      slices = _useStream.slices,
+      getBorderColor = _useStream.getBorderColor,
+      getDotSize = _useStream.getDotSize,
+      getDotColor = _useStream.getDotColor,
+      getDotBorderWidth = _useStream.getDotBorderWidth,
+      getDotBorderColor = _useStream.getDotBorderColor,
+      getTooltipLabel = _useStream.getTooltipLabel,
+      getTooltipValue = _useStream.getTooltipValue;
+  var boundDefs = core.bindDefs(defs, layers, fill);
+  return React__default.createElement(core.SvgWrapper, {
+    width: outerWidth,
+    height: outerHeight,
+    margin: margin,
+    defs: boundDefs,
+    role: role
+  }, React__default.createElement(axes.Grid, {
+    width: innerWidth,
+    height: innerHeight,
+    xScale: enableGridX ? xScale : null,
+    yScale: enableGridY ? yScale : null
+  }), React__default.createElement(StreamLayers, {
+    layers: layers,
+    fillOpacity: fillOpacity,
+    borderWidth: borderWidth,
+    getBorderColor: getBorderColor,
+    getTooltipLabel: getTooltipLabel,
+    isInteractive: isInteractive
+  }), React__default.createElement(axes.Axes, {
+    xScale: xScale,
+    yScale: yScale,
+    width: innerWidth,
+    height: innerHeight,
+    top: axisTop,
+    right: axisRight,
+    bottom: axisBottom,
+    left: axisLeft
+  }), enableDots && layers.map(function (layer) {
+    return React__default.createElement(StreamDots$1, {
+      key: layer.id,
+      id: layer.id,
+      color: layer.color,
+      data: layer.layer,
+      dotComponent: dotComponent,
+      position: dotPosition,
+      getSize: getDotSize,
+      getColor: getDotColor,
+      getBorderWidth: getDotBorderWidth,
+      getBorderColor: getDotBorderColor
     });
-    return {
-      id: keys[layerIndex],
-      layer: layer,
-      path: areaGenerator(layer),
-      color: getColor({
-        index: layerIndex
-      })
-    };
-  });
-  var slices = range(data.length).map(function (i) {
-    return {
-      index: i,
-      x: enhancedLayers[0].layer[i].x,
-      stack: sortBy(enhancedLayers.map(function (layer) {
-        return _objectSpread$2({
-          id: layer.id,
-          color: layer.color
-        }, layer.layer[i]);
-      }), 'y2')
-    };
-  });
-  var boundDefs = core.bindDefs(defs, enhancedLayers, fill);
-  return React__default.createElement(core.Container, {
-    isInteractive: isInteractive,
-    theme: theme,
-    animate: animate,
-    motionDamping: motionDamping,
-    motionStiffness: motionStiffness
-  }, function (_ref2) {
-    var showTooltip = _ref2.showTooltip,
-        hideTooltip = _ref2.hideTooltip;
-    return React__default.createElement(core.SvgWrapper, {
-      width: outerWidth,
-      height: outerHeight,
-      margin: margin,
-      defs: boundDefs,
-      theme: theme
-    }, React__default.createElement(axes.Grid, {
-      width: width,
-      height: height,
-      xScale: enableGridX ? xScale : null,
-      yScale: enableGridY ? yScale : null
-    }), React__default.createElement(StreamLayers, {
-      layers: enhancedLayers,
-      fillOpacity: fillOpacity,
-      borderWidth: borderWidth,
-      getBorderColor: getBorderColor,
-      showTooltip: showTooltip,
-      hideTooltip: hideTooltip,
-      getTooltipLabel: getTooltipLabel,
-      theme: theme,
-      animate: animate,
-      motionDamping: motionDamping,
-      motionStiffness: motionStiffness
-    }), React__default.createElement(axes.Axes, {
-      xScale: xScale,
-      yScale: yScale,
-      width: width,
-      height: height,
-      top: axisTop,
-      right: axisRight,
-      bottom: axisBottom,
-      left: axisLeft
-    }), enableDots && enhancedLayers.map(function (layer) {
-      return React__default.createElement(StreamDots$1, {
-        key: layer.id,
-        id: layer.id,
-        color: layer.color,
-        data: layer.layer,
-        renderDot: renderDot,
-        position: dotPosition,
-        getSize: getDotSize,
-        getColor: getDotColor,
-        getBorderWidth: getDotBorderWidth,
-        getBorderColor: getDotBorderColor,
-        animate: animate,
-        motionDamping: motionDamping,
-        motionStiffness: motionStiffness
-      });
-    }), isInteractive && enableStackTooltip && React__default.createElement(StreamSlices$1, {
-      slices: slices,
-      height: height,
-      showTooltip: showTooltip,
-      hideTooltip: hideTooltip,
-      theme: theme,
-      getTooltipValue: getTooltipValue,
-      getTooltipLabel: getTooltipLabel
-    }), legends$1.map(function (legend, i) {
-      var legendData = enhancedLayers.map(function (l) {
-        return {
-          id: l.id,
-          label: l.id,
-          color: l.color,
-          fill: l.fill
-        };
-      }).reverse();
-      return React__default.createElement(legends.BoxLegendSvg, _extends$1({
-        key: i
-      }, legend, {
-        containerWidth: width,
-        containerHeight: height,
-        data: legendData,
-        theme: theme
-      }));
+  }), isInteractive && enableStackTooltip && React__default.createElement(StreamSlices$1, {
+    slices: slices,
+    height: innerHeight,
+    getTooltipValue: getTooltipValue,
+    getTooltipLabel: getTooltipLabel
+  }), legends$1.map(function (legend, i) {
+    var legendData = layers.map(function (l) {
+      return {
+        id: l.id,
+        label: l.id,
+        color: l.color,
+        fill: l.fill
+      };
+    }).reverse();
+    return React__default.createElement(legends.BoxLegendSvg, Object.assign({
+      key: i
+    }, legend, {
+      containerWidth: innerWidth,
+      containerHeight: innerHeight,
+      data: legendData
     }));
-  });
+  }));
 };
-Stream.propTypes = StreamPropTypes;
-var enhancedStream = enhance$2(Stream);
-enhancedStream.displayName = 'Stream';
+var WrappedStream = core.withContainer(Stream);
+WrappedStream.defaultProps = StreamDefaultProps;
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveStream = function ResponsiveStream(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedStream, _extends$2({
+    return React__default.createElement(WrappedStream, Object.assign({
       width: width,
       height: height
     }, props));
@@ -730,6 +686,7 @@ var ResponsiveStream = function ResponsiveStream(props) {
 };
 
 exports.ResponsiveStream = ResponsiveStream;
-exports.Stream = enhancedStream;
+exports.Stream = WrappedStream;
 exports.StreamDefaultProps = StreamDefaultProps;
 exports.StreamPropTypes = StreamPropTypes;
+//# sourceMappingURL=nivo-stream.cjs.js.map

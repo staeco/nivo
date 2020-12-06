@@ -12,19 +12,54 @@ var legends = require('@nivo/legends');
 var PropTypes = _interopDefault(require('prop-types'));
 var d3Sankey = require('d3-sankey');
 var colors = require('@nivo/colors');
-var pure = _interopDefault(require('recompose/pure'));
-var _withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
-var _withState = _interopDefault(require('recompose/withState'));
-var _defaultProps = _interopDefault(require('recompose/defaultProps'));
-var _compose = _interopDefault(require('recompose/compose'));
 var _cloneDeep = _interopDefault(require('lodash/cloneDeep'));
-var reactMotion = require('react-motion');
-var withHandlers = _interopDefault(require('recompose/withHandlers'));
+var reactSpring = require('react-spring');
 var tooltip = require('@nivo/tooltip');
 var d3Shape = require('d3-shape');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var sankeyAlignmentPropMapping = {
   center: d3Sankey.sankeyCenter,
   justify: d3Sankey.sankeyJustify,
@@ -36,7 +71,7 @@ var sankeyAlignmentPropType = PropTypes.oneOf(sankeyAlignmentPropKeys);
 var sankeyAlignmentFromProp = function sankeyAlignmentFromProp(prop) {
   return sankeyAlignmentPropMapping[prop];
 };
-var SankeyPropTypes = _objectSpread({
+var SankeyPropTypes = _objectSpread2({
   data: PropTypes.shape({
     nodes: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
@@ -69,17 +104,16 @@ var SankeyPropTypes = _objectSpread({
   labelPadding: PropTypes.number.isRequired,
   labelOrientation: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
   labelTextColor: colors.inheritedColorPropType,
-  getLabelTextColor: PropTypes.func.isRequired,
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
   labelFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-  getLabel: PropTypes.func.isRequired,
   nodeTooltip: PropTypes.func,
   linkTooltip: PropTypes.func,
   isInteractive: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   legends: PropTypes.arrayOf(PropTypes.shape(legends.LegendPropShape)).isRequired,
-  layers: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.oneOf(['links', 'nodes', 'labels', 'legends']), PropTypes.func])).isRequired
+  layers: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.oneOf(['links', 'nodes', 'labels', 'legends']), PropTypes.func])).isRequired,
+  role: PropTypes.string.isRequired
 }, core.motionPropTypes);
 var SankeyDefaultProps = {
   layout: 'horizontal',
@@ -117,124 +151,207 @@ var SankeyDefaultProps = {
   isInteractive: true,
   onClick: core.noop,
   legends: [],
-  layers: ['links', 'nodes', 'labels', 'legends']
+  layers: ['links', 'nodes', 'labels', 'legends'],
+  role: 'img',
+  animate: true,
+  motionConfig: 'gentle'
 };
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
 
 var getId = function getId(d) {
   return d.id;
 };
-var enhance = (function (Component) {
-  return _compose(_defaultProps(SankeyDefaultProps), _withState('currentNode', 'setCurrentNode', null), _withState('currentLink', 'setCurrentLink', null), core.withTheme(), core.withDimensions(), core.withMotion(), _withPropsOnChange(['colors'], function (_ref) {
-    var colors$1 = _ref.colors;
-    return {
-      getColor: colors.getOrdinalColorScale(colors$1, 'id'),
-      getLinkColor: colors.getOrdinalColorScale(colors$1, 'source.id')
-    };
-  }), _withPropsOnChange(['nodeBorderColor', 'theme'], function (_ref2) {
-    var nodeBorderColor = _ref2.nodeBorderColor,
-        theme = _ref2.theme;
-    return {
-      getNodeBorderColor: colors.getInheritedColorGenerator(nodeBorderColor, theme)
-    };
-  }), _withPropsOnChange(['labelTextColor', 'theme'], function (_ref3) {
-    var labelTextColor = _ref3.labelTextColor,
-        theme = _ref3.theme;
-    return {
-      getLabelTextColor: colors.getInheritedColorGenerator(labelTextColor, theme)
-    };
-  }), _withPropsOnChange(['label', 'labelFormat'], function (_ref4) {
-    var label = _ref4.label,
-        labelFormat = _ref4.labelFormat;
-    return {
-      getLabel: core.getLabelGenerator(label, labelFormat)
-    };
-  }), _withPropsOnChange(['sort'], function (_ref5) {
-    var sort = _ref5.sort;
-    var sortFunction = sort;
-    if (sort === 'auto') {
-      sortFunction = undefined;
-    } else if (sort === 'input') {
-      sortFunction = null;
-    } else if (sort === 'ascending') {
-      sortFunction = function sortFunction(a, b) {
-        return a.value - b.value;
-      };
-    } else if (sort === 'descending') {
-      sortFunction = function sortFunction(a, b) {
-        return b.value - a.value;
-      };
+var computeNodeAndLinks = function computeNodeAndLinks(_ref) {
+  var _data = _ref.data,
+      layout = _ref.layout,
+      alignFunction = _ref.alignFunction,
+      sortFunction = _ref.sortFunction,
+      linkSortMode = _ref.linkSortMode,
+      nodeThickness = _ref.nodeThickness,
+      nodeSpacing = _ref.nodeSpacing,
+      nodeInnerPadding = _ref.nodeInnerPadding,
+      width = _ref.width,
+      height = _ref.height,
+      getColor = _ref.getColor,
+      getLinkColor = _ref.getLinkColor,
+      getLabel = _ref.getLabel;
+  var sankey = d3Sankey.sankey().nodeAlign(alignFunction).nodeSort(sortFunction).linkSort(linkSortMode).nodeWidth(nodeThickness).nodePadding(nodeSpacing).size(layout === 'horizontal' ? [width, height] : [height, width]).nodeId(getId);
+  var data = _cloneDeep(_data);
+  sankey(data);
+  data.nodes.forEach(function (node) {
+    node.color = getColor(node);
+    node.label = getLabel(node);
+    if (layout === 'horizontal') {
+      node.x = node.x0 + nodeInnerPadding;
+      node.y = node.y0;
+      node.width = Math.max(node.x1 - node.x0 - nodeInnerPadding * 2, 0);
+      node.height = Math.max(node.y1 - node.y0, 0);
+    } else {
+      node.x = node.y0;
+      node.y = node.x0 + nodeInnerPadding;
+      node.width = Math.max(node.y1 - node.y0, 0);
+      node.height = Math.max(node.x1 - node.x0 - nodeInnerPadding * 2, 0);
+      var oldX0 = node.x0;
+      var oldX1 = node.x1;
+      node.x0 = node.y0;
+      node.x1 = node.y1;
+      node.y0 = oldX0;
+      node.y1 = oldX1;
     }
-    return {
-      sortFunction: sortFunction
+  });
+  data.links.forEach(function (link) {
+    link.color = getLinkColor(link);
+    link.pos0 = link.y0;
+    link.pos1 = link.y1;
+    link.thickness = link.width;
+    delete link.y0;
+    delete link.y1;
+    delete link.width;
+  });
+  return data;
+};
+var useSankey = function useSankey(_ref2) {
+  var data = _ref2.data,
+      layout = _ref2.layout,
+      width = _ref2.width,
+      height = _ref2.height,
+      sort = _ref2.sort,
+      align = _ref2.align,
+      colors$1 = _ref2.colors,
+      nodeThickness = _ref2.nodeThickness,
+      nodeSpacing = _ref2.nodeSpacing,
+      nodeInnerPadding = _ref2.nodeInnerPadding,
+      nodeBorderColor = _ref2.nodeBorderColor,
+      label = _ref2.label,
+      labelFormat = _ref2.labelFormat,
+      labelTextColor = _ref2.labelTextColor;
+  var _useState = React.useState(null),
+      _useState2 = _slicedToArray(_useState, 2),
+      currentNode = _useState2[0],
+      setCurrentNode = _useState2[1];
+  var _useState3 = React.useState(null),
+      _useState4 = _slicedToArray(_useState3, 2),
+      currentLink = _useState4[0],
+      setCurrentLink = _useState4[1];
+  var sortFunction = React.useMemo(function () {
+    if (sort === 'auto') return undefined;
+    if (sort === 'input') return null;
+    if (sort === 'ascending') return function (a, b) {
+      return a.value - b.value;
     };
-  }), _withPropsOnChange(['align'], function (_ref6) {
-    var align = _ref6.align;
-    return {
-      alignFunction: sankeyAlignmentFromProp(align)
+    if (sort === 'descending') return function (a, b) {
+      return b.value - a.value;
     };
-  }), _withPropsOnChange(['data', 'layout', 'alignFunction', 'sortFunction', 'nodeThickness', 'nodeSpacing', 'nodeInnerPadding', 'width', 'height', 'getColor', 'getLinkColor', 'getLabel'], function (_ref7) {
-    var _data = _ref7.data,
-        layout = _ref7.layout,
-        alignFunction = _ref7.alignFunction,
-        sortFunction = _ref7.sortFunction,
-        nodeThickness = _ref7.nodeThickness,
-        nodeSpacing = _ref7.nodeSpacing,
-        nodeInnerPadding = _ref7.nodeInnerPadding,
-        width = _ref7.width,
-        height = _ref7.height,
-        getColor = _ref7.getColor,
-        getLinkColor = _ref7.getLinkColor,
-        getLabel = _ref7.getLabel;
-    var sankey = d3Sankey.sankey().nodeAlign(alignFunction).nodeSort(sortFunction).nodeWidth(nodeThickness).nodePadding(nodeSpacing).size(layout === 'horizontal' ? [width, height] : [height, width]).nodeId(getId);
-    var data = _cloneDeep(_data);
-    sankey(data);
-    data.nodes.forEach(function (node) {
-      node.color = getColor(node);
-      node.label = getLabel(node);
-      if (layout === 'horizontal') {
-        node.x = node.x0 + nodeInnerPadding;
-        node.y = node.y0;
-        node.width = Math.max(node.x1 - node.x0 - nodeInnerPadding * 2, 0);
-        node.height = Math.max(node.y1 - node.y0, 0);
-      } else {
-        node.x = node.y0;
-        node.y = node.x0 + nodeInnerPadding;
-        node.width = Math.max(node.y1 - node.y0, 0);
-        node.height = Math.max(node.x1 - node.x0 - nodeInnerPadding * 2, 0);
-        var oldX0 = node.x0;
-        var oldX1 = node.x1;
-        node.x0 = node.y0;
-        node.x1 = node.y1;
-        node.y0 = oldX0;
-        node.y1 = oldX1;
-      }
+    return sort;
+  }, [sort]);
+  var linkSortMode = sort === 'input' ? null : undefined;
+  var alignFunction = React.useMemo(function () {
+    return sankeyAlignmentFromProp(align);
+  }, [align]);
+  var theme = core.useTheme();
+  var getColor = colors.useOrdinalColorScale(colors$1, 'id');
+  var getNodeBorderColor = colors.useInheritedColor(nodeBorderColor, theme);
+  var getLinkColor = colors.useOrdinalColorScale(colors$1, 'source.id');
+  var getLabel = React.useMemo(function () {
+    return core.getLabelGenerator(label, labelFormat);
+  }, [label, labelFormat]);
+  var getLabelTextColor = colors.useInheritedColor(labelTextColor, theme);
+  var _useMemo = React.useMemo(function () {
+    return computeNodeAndLinks({
+      data: data,
+      layout: layout,
+      alignFunction: alignFunction,
+      sortFunction: sortFunction,
+      linkSortMode: linkSortMode,
+      nodeThickness: nodeThickness,
+      nodeSpacing: nodeSpacing,
+      nodeInnerPadding: nodeInnerPadding,
+      width: width,
+      height: height,
+      getColor: getColor,
+      getLinkColor: getLinkColor,
+      getLabel: getLabel
     });
-    data.links.forEach(function (link) {
-      link.color = getLinkColor(link);
-      link.pos0 = link.y0;
-      link.pos1 = link.y1;
-      link.thickness = link.width;
-      delete link.y0;
-      delete link.y1;
-      delete link.width;
+  }, [data, layout, alignFunction, sortFunction, linkSortMode, nodeThickness, nodeSpacing, nodeInnerPadding, width, height, getColor, getLinkColor, getLabel]),
+      nodes = _useMemo.nodes,
+      links = _useMemo.links;
+  var legendData = React.useMemo(function () {
+    return nodes.map(function (node) {
+      return {
+        id: node.id,
+        label: node.label,
+        color: node.color
+      };
     });
-    return data;
-  }), _withPropsOnChange(['nodes'], function (_ref8) {
-    var nodes = _ref8.nodes;
-    return {
-      legendData: nodes.map(function (node) {
-        return {
-          id: node.id,
-          label: node.label,
-          color: node.color
-        };
-      })
-    };
-  }), pure)(Component);
-});
+  }, [nodes]);
+  return {
+    nodes: nodes,
+    links: links,
+    legendData: legendData,
+    getNodeBorderColor: getNodeBorderColor,
+    currentNode: currentNode,
+    setCurrentNode: setCurrentNode,
+    currentLink: currentLink,
+    setCurrentLink: setCurrentLink,
+    getLabelTextColor: getLabelTextColor
+  };
+};
 
 var SankeyNodesItem = function SankeyNodesItem(_ref) {
-  var x = _ref.x,
+  var node = _ref.node,
+      x = _ref.x,
       y = _ref.y,
       width = _ref.width,
       height = _ref.height,
@@ -242,110 +359,75 @@ var SankeyNodesItem = function SankeyNodesItem(_ref) {
       opacity = _ref.opacity,
       borderWidth = _ref.borderWidth,
       borderColor = _ref.borderColor,
-      handleMouseEnter = _ref.handleMouseEnter,
-      handleMouseMove = _ref.handleMouseMove,
-      handleMouseLeave = _ref.handleMouseLeave,
-      onClick = _ref.onClick;
-  return React__default.createElement("rect", {
+      setCurrent = _ref.setCurrent,
+      isInteractive = _ref.isInteractive,
+      onClick = _ref.onClick,
+      tooltip$1 = _ref.tooltip;
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedProps = reactSpring.useSpring({
     x: x,
     y: y,
     width: width,
     height: height,
-    fill: color,
-    fillOpacity: opacity,
+    opacity: opacity,
+    color: color,
+    config: springConfig,
+    immediate: !animate
+  });
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var tooltipContent = React.useMemo(function () {
+    if (tooltip$1) {
+      return React__default.createElement(tooltip.BasicTooltip, {
+        id: tooltip$1(node),
+        enableChip: false
+      });
+    }
+    return React__default.createElement(tooltip.BasicTooltip, {
+      id: node.label,
+      enableChip: true,
+      color: node.color
+    });
+  }, [tooltip$1, node]);
+  var handleMouseEnter = React.useCallback(function (event) {
+    setCurrent(node);
+    showTooltipFromEvent(tooltipContent, event, 'left');
+  }, [setCurrent, node, showTooltipFromEvent, tooltipContent]);
+  var handleMouseMove = React.useCallback(function (event) {
+    showTooltipFromEvent(tooltipContent, event, 'left');
+  }, [showTooltipFromEvent, tooltipContent]);
+  var handleMouseLeave = React.useCallback(function () {
+    setCurrent(null);
+    hideTooltip();
+  }, [setCurrent, hideTooltip]);
+  var handleClick = React.useCallback(function (event) {
+    onClick(node, event);
+  }, [onClick, node]);
+  return React__default.createElement(reactSpring.animated.rect, {
+    x: animatedProps.x,
+    y: animatedProps.y,
+    width: reactSpring.to(animatedProps.width, function (v) {
+      return Math.max(v, 0);
+    }),
+    height: reactSpring.to(animatedProps.height, function (v) {
+      return Math.max(v, 0);
+    }),
+    fill: animatedProps.color,
+    fillOpacity: animatedProps.opacity,
     strokeWidth: borderWidth,
     stroke: borderColor,
     strokeOpacity: opacity,
-    onMouseEnter: handleMouseEnter,
-    onMouseMove: handleMouseMove,
-    onMouseLeave: handleMouseLeave,
-    onClick: onClick
+    onMouseEnter: isInteractive ? handleMouseEnter : undefined,
+    onMouseMove: isInteractive ? handleMouseMove : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined
   });
 };
-SankeyNodesItem.propTypes = {
-  node: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    color: PropTypes.string.isRequired
-  }),
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  color: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
-  handleMouseEnter: PropTypes.func.isRequired,
-  handleMouseMove: PropTypes.func.isRequired,
-  handleMouseLeave: PropTypes.func.isRequired,
-  tooltip: PropTypes.element.isRequired,
-  theme: PropTypes.object.isRequired
-};
-var enhance$1 = _compose(_withPropsOnChange(['node', 'theme', 'tooltip'], function (_ref2) {
-  var node = _ref2.node,
-      theme = _ref2.theme,
-      tooltip$1 = _ref2.tooltip;
-  if (tooltip$1) {
-    return {
-      tooltip: React__default.createElement(tooltip.BasicTooltip, {
-        id: tooltip$1(node),
-        enableChip: false,
-        theme: theme
-      })
-    };
-  }
-  return {
-    tooltip: React__default.createElement(tooltip.BasicTooltip, {
-      id: node.label,
-      enableChip: true,
-      color: node.color,
-      theme: theme
-    })
-  };
-}), _withPropsOnChange(['onClick', 'node'], function (_ref3) {
-  var _onClick = _ref3.onClick,
-      node = _ref3.node;
-  return {
-    onClick: function onClick(event) {
-      return _onClick(node, event);
-    }
-  };
-}), withHandlers({
-  handleMouseEnter: function handleMouseEnter(_ref4) {
-    var showTooltip = _ref4.showTooltip,
-        setCurrent = _ref4.setCurrent,
-        node = _ref4.node,
-        tooltip = _ref4.tooltip;
-    return function (e) {
-      setCurrent(node);
-      showTooltip(tooltip, e);
-    };
-  },
-  handleMouseMove: function handleMouseMove(_ref5) {
-    var showTooltip = _ref5.showTooltip,
-        tooltip = _ref5.tooltip;
-    return function (e) {
-      showTooltip(tooltip, e);
-    };
-  },
-  handleMouseLeave: function handleMouseLeave(_ref6) {
-    var hideTooltip = _ref6.hideTooltip,
-        setCurrent = _ref6.setCurrent;
-    return function () {
-      setCurrent(null);
-      hideTooltip();
-    };
-  }
-}), pure);
-var SankeyNodesItem$1 = enhance$1(SankeyNodesItem);
+var SankeyNodesItem$1 = React.memo(SankeyNodesItem);
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var SankeyNodes = function SankeyNodes(_ref) {
   var nodes = _ref.nodes,
       nodeOpacity = _ref.nodeOpacity,
@@ -353,120 +435,39 @@ var SankeyNodes = function SankeyNodes(_ref) {
       nodeHoverOthersOpacity = _ref.nodeHoverOthersOpacity,
       nodeBorderWidth = _ref.nodeBorderWidth,
       getNodeBorderColor = _ref.getNodeBorderColor,
-      animate = _ref.animate,
-      motionDamping = _ref.motionDamping,
-      motionStiffness = _ref.motionStiffness,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
       setCurrentNode = _ref.setCurrentNode,
       currentNode = _ref.currentNode,
       currentLink = _ref.currentLink,
       isCurrentNode = _ref.isCurrentNode,
+      isInteractive = _ref.isInteractive,
       onClick = _ref.onClick,
-      tooltip = _ref.tooltip,
-      theme = _ref.theme;
+      tooltip = _ref.tooltip;
   var getOpacity = function getOpacity(node) {
     if (!currentNode && !currentLink) return nodeOpacity;
     if (isCurrentNode(node)) return nodeHoverOpacity;
     return nodeHoverOthersOpacity;
   };
-  if (!animate) {
-    return React__default.createElement(React.Fragment, null, nodes.map(function (node) {
-      return React__default.createElement(SankeyNodesItem$1, {
-        key: node.id,
-        node: node,
-        x: node.x,
-        y: node.y,
-        width: node.width,
-        height: node.height,
-        color: node.color,
-        opacity: getOpacity(node),
-        borderWidth: nodeBorderWidth,
-        borderColor: getNodeBorderColor(node),
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrent: setCurrentNode,
-        onClick: onClick,
-        tooltip: tooltip,
-        theme: theme
-      });
-    }));
-  }
-  var springProps = {
-    damping: motionDamping,
-    stiffness: motionStiffness
-  };
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: nodes.map(function (node) {
-      return {
-        key: node.id,
-        data: node,
-        style: _objectSpread$1({
-          x: reactMotion.spring(node.x, springProps),
-          y: reactMotion.spring(node.y, springProps),
-          width: reactMotion.spring(node.width, springProps),
-          height: reactMotion.spring(node.height, springProps),
-          opacity: reactMotion.spring(getOpacity(node), springProps)
-        }, colors.interpolateColor(node.color, springProps))
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement(React.Fragment, null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          node = _ref2.data;
-      var color = colors.getInterpolatedColor(style);
-      return React__default.createElement(SankeyNodesItem$1, {
-        key: key,
-        node: node,
-        x: style.x,
-        y: style.y,
-        width: Math.max(style.width, 0),
-        height: Math.max(style.height, 0),
-        color: color,
-        opacity: style.opacity,
-        borderWidth: nodeBorderWidth,
-        borderColor: getNodeBorderColor(_objectSpread$1({}, node, {
-          color: color
-        })),
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrent: setCurrentNode,
-        onClick: onClick,
-        tooltip: tooltip,
-        theme: theme
-      });
-    }));
+  return nodes.map(function (node) {
+    return React__default.createElement(SankeyNodesItem$1, {
+      key: node.id,
+      node: node,
+      x: node.x,
+      y: node.y,
+      width: node.width,
+      height: node.height,
+      color: node.color,
+      opacity: getOpacity(node),
+      borderWidth: nodeBorderWidth,
+      borderColor: getNodeBorderColor(node),
+      setCurrent: setCurrentNode,
+      isInteractive: isInteractive,
+      onClick: onClick,
+      tooltip: tooltip
+    });
   });
 };
-SankeyNodes.propTypes = _objectSpread$1({
-  nodes: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired
-  })).isRequired,
-  nodeOpacity: PropTypes.number.isRequired,
-  nodeHoverOpacity: PropTypes.number.isRequired,
-  nodeHoverOthersOpacity: PropTypes.number.isRequired,
-  nodeBorderWidth: PropTypes.number.isRequired,
-  getNodeBorderColor: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired,
-  tooltip: PropTypes.func
-}, core.motionPropTypes, {
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  setCurrentNode: PropTypes.func.isRequired,
-  currentNode: PropTypes.object,
-  currentLink: PropTypes.object,
-  isCurrentNode: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
-});
-var SankeyNodes$1 = pure(SankeyNodes);
+var SankeyNodes$1 = React.memo(SankeyNodes);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var SankeyLinkGradient = React.memo(function (_ref) {
   var id = _ref.id,
       layout = _ref.layout,
@@ -484,7 +485,7 @@ var SankeyLinkGradient = React.memo(function (_ref) {
     gradientProps.y1 = '0%';
     gradientProps.y2 = '100%';
   }
-  return React__default.createElement("linearGradient", _extends({
+  return React__default.createElement("linearGradient", Object.assign({
     id: id,
     spreadMethod: "pad"
   }, gradientProps), React__default.createElement("stop", {
@@ -495,12 +496,6 @@ var SankeyLinkGradient = React.memo(function (_ref) {
     stopColor: endColor
   }));
 });
-SankeyLinkGradient.propTypes = {
-  id: PropTypes.string.isRequired,
-  layout: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  startColor: PropTypes.string.isRequired,
-  endColor: PropTypes.string.isRequired
-};
 SankeyLinkGradient.displayName = 'SankeyLinkGradient';
 
 var tooltipStyles = {
@@ -529,23 +524,6 @@ var TooltipContent = function TooltipContent(_ref) {
     style: tooltipStyles.targetChip
   }), React__default.createElement("strong", null, format ? format(link.value) : link.value));
 };
-TooltipContent.propTypes = {
-  link: PropTypes.shape({
-    source: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      color: PropTypes.string.isRequired
-    }).isRequired,
-    target: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      color: PropTypes.string.isRequired
-    }).isRequired,
-    color: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired
-  }).isRequired,
-  format: PropTypes.func
-};
 var SankeyLinksItem = function SankeyLinksItem(_ref2) {
   var link = _ref2.link,
       layout = _ref2.layout,
@@ -554,120 +532,72 @@ var SankeyLinksItem = function SankeyLinksItem(_ref2) {
       opacity = _ref2.opacity,
       blendMode = _ref2.blendMode,
       enableGradient = _ref2.enableGradient,
-      handleMouseEnter = _ref2.handleMouseEnter,
-      handleMouseMove = _ref2.handleMouseMove,
-      handleMouseLeave = _ref2.handleMouseLeave,
+      setCurrent = _ref2.setCurrent,
+      tooltip$1 = _ref2.tooltip,
+      tooltipFormat = _ref2.tooltipFormat,
+      isInteractive = _ref2.isInteractive,
       onClick = _ref2.onClick;
   var linkId = "".concat(link.source.id, ".").concat(link.target.id);
-  return React__default.createElement(React.Fragment, null, enableGradient && React__default.createElement(SankeyLinkGradient, {
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var animatedPath = core.useAnimatedPath(path);
+  var animatedProps = reactSpring.useSpring({
+    color: color,
+    opacity: opacity,
+    config: springConfig,
+    immediate: !animate
+  });
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var tooltipContent = React.useMemo(function () {
+    if (tooltip$1) {
+      return React__default.createElement(tooltip.BasicTooltip, {
+        id: tooltip$1(link),
+        enableChip: false
+      });
+    }
+    return React__default.createElement(tooltip.BasicTooltip, {
+      id: React__default.createElement(TooltipContent, {
+        format: tooltipFormat,
+        link: link
+      })
+    });
+  }, [tooltip$1, tooltipFormat, link]);
+  var handleMouseEnter = React.useCallback(function (event) {
+    setCurrent(link);
+    showTooltipFromEvent(tooltipContent, event, 'left');
+  }, [setCurrent, link, showTooltipFromEvent, tooltipContent]);
+  var handleMouseMove = React.useCallback(function (event) {
+    showTooltipFromEvent(tooltipContent, event, 'left');
+  }, [showTooltipFromEvent, tooltipContent]);
+  var handleMouseLeave = React.useCallback(function () {
+    setCurrent(null);
+    hideTooltip();
+  }, [setCurrent, hideTooltip]);
+  var handleClick = React.useCallback(function (event) {
+    onClick(link, event);
+  }, [onClick, link]);
+  return React__default.createElement(React__default.Fragment, null, enableGradient && React__default.createElement(SankeyLinkGradient, {
     id: linkId,
     layout: layout,
     startColor: link.startColor || link.source.color,
     endColor: link.endColor || link.target.color
-  }), React__default.createElement("path", {
-    fill: enableGradient ? "url(#".concat(encodeURI(linkId), ")") : color,
-    d: path,
-    fillOpacity: opacity,
-    onMouseEnter: handleMouseEnter,
-    onMouseMove: handleMouseMove,
-    onMouseLeave: handleMouseLeave,
-    onClick: onClick,
+  }), React__default.createElement(reactSpring.animated.path, {
+    fill: enableGradient ? "url(\"#".concat(encodeURI(linkId), "\")") : animatedProps.color,
+    d: animatedPath,
+    fillOpacity: animatedProps.opacity,
+    onMouseEnter: isInteractive ? handleMouseEnter : undefined,
+    onMouseMove: isInteractive ? handleMouseMove : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined,
     style: {
       mixBlendMode: blendMode
     }
   }));
 };
-SankeyLinksItem.propTypes = {
-  link: PropTypes.shape({
-    source: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      color: PropTypes.string.isRequired
-    }).isRequired,
-    target: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      color: PropTypes.string.isRequired
-    }).isRequired,
-    color: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    startColor: PropTypes.string,
-    endColor: PropTypes.string
-  }).isRequired,
-  layout: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  path: PropTypes.string.isRequired,
-  color: PropTypes.string.isRequired,
-  opacity: PropTypes.number.isRequired,
-  blendMode: core.blendModePropType.isRequired,
-  enableGradient: PropTypes.bool.isRequired,
-  theme: PropTypes.object.isRequired,
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
-  handleMouseEnter: PropTypes.func.isRequired,
-  handleMouseMove: PropTypes.func.isRequired,
-  handleMouseLeave: PropTypes.func.isRequired
-};
-var enhance$2 = _compose(_withPropsOnChange(['link', 'theme', 'tooltip', 'tooltipFormat'], function (_ref3) {
-  var link = _ref3.link,
-      theme = _ref3.theme,
-      tooltip$1 = _ref3.tooltip,
-      tooltipFormat = _ref3.tooltipFormat;
-  if (tooltip$1) {
-    return {
-      tooltip: React__default.createElement(tooltip.BasicTooltip, {
-        id: tooltip$1(link),
-        enableChip: false,
-        theme: theme
-      })
-    };
-  }
-  return {
-    tooltip: React__default.createElement(tooltip.BasicTooltip, {
-      id: React__default.createElement(TooltipContent, {
-        format: tooltipFormat,
-        link: link
-      }),
-      theme: theme
-    })
-  };
-}), _withPropsOnChange(['onClick', 'link'], function (_ref4) {
-  var _onClick = _ref4.onClick,
-      link = _ref4.link;
-  return {
-    onClick: function onClick(event) {
-      return _onClick(link, event);
-    }
-  };
-}), withHandlers({
-  handleMouseEnter: function handleMouseEnter(_ref5) {
-    var showTooltip = _ref5.showTooltip,
-        setCurrent = _ref5.setCurrent,
-        link = _ref5.link,
-        tooltip = _ref5.tooltip;
-    return function (e) {
-      setCurrent(link);
-      showTooltip(tooltip, e);
-    };
-  },
-  handleMouseMove: function handleMouseMove(_ref6) {
-    var showTooltip = _ref6.showTooltip,
-        tooltip = _ref6.tooltip;
-    return function (e) {
-      showTooltip(tooltip, e);
-    };
-  },
-  handleMouseLeave: function handleMouseLeave(_ref7) {
-    var hideTooltip = _ref7.hideTooltip,
-        setCurrent = _ref7.setCurrent;
-    return function () {
-      setCurrent(null);
-      hideTooltip();
-    };
-  }
-}), pure);
-var SankeyLinksItem$1 = enhance$2(SankeyLinksItem);
+var SankeyLinksItem$1 = React.memo(SankeyLinksItem);
 
 var sankeyLinkHorizontal = function sankeyLinkHorizontal() {
   var lineGenerator = d3Shape.line().curve(d3Shape.curveMonotoneX);
@@ -692,9 +622,6 @@ var sankeyLinkVertical = function sankeyLinkVertical() {
   };
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var SankeyLinks = function SankeyLinks(_ref) {
   var links = _ref.links,
       layout = _ref.layout,
@@ -704,112 +631,40 @@ var SankeyLinks = function SankeyLinks(_ref) {
       linkContract = _ref.linkContract,
       linkBlendMode = _ref.linkBlendMode,
       enableLinkGradient = _ref.enableLinkGradient,
-      animate = _ref.animate,
-      motionDamping = _ref.motionDamping,
-      motionStiffness = _ref.motionStiffness,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
       setCurrentLink = _ref.setCurrentLink,
       currentNode = _ref.currentNode,
       currentLink = _ref.currentLink,
       isCurrentLink = _ref.isCurrentLink,
+      isInteractive = _ref.isInteractive,
       onClick = _ref.onClick,
       tooltipFormat = _ref.tooltipFormat,
-      tooltip = _ref.tooltip,
-      theme = _ref.theme;
+      tooltip = _ref.tooltip;
   var getOpacity = function getOpacity(link) {
     if (!currentNode && !currentLink) return linkOpacity;
     if (isCurrentLink(link)) return linkHoverOpacity;
     return linkHoverOthersOpacity;
   };
   var getLinkPath = layout === 'horizontal' ? sankeyLinkHorizontal() : sankeyLinkVertical();
-  if (animate !== true) {
-    return React__default.createElement("g", null, links.map(function (link) {
-      return React__default.createElement(SankeyLinksItem$1, {
-        key: "".concat(link.source.id, ".").concat(link.target.id),
-        link: link,
-        layout: layout,
-        path: getLinkPath(link, linkContract),
-        color: link.color,
-        opacity: getOpacity(link),
-        blendMode: linkBlendMode,
-        enableGradient: enableLinkGradient,
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrent: setCurrentLink,
-        onClick: onClick,
-        tooltip: tooltip,
-        theme: theme,
-        tooltipFormat: tooltipFormat
-      });
-    }));
-  }
-  var springConfig = {
-    stiffness: motionStiffness,
-    damping: motionDamping
-  };
-  return React__default.createElement(React.Fragment, null, links.map(function (link) {
-    return React__default.createElement(core.SmartMotion, {
+  return links.map(function (link) {
+    return React__default.createElement(SankeyLinksItem$1, {
       key: "".concat(link.source.id, ".").concat(link.target.id),
-      style: function style(spring) {
-        return {
-          path: spring(getLinkPath(link, linkContract), springConfig),
-          color: spring(link.color, springConfig),
-          opacity: spring(getOpacity(link), springConfig)
-        };
-      }
-    }, function (style) {
-      return React__default.createElement(SankeyLinksItem$1, _extends$1({
-        link: link,
-        layout: layout
-      }, style, {
-        blendMode: linkBlendMode,
-        enableGradient: enableLinkGradient,
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrent: setCurrentLink,
-        onClick: onClick,
-        tooltip: tooltip,
-        theme: theme,
-        tooltipFormat: tooltipFormat
-      }));
+      link: link,
+      layout: layout,
+      path: getLinkPath(link, linkContract),
+      color: link.color,
+      opacity: getOpacity(link),
+      blendMode: linkBlendMode,
+      enableGradient: enableLinkGradient,
+      setCurrent: setCurrentLink,
+      isInteractive: isInteractive,
+      onClick: onClick,
+      tooltip: tooltip,
+      tooltipFormat: tooltipFormat
     });
-  }));
+  });
 };
-SankeyLinks.propTypes = _objectSpread$2({
-  layout: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  links: PropTypes.arrayOf(PropTypes.shape({
-    source: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
-    }).isRequired,
-    target: PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
-    }).isRequired,
-    thickness: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired
-  })).isRequired,
-  linkOpacity: PropTypes.number.isRequired,
-  linkHoverOpacity: PropTypes.number.isRequired,
-  linkHoverOthersOpacity: PropTypes.number.isRequired,
-  linkContract: PropTypes.number.isRequired,
-  linkBlendMode: core.blendModePropType.isRequired,
-  enableLinkGradient: PropTypes.bool.isRequired,
-  theme: PropTypes.object.isRequired,
-  tooltip: PropTypes.func
-}, core.motionPropTypes, {
-  showTooltip: PropTypes.func.isRequired,
-  hideTooltip: PropTypes.func.isRequired,
-  setCurrentLink: PropTypes.func.isRequired,
-  currentLink: PropTypes.object,
-  isCurrentLink: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
-});
-var SankeyLinks$1 = pure(SankeyLinks);
+var SankeyLinks$1 = React.memo(SankeyLinks);
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var SankeyLabels = function SankeyLabels(_ref) {
   var nodes = _ref.nodes,
       layout = _ref.layout,
@@ -818,11 +673,8 @@ var SankeyLabels = function SankeyLabels(_ref) {
       labelPosition = _ref.labelPosition,
       labelPadding = _ref.labelPadding,
       labelOrientation = _ref.labelOrientation,
-      getLabelTextColor = _ref.getLabelTextColor,
-      theme = _ref.theme,
-      animate = _ref.animate,
-      motionDamping = _ref.motionDamping,
-      motionStiffness = _ref.motionStiffness;
+      getLabelTextColor = _ref.getLabelTextColor;
+  var theme = core.useTheme();
   var labelRotation = labelOrientation === 'vertical' ? -90 : 0;
   var labels = nodes.map(function (node) {
     var x;
@@ -876,117 +728,102 @@ var SankeyLabels = function SankeyLabels(_ref) {
       color: getLabelTextColor(node)
     };
   });
-  if (!animate) {
-    return React__default.createElement("g", null, labels.map(function (label) {
-      return React__default.createElement("text", {
-        key: label.id,
-        dominantBaseline: "central",
-        textAnchor: label.textAnchor,
-        transform: "translate(".concat(label.x, ", ").concat(label.y, ") rotate(").concat(labelRotation, ")"),
-        style: _objectSpread$3({}, theme.labels.text, {
-          fill: label.color
-        })
-      }, label.label);
-    }));
-  }
-  var springProps = {
-    damping: motionDamping,
-    stiffness: motionStiffness
-  };
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: labels.map(function (label) {
-      return {
-        key: label.id,
-        data: label,
-        style: _objectSpread$3({
-          x: reactMotion.spring(label.x, springProps),
-          y: reactMotion.spring(label.y, springProps),
-          rotation: reactMotion.spring(labelRotation, springProps)
-        }, colors.interpolateColor(label.color, springProps))
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement(React.Fragment, null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          data = _ref2.data;
-      var color = colors.getInterpolatedColor(style);
-      return React__default.createElement("text", {
-        key: key,
-        transform: "translate(".concat(style.x, ", ").concat(style.y, ") rotate(").concat(style.rotation, ")"),
-        dominantBaseline: "central",
-        textAnchor: data.textAnchor,
-        style: _objectSpread$3({}, theme.labels.text, {
-          fill: color,
-          pointerEvents: 'none'
-        })
-      }, data.label);
-    }));
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var springs = reactSpring.useSprings(labels.length, labels.map(function (label) {
+    return {
+      transform: "translate(".concat(label.x, ", ").concat(label.y, ") rotate(").concat(labelRotation, ")"),
+      color: label.color,
+      config: springConfig,
+      immediate: !animate
+    };
+  }));
+  return springs.map(function (animatedProps, index) {
+    var label = labels[index];
+    return React__default.createElement(reactSpring.animated.text, {
+      key: label.id,
+      dominantBaseline: "central",
+      textAnchor: label.textAnchor,
+      transform: animatedProps.transform,
+      style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+        fill: animatedProps.color,
+        pointerEvents: 'none'
+      })
+    }, label.label);
   });
 };
-SankeyLabels.propTypes = _objectSpread$3({
-  nodes: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    x1: PropTypes.number.isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-  })).isRequired,
-  layout: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  labelPosition: PropTypes.oneOf(['inside', 'outside']).isRequired,
-  labelPadding: PropTypes.number.isRequired,
-  labelOrientation: PropTypes.oneOf(['horizontal', 'vertical']).isRequired,
-  getLabelTextColor: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired
-}, core.motionPropTypes);
-var SankeyLabels$1 = pure(SankeyLabels);
+var SankeyLabels$1 = React.memo(SankeyLabels);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var Sankey = function Sankey(_ref) {
-  var nodes = _ref.nodes,
-      links = _ref.links,
+  var data = _ref.data,
       layout = _ref.layout,
-      margin = _ref.margin,
+      sort = _ref.sort,
+      align = _ref.align,
       width = _ref.width,
       height = _ref.height,
-      outerWidth = _ref.outerWidth,
-      outerHeight = _ref.outerHeight,
+      partialMargin = _ref.margin,
+      colors = _ref.colors,
+      nodeThickness = _ref.nodeThickness,
+      nodeSpacing = _ref.nodeSpacing,
+      nodeInnerPadding = _ref.nodeInnerPadding,
+      nodeBorderColor = _ref.nodeBorderColor,
       nodeOpacity = _ref.nodeOpacity,
       nodeHoverOpacity = _ref.nodeHoverOpacity,
       nodeHoverOthersOpacity = _ref.nodeHoverOthersOpacity,
       nodeBorderWidth = _ref.nodeBorderWidth,
-      getNodeBorderColor = _ref.getNodeBorderColor,
-      setCurrentNode = _ref.setCurrentNode,
-      currentNode = _ref.currentNode,
       linkOpacity = _ref.linkOpacity,
       linkHoverOpacity = _ref.linkHoverOpacity,
       linkHoverOthersOpacity = _ref.linkHoverOthersOpacity,
       linkContract = _ref.linkContract,
       linkBlendMode = _ref.linkBlendMode,
       enableLinkGradient = _ref.enableLinkGradient,
-      setCurrentLink = _ref.setCurrentLink,
-      currentLink = _ref.currentLink,
       enableLabels = _ref.enableLabels,
       labelPosition = _ref.labelPosition,
       labelPadding = _ref.labelPadding,
       labelOrientation = _ref.labelOrientation,
-      getLabelTextColor = _ref.getLabelTextColor,
-      theme = _ref.theme,
+      label = _ref.label,
+      labelFormat = _ref.labelFormat,
+      labelTextColor = _ref.labelTextColor,
       nodeTooltip = _ref.nodeTooltip,
       linkTooltip = _ref.linkTooltip,
-      animate = _ref.animate,
-      motionDamping = _ref.motionDamping,
-      motionStiffness = _ref.motionStiffness,
       isInteractive = _ref.isInteractive,
       onClick = _ref.onClick,
       tooltipFormat = _ref.tooltipFormat,
       legends$1 = _ref.legends,
-      legendData = _ref.legendData,
-      layers = _ref.layers;
+      layers = _ref.layers,
+      role = _ref.role;
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useSankey = useSankey({
+    data: data,
+    layout: layout,
+    width: innerWidth,
+    height: innerHeight,
+    sort: sort,
+    align: align,
+    colors: colors,
+    nodeThickness: nodeThickness,
+    nodeSpacing: nodeSpacing,
+    nodeInnerPadding: nodeInnerPadding,
+    nodeBorderColor: nodeBorderColor,
+    label: label,
+    labelFormat: labelFormat,
+    labelTextColor: labelTextColor
+  }),
+      nodes = _useSankey.nodes,
+      links = _useSankey.links,
+      legendData = _useSankey.legendData,
+      getNodeBorderColor = _useSankey.getNodeBorderColor,
+      currentNode = _useSankey.currentNode,
+      setCurrentNode = _useSankey.setCurrentNode,
+      currentLink = _useSankey.currentLink,
+      setCurrentLink = _useSankey.setCurrentLink,
+      getLabelTextColor = _useSankey.getLabelTextColor;
   var isCurrentNode = function isCurrentNode() {
     return false;
   };
@@ -1027,125 +864,98 @@ var Sankey = function Sankey(_ref) {
       return source.id === currentNode.id || target.id === currentNode.id;
     };
   }
-  return React__default.createElement(core.Container, {
-    isInteractive: isInteractive,
-    theme: theme,
-    animate: animate,
-    motionDamping: motionDamping,
-    motionStiffness: motionStiffness
-  }, function (_ref8) {
-    var showTooltip = _ref8.showTooltip,
-        hideTooltip = _ref8.hideTooltip;
-    var layerProps = {
+  var layerProps = {
+    links: links,
+    nodes: nodes,
+    margin: margin,
+    width: width,
+    height: height,
+    outerWidth: outerWidth,
+    outerHeight: outerHeight
+  };
+  var layerById = {
+    links: React__default.createElement(SankeyLinks$1, {
+      key: "links",
       links: links,
+      layout: layout,
+      linkContract: linkContract,
+      linkOpacity: linkOpacity,
+      linkHoverOpacity: linkHoverOpacity,
+      linkHoverOthersOpacity: linkHoverOthersOpacity,
+      linkBlendMode: linkBlendMode,
+      enableLinkGradient: enableLinkGradient,
+      setCurrentLink: setCurrentLink,
+      currentNode: currentNode,
+      currentLink: currentLink,
+      isCurrentLink: isCurrentLink,
+      isInteractive: isInteractive,
+      onClick: onClick,
+      tooltip: linkTooltip,
+      tooltipFormat: tooltipFormat
+    }),
+    nodes: React__default.createElement(SankeyNodes$1, {
+      key: "nodes",
       nodes: nodes,
-      margin: margin,
-      width: width,
-      height: height,
-      outerWidth: outerWidth,
-      outerHeight: outerHeight
-    };
-    var layerById = {
-      links: React__default.createElement(SankeyLinks$1, {
-        key: "links",
-        links: links,
-        layout: layout,
-        linkContract: linkContract,
-        linkOpacity: linkOpacity,
-        linkHoverOpacity: linkHoverOpacity,
-        linkHoverOthersOpacity: linkHoverOthersOpacity,
-        linkBlendMode: linkBlendMode,
-        enableLinkGradient: enableLinkGradient,
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrentLink: setCurrentLink,
-        currentNode: currentNode,
-        currentLink: currentLink,
-        isCurrentLink: isCurrentLink,
-        onClick: onClick,
-        tooltip: linkTooltip,
-        theme: theme,
-        tooltipFormat: tooltipFormat,
-        animate: animate,
-        motionDamping: motionDamping,
-        motionStiffness: motionStiffness
-      }),
-      nodes: React__default.createElement(SankeyNodes$1, {
-        key: "nodes",
-        nodes: nodes,
-        nodeOpacity: nodeOpacity,
-        nodeHoverOpacity: nodeHoverOpacity,
-        nodeHoverOthersOpacity: nodeHoverOthersOpacity,
-        nodeBorderWidth: nodeBorderWidth,
-        getNodeBorderColor: getNodeBorderColor,
-        showTooltip: showTooltip,
-        hideTooltip: hideTooltip,
-        setCurrentNode: setCurrentNode,
-        currentNode: currentNode,
-        currentLink: currentLink,
-        isCurrentNode: isCurrentNode,
-        onClick: onClick,
-        tooltip: nodeTooltip,
-        theme: theme,
-        tooltipFormat: tooltipFormat,
-        animate: animate,
-        motionDamping: motionDamping,
-        motionStiffness: motionStiffness
-      }),
-      labels: null,
-      legends: legends$1.map(function (legend, i) {
-        return React__default.createElement(legends.BoxLegendSvg, _extends$2({
-          key: "legend".concat(i)
-        }, legend, {
-          containerWidth: width,
-          containerHeight: height,
-          data: legendData,
-          theme: theme
-        }));
-      })
-    };
-    if (enableLabels) {
-      layerById.labels = React__default.createElement(SankeyLabels$1, {
-        key: "labels",
-        nodes: nodes,
-        layout: layout,
-        width: width,
-        height: height,
-        labelPosition: labelPosition,
-        labelPadding: labelPadding,
-        labelOrientation: labelOrientation,
-        getLabelTextColor: getLabelTextColor,
-        theme: theme,
-        animate: animate,
-        motionDamping: motionDamping,
-        motionStiffness: motionStiffness
-      });
+      nodeOpacity: nodeOpacity,
+      nodeHoverOpacity: nodeHoverOpacity,
+      nodeHoverOthersOpacity: nodeHoverOthersOpacity,
+      nodeBorderWidth: nodeBorderWidth,
+      getNodeBorderColor: getNodeBorderColor,
+      setCurrentNode: setCurrentNode,
+      currentNode: currentNode,
+      currentLink: currentLink,
+      isCurrentNode: isCurrentNode,
+      isInteractive: isInteractive,
+      onClick: onClick,
+      tooltip: nodeTooltip,
+      tooltipFormat: tooltipFormat
+    }),
+    labels: null,
+    legends: legends$1.map(function (legend, i) {
+      return React__default.createElement(legends.BoxLegendSvg, Object.assign({
+        key: "legend".concat(i)
+      }, legend, {
+        containerWidth: innerWidth,
+        containerHeight: innerHeight,
+        data: legendData
+      }));
+    })
+  };
+  if (enableLabels) {
+    layerById.labels = React__default.createElement(SankeyLabels$1, {
+      key: "labels",
+      nodes: nodes,
+      layout: layout,
+      width: innerWidth,
+      height: innerHeight,
+      labelPosition: labelPosition,
+      labelPadding: labelPadding,
+      labelOrientation: labelOrientation,
+      getLabelTextColor: getLabelTextColor
+    });
+  }
+  return React__default.createElement(core.SvgWrapper, {
+    width: outerWidth,
+    height: outerHeight,
+    margin: margin,
+    role: role
+  }, layers.map(function (layer, i) {
+    if (typeof layer === 'function') {
+      return React__default.createElement(React.Fragment, {
+        key: i
+      }, layer(layerProps));
     }
-    return React__default.createElement(core.SvgWrapper, {
-      width: outerWidth,
-      height: outerHeight,
-      margin: margin,
-      theme: theme
-    }, layers.map(function (layer, i) {
-      if (typeof layer === 'function') {
-        return React__default.createElement(React.Fragment, {
-          key: i
-        }, layer(layerProps));
-      }
-      return layerById[layer];
-    }));
-  });
+    return layerById[layer];
+  }));
 };
-Sankey.propTypes = SankeyPropTypes;
-var enhancedSankey = enhance(Sankey);
-enhancedSankey.displayName = 'Sankey';
+var WrappedSankey = core.withContainer(Sankey);
+WrappedSankey.defaultProps = SankeyDefaultProps;
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveSankey = function ResponsiveSankey(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedSankey, _extends$3({
+    return React__default.createElement(WrappedSankey, Object.assign({
       width: width,
       height: height
     }, props));
@@ -1153,10 +963,11 @@ var ResponsiveSankey = function ResponsiveSankey(props) {
 };
 
 exports.ResponsiveSankey = ResponsiveSankey;
-exports.Sankey = enhancedSankey;
+exports.Sankey = WrappedSankey;
 exports.SankeyDefaultProps = SankeyDefaultProps;
 exports.SankeyPropTypes = SankeyPropTypes;
 exports.sankeyAlignmentFromProp = sankeyAlignmentFromProp;
 exports.sankeyAlignmentPropKeys = sankeyAlignmentPropKeys;
 exports.sankeyAlignmentPropMapping = sankeyAlignmentPropMapping;
 exports.sankeyAlignmentPropType = sankeyAlignmentPropType;
+//# sourceMappingURL=nivo-sankey.cjs.js.map

@@ -14,8 +14,120 @@ var tooltip = require('@nivo/tooltip');
 var d3Shape = require('d3-shape');
 var scales = require('@nivo/scales');
 var PropTypes = _interopDefault(require('prop-types'));
-var reactMotion = require('react-motion');
+var reactSpring = require('react-spring');
 var voronoi = require('@nivo/voronoi');
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
 
 var LinePointTooltip = function LinePointTooltip(_ref) {
   var point = _ref.point;
@@ -24,9 +136,6 @@ var LinePointTooltip = function LinePointTooltip(_ref) {
     enableChip: true,
     color: point.serieColor
   });
-};
-LinePointTooltip.propTypes = {
-  point: PropTypes.object.isRequired
 };
 var PointTooltip = React.memo(LinePointTooltip);
 
@@ -40,9 +149,6 @@ var Chip = function Chip(_ref) {
       background: color
     }
   });
-};
-Chip.propTypes = {
-  color: PropTypes.string.isRequired
 };
 var SliceTooltip = function SliceTooltip(_ref2) {
   var slice = _ref2.slice,
@@ -59,14 +165,8 @@ var SliceTooltip = function SliceTooltip(_ref2) {
     })
   });
 };
-SliceTooltip.propTypes = {
-  slice: PropTypes.object.isRequired,
-  axis: PropTypes.oneOf(['x', 'y']).isRequired
-};
 var SliceTooltip$1 = React.memo(SliceTooltip);
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
@@ -95,6 +195,8 @@ var commonPropTypes = {
   pointColor: PropTypes.any.isRequired,
   pointBorderWidth: PropTypes.number.isRequired,
   pointBorderColor: PropTypes.any.isRequired,
+  enablePointLabel: PropTypes.bool.isRequired,
+  pointLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
   markers: PropTypes.arrayOf(PropTypes.shape({
     axis: PropTypes.oneOf(['x', 'y']).isRequired,
     value: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
@@ -110,18 +212,18 @@ var commonPropTypes = {
   isInteractive: PropTypes.bool.isRequired,
   debugMesh: PropTypes.bool.isRequired,
   tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  tooltipFormat: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
   enableSlices: PropTypes.oneOf(['x', 'y', false]).isRequired,
   debugSlices: PropTypes.bool.isRequired,
   sliceTooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
   enableCrosshair: PropTypes.bool.isRequired,
-  crosshairType: tooltip.crosshairPropTypes.type.isRequired
+  crosshairType: PropTypes.string.isRequired
 };
-var LinePropTypes = _objectSpread({}, commonPropTypes, {
+var LinePropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   enablePointLabel: PropTypes.bool.isRequired,
+  role: PropTypes.string.isRequired,
   useMesh: PropTypes.bool.isRequired
-}, core.motionPropTypes, core.defsPropTypes);
-var LineCanvasPropTypes = _objectSpread({
+}, core.motionPropTypes), core.defsPropTypes);
+var LineCanvasPropTypes = _objectSpread2({
   pixelRatio: PropTypes.number.isRequired
 }, commonPropTypes);
 var commonDefaultProps = {
@@ -148,6 +250,8 @@ var commonDefaultProps = {
   pointBorderColor: {
     theme: 'background'
   },
+  enablePointLabel: false,
+  pointLabel: 'yFormatted',
   colors: {
     scheme: 'nivo'
   },
@@ -166,29 +270,19 @@ var commonDefaultProps = {
   enableCrosshair: true,
   crosshairType: 'bottom-left'
 };
-var LineDefaultProps = _objectSpread({}, commonDefaultProps, {
+var LineDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   enablePointLabel: false,
   useMesh: false,
   animate: true,
-  motionStiffness: 90,
-  motionDamping: 15,
+  motionConfig: 'gentle',
   defs: [],
-  fill: []
+  fill: [],
+  role: 'img'
 });
-var LineCanvasDefaultProps = _objectSpread({}, commonDefaultProps, {
+var LineCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 var useLineGenerator = function useLineGenerator(_ref) {
   var curve = _ref.curve;
   return React.useMemo(function () {
@@ -236,7 +330,7 @@ var usePoints = function usePoints(_ref3) {
         };
         point.color = getPointColor(serie);
         point.borderColor = getPointBorderColor(point);
-        point.data = _objectSpread$1({}, datum.data, {
+        point.data = _objectSpread2(_objectSpread2({}, datum.data), {}, {
           xFormatted: formatX(datum.data.x),
           yFormatted: formatY(datum.data.y)
         });
@@ -349,7 +443,7 @@ var useLine = function useLine(_ref9) {
       rawSeries = _useMemo.series;
   var series = React.useMemo(function () {
     return rawSeries.map(function (serie) {
-      return _objectSpread$1({}, serie, {
+      return _objectSpread2(_objectSpread2({}, serie), {}, {
         color: getColor(serie)
       });
     });
@@ -387,116 +481,66 @@ var useLine = function useLine(_ref9) {
   };
 };
 
-var Areas = function Areas(_ref) {
-  var areaGenerator = _ref.areaGenerator,
+var AreaPath = function AreaPath(_ref) {
+  var areaBlendMode = _ref.areaBlendMode,
       areaOpacity = _ref.areaOpacity,
-      areaBlendMode = _ref.areaBlendMode,
-      lines = _ref.lines;
+      color = _ref.color,
+      fill = _ref.fill,
+      path = _ref.path;
   var _useMotionConfig = core.useMotionConfig(),
       animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (animate !== true) {
-    return React__default.createElement("g", null, lines.slice(0).reverse().map(function (_ref2) {
-      var id = _ref2.id,
-          data = _ref2.data,
-          areaColor = _ref2.color,
-          fill = _ref2.fill;
-      return React__default.createElement("path", {
-        key: id,
-        d: areaGenerator(data.map(function (d) {
-          return d.position;
-        })),
-        fill: fill ? fill : areaColor,
-        fillOpacity: areaOpacity,
-        strokeWidth: 0,
-        style: {
-          mixBlendMode: areaBlendMode
-        }
-      });
-    }));
-  }
-  return React__default.createElement("g", null, lines.slice(0).reverse().map(function (_ref3) {
-    var id = _ref3.id,
-        data = _ref3.data,
-        areaColor = _ref3.color,
-        fill = _ref3.fill;
-    return React__default.createElement(core.SmartMotion, {
-      key: id,
-      style: function style(spring) {
-        return {
-          d: spring(areaGenerator(data.map(function (d) {
-            return d.position;
-          })), springConfig),
-          fill: spring(areaColor, springConfig)
-        };
-      }
-    }, function (style) {
-      return React__default.createElement("path", {
-        key: id,
-        d: style.d,
-        fill: fill ? fill : areaColor,
-        fillOpacity: areaOpacity,
-        strokeWidth: 0,
-        style: {
-          mixBlendMode: areaBlendMode
-        }
-      });
-    });
-  }));
+      springConfig = _useMotionConfig.config;
+  var animatedPath = core.useAnimatedPath(path);
+  var animatedProps = reactSpring.useSpring({
+    color: color,
+    config: springConfig,
+    immediate: !animate
+  });
+  return React__default.createElement(reactSpring.animated.path, {
+    d: animatedPath,
+    fill: fill ? fill : animatedProps.color,
+    fillOpacity: areaOpacity,
+    strokeWidth: 0,
+    style: {
+      mixBlendMode: areaBlendMode
+    }
+  });
 };
-Areas.propTypes = {
-  areaGenerator: PropTypes.func.isRequired,
-  areaOpacity: PropTypes.number.isRequired,
-  areaBlendMode: core.blendModePropType.isRequired,
-  lines: PropTypes.arrayOf(PropTypes.object).isRequired
+var Areas = function Areas(_ref2) {
+  var areaGenerator = _ref2.areaGenerator,
+      areaOpacity = _ref2.areaOpacity,
+      areaBlendMode = _ref2.areaBlendMode,
+      lines = _ref2.lines;
+  var computedLines = lines.slice(0).reverse();
+  return React__default.createElement("g", null, computedLines.map(function (line) {
+    return React__default.createElement(AreaPath, Object.assign({
+      key: line.id,
+      path: areaGenerator(line.data.map(function (d) {
+        return d.position;
+      }))
+    }, _objectSpread2({
+      areaOpacity: areaOpacity,
+      areaBlendMode: areaBlendMode
+    }, line)));
+  }));
 };
 var Areas$1 = React.memo(Areas);
 
 var LinesItem = function LinesItem(_ref) {
   var lineGenerator = _ref.lineGenerator,
-      id = _ref.id,
       points = _ref.points,
       color = _ref.color,
       thickness = _ref.thickness;
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
-  if (animate !== true) {
-    return React__default.createElement("path", {
-      key: id,
-      d: lineGenerator(points),
-      fill: "none",
-      strokeWidth: thickness,
-      stroke: color
-    });
-  }
-  return React__default.createElement(core.SmartMotion, {
-    key: id,
-    style: function style(spring) {
-      return {
-        d: spring(lineGenerator(points), springConfig),
-        stroke: spring(color, springConfig)
-      };
-    }
-  }, function (style) {
-    return React__default.createElement("path", {
-      key: id,
-      d: style.d,
-      fill: "none",
-      strokeWidth: thickness,
-      stroke: style.stroke
-    });
+  var path = React.useMemo(function () {
+    return lineGenerator(points);
+  }, [lineGenerator, points]);
+  var animatedPath = core.useAnimatedPath(path);
+  return React__default.createElement(reactSpring.animated.path, {
+    d: animatedPath,
+    fill: "none",
+    strokeWidth: thickness,
+    stroke: color
   });
-};
-LinesItem.propTypes = {
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  points: PropTypes.arrayOf(PropTypes.shape({
-    x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    y: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-  })),
-  lineGenerator: PropTypes.func.isRequired,
-  color: PropTypes.string.isRequired,
-  thickness: PropTypes.number.isRequired
 };
 var LinesItem$1 = React.memo(LinesItem);
 
@@ -504,7 +548,7 @@ var Lines = function Lines(_ref) {
   var lines = _ref.lines,
       lineGenerator = _ref.lineGenerator,
       lineWidth = _ref.lineWidth;
-  return lines.map(function (_ref2) {
+  return lines.reverse().map(function (_ref2) {
     var id = _ref2.id,
         data = _ref2.data,
         color = _ref2.color;
@@ -519,24 +563,6 @@ var Lines = function Lines(_ref) {
       thickness: lineWidth
     });
   });
-};
-Lines.propTypes = {
-  lines: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    color: PropTypes.string.isRequired,
-    data: PropTypes.arrayOf(PropTypes.shape({
-      data: PropTypes.shape({
-        x: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
-        y: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)])
-      }).isRequired,
-      position: PropTypes.shape({
-        x: PropTypes.number,
-        y: PropTypes.number
-      }).isRequired
-    })).isRequired
-  })).isRequired,
-  lineWidth: PropTypes.number.isRequired,
-  lineGenerator: PropTypes.func.isRequired
 };
 var Lines$1 = React.memo(Lines);
 
@@ -582,15 +608,6 @@ var SlicesItem = function SlicesItem(_ref) {
     onMouseLeave: handleMouseLeave
   });
 };
-SlicesItem.propTypes = {
-  slice: PropTypes.object.isRequired,
-  axis: PropTypes.oneOf(['x', 'y']).isRequired,
-  debug: PropTypes.bool.isRequired,
-  height: PropTypes.number.isRequired,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
-  isCurrent: PropTypes.bool.isRequired,
-  setCurrent: PropTypes.func.isRequired
-};
 var SlicesItem$1 = React.memo(SlicesItem);
 
 var Slices = function Slices(_ref) {
@@ -614,23 +631,8 @@ var Slices = function Slices(_ref) {
     });
   });
 };
-Slices.propTypes = {
-  slices: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    points: PropTypes.arrayOf(PropTypes.object).isRequired
-  })).isRequired,
-  axis: PropTypes.oneOf(['x', 'y']).isRequired,
-  debug: PropTypes.bool.isRequired,
-  height: PropTypes.number.isRequired,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  current: PropTypes.object,
-  setCurrent: PropTypes.func.isRequired
-};
 var Slices$1 = React.memo(Slices);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var Points = function Points(_ref) {
   var points = _ref.points,
       symbol = _ref.symbol,
@@ -640,11 +642,8 @@ var Points = function Points(_ref) {
       label = _ref.label,
       labelYOffset = _ref.labelYOffset;
   var theme = core.useTheme();
-  var _useMotionConfig = core.useMotionConfig(),
-      animate = _useMotionConfig.animate,
-      springConfig = _useMotionConfig.springConfig;
   var getLabel = core.getLabelGenerator(label);
-  var mappedPoints = points.map(function (point) {
+  var mappedPoints = points.reverse().map(function (point) {
     var mappedPoint = {
       id: point.id,
       x: point.x,
@@ -656,70 +655,22 @@ var Points = function Points(_ref) {
     };
     return mappedPoint;
   });
-  if (animate !== true) {
-    return React__default.createElement("g", null, mappedPoints.map(function (point) {
-      return React__default.createElement(core.DotsItem, {
-        key: point.id,
-        x: point.x,
-        y: point.y,
-        datum: point.datum,
-        symbol: symbol,
-        size: size,
-        color: point.fill,
-        borderWidth: borderWidth,
-        borderColor: point.stroke,
-        label: point.label,
-        labelYOffset: labelYOffset,
-        theme: theme
-      });
-    }));
-  }
-  return React__default.createElement(reactMotion.TransitionMotion, {
-    styles: mappedPoints.map(function (point) {
-      return {
-        key: point.id,
-        data: point,
-        style: {
-          x: reactMotion.spring(point.x, springConfig),
-          y: reactMotion.spring(point.y, springConfig),
-          size: reactMotion.spring(size, springConfig)
-        }
-      };
-    })
-  }, function (interpolatedStyles) {
-    return React__default.createElement("g", null, interpolatedStyles.map(function (_ref2) {
-      var key = _ref2.key,
-          style = _ref2.style,
-          point = _ref2.data;
-      return React__default.createElement(core.DotsItem, _extends({
-        key: key
-      }, style, {
-        symbol: symbol,
-        datum: point.datum,
-        color: point.fill,
-        borderWidth: borderWidth,
-        borderColor: point.stroke,
-        label: point.label,
-        labelYOffset: labelYOffset,
-        theme: theme
-      }));
-    }));
-  });
-};
-Points.propTypes = {
-  points: PropTypes.arrayOf(PropTypes.object),
-  symbol: PropTypes.func,
-  size: PropTypes.number.isRequired,
-  color: PropTypes.func.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.func.isRequired,
-  enableLabel: PropTypes.bool.isRequired,
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
-  labelYOffset: PropTypes.number
-};
-Points.defaultProps = {
-  enableLabel: false,
-  label: 'yFormatted'
+  return React__default.createElement("g", null, mappedPoints.map(function (point) {
+    return React__default.createElement(core.DotsItem, {
+      key: point.id,
+      x: point.x,
+      y: point.y,
+      datum: point.datum,
+      symbol: symbol,
+      size: size,
+      color: point.fill,
+      borderWidth: borderWidth,
+      borderColor: point.stroke,
+      label: point.label,
+      labelYOffset: labelYOffset,
+      theme: theme
+    });
+  }));
 };
 var Points$1 = React.memo(Points);
 
@@ -771,28 +722,8 @@ var Mesh = function Mesh(_ref) {
     debug: debug
   });
 };
-Mesh.propTypes = {
-  points: PropTypes.arrayOf(PropTypes.object).isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  margin: PropTypes.object.isRequired,
-  setCurrent: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func,
-  tooltip: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
-  debug: PropTypes.bool.isRequired
-};
 var Mesh$1 = React.memo(Mesh);
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
 var Line = function Line(props) {
   var data = props.data,
       xScaleSpec = props.xScale,
@@ -826,7 +757,6 @@ var Line = function Line(props) {
       pointBorderColor = props.pointBorderColor,
       enablePointLabel = props.enablePointLabel,
       pointLabel = props.pointLabel,
-      pointLabelFormat = props.pointLabelFormat,
       pointLabelYOffset = props.pointLabelYOffset,
       defs = props.defs,
       fill = props.fill,
@@ -844,7 +774,8 @@ var Line = function Line(props) {
       debugSlices = props.debugSlices,
       sliceTooltip = props.sliceTooltip,
       enableCrosshair = props.enableCrosshair,
-      crosshairType = props.crosshairType;
+      crosshairType = props.crosshairType,
+      role = props.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       innerWidth = _useDimensions.innerWidth,
@@ -877,11 +808,11 @@ var Line = function Line(props) {
   var getPointColor = colors.useInheritedColor(pointColor, theme);
   var getPointBorderColor = colors.useInheritedColor(pointBorderColor, theme);
   var _useState = React.useState(null),
-      _useState2 = _slicedToArray$1(_useState, 2),
+      _useState2 = _slicedToArray(_useState, 2),
       currentPoint = _useState2[0],
       setCurrentPoint = _useState2[1];
   var _useState3 = React.useState(null),
-      _useState4 = _slicedToArray$1(_useState3, 2),
+      _useState4 = _slicedToArray(_useState3, 2),
       currentSlice = _useState4[0],
       setCurrentSlice = _useState4[1];
   var legendData = React.useMemo(function () {
@@ -937,7 +868,7 @@ var Line = function Line(props) {
     crosshair: null,
     mesh: null,
     legends: legends$1.map(function (legend, i) {
-      return React__default.createElement(legends.BoxLegendSvg, _extends$1({
+      return React__default.createElement(legends.BoxLegendSvg, Object.assign({
         key: "legend.".concat(i)
       }, legend, {
         containerWidth: innerWidth,
@@ -980,7 +911,6 @@ var Line = function Line(props) {
       borderColor: getPointBorderColor,
       enableLabel: enablePointLabel,
       label: pointLabel,
-      labelFormat: pointLabelFormat,
       labelYOffset: pointLabelYOffset
     });
   }
@@ -1027,12 +957,13 @@ var Line = function Line(props) {
     defs: boundDefs,
     width: outerWidth,
     height: outerHeight,
-    margin: margin
+    margin: margin,
+    role: role
   }, layers.map(function (layer, i) {
     if (typeof layer === 'function') {
       return React__default.createElement(React.Fragment, {
         key: i
-      }, layer(_objectSpread$2({}, props, {
+      }, layer(_objectSpread2(_objectSpread2({}, props), {}, {
         innerWidth: innerWidth,
         innerHeight: innerHeight,
         series: series,
@@ -1041,34 +972,30 @@ var Line = function Line(props) {
         xScale: xScale,
         yScale: yScale,
         lineGenerator: lineGenerator,
-        areaGenerator: areaGenerator
+        areaGenerator: areaGenerator,
+        currentPoint: currentPoint,
+        setCurrentPoint: setCurrentPoint,
+        currentSlice: currentSlice,
+        setCurrentSlice: setCurrentSlice
       })));
     }
     return layerById[layer];
   }));
 };
-Line.propTypes = LinePropTypes;
 Line.defaultProps = LineDefaultProps;
 var Line$1 = core.withContainer(Line);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var ResponsiveLine = function ResponsiveLine(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Line$1, _extends$2({
+    return React__default.createElement(Line$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$2(arr, i) { return _arrayWithHoles$2(arr) || _iterableToArrayLimit$2(arr, i) || _nonIterableRest$2(); }
-function _nonIterableRest$2() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$2(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$2(arr) { if (Array.isArray(arr)) return arr; }
 var LineCanvas = function LineCanvas(_ref) {
   var width = _ref.width,
       height = _ref.height,
@@ -1104,7 +1031,8 @@ var LineCanvas = function LineCanvas(_ref) {
       debugMesh = _ref.debugMesh,
       onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
-      tooltip$1 = _ref.tooltip;
+      tooltip$1 = _ref.tooltip,
+      canvasRef = _ref.canvasRef;
   var canvasEl = React.useRef(null);
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
@@ -1114,7 +1042,7 @@ var LineCanvas = function LineCanvas(_ref) {
       outerHeight = _useDimensions.outerHeight;
   var theme = core.useTheme();
   var _useState = React.useState(null),
-      _useState2 = _slicedToArray$2(_useState, 2),
+      _useState2 = _slicedToArray(_useState, 2),
       currentPoint = _useState2[0],
       setCurrentPoint = _useState2[1];
   var _useLine = useLine({
@@ -1146,6 +1074,9 @@ var LineCanvas = function LineCanvas(_ref) {
       delaunay = _useVoronoiMesh.delaunay,
       voronoi$1 = _useVoronoiMesh.voronoi;
   React.useEffect(function () {
+    if (canvasRef) {
+      canvasRef.current = canvasEl.current;
+    }
     canvasEl.current.width = outerWidth * pixelRatio;
     canvasEl.current.height = outerHeight * pixelRatio;
     var ctx = canvasEl.current.getContext('2d');
@@ -1154,6 +1085,22 @@ var LineCanvas = function LineCanvas(_ref) {
     ctx.fillRect(0, 0, outerWidth, outerHeight);
     ctx.translate(margin.left, margin.top);
     layers.forEach(function (layer) {
+      if (typeof layer === 'function') {
+        layer({
+          ctx: ctx,
+          innerWidth: innerWidth,
+          innerHeight: innerHeight,
+          series: series,
+          points: points,
+          xScale: xScale,
+          yScale: yScale,
+          lineWidth: lineWidth,
+          lineGenerator: lineGenerator,
+          areaGenerator: areaGenerator,
+          currentPoint: currentPoint,
+          setCurrentPoint: setCurrentPoint
+        });
+      }
       if (layer === 'grid' && theme.grid.line.strokeWidth > 0) {
         ctx.lineWidth = theme.grid.line.strokeWidth;
         ctx.strokeStyle = theme.grid.line.stroke;
@@ -1239,7 +1186,7 @@ var LineCanvas = function LineCanvas(_ref) {
           };
         }).reverse();
         legends$1.forEach(function (legend) {
-          legends.renderLegendToCanvas(ctx, _objectSpread$3({}, legend, {
+          legends.renderLegendToCanvas(ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
             data: legend.data || legendData,
             containerWidth: innerWidth,
             containerHeight: innerHeight,
@@ -1251,7 +1198,7 @@ var LineCanvas = function LineCanvas(_ref) {
   }, [canvasEl, outerWidth, outerHeight, layers, theme, lineGenerator, series, xScale, yScale, enableGridX, gridXValues, enableGridY, gridYValues, axisTop, axisRight, axisBottom, axisLeft, legends$1, points, enablePoints, pointSize, currentPoint]);
   var getPointFromMouseEvent = React.useCallback(function (event) {
     var _getRelativeCursor = core.getRelativeCursor(canvasEl.current, event),
-        _getRelativeCursor2 = _slicedToArray$2(_getRelativeCursor, 2),
+        _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
         x = _getRelativeCursor2[0],
         y = _getRelativeCursor2[1];
     if (!core.isCursorInRect(margin.left, margin.top, innerWidth, innerHeight, x, y)) return null;
@@ -1298,21 +1245,27 @@ var LineCanvas = function LineCanvas(_ref) {
     onClick: isInteractive ? handleClick : undefined
   });
 };
-LineCanvas.propTypes = LineCanvasPropTypes;
 LineCanvas.defaultProps = LineCanvasDefaultProps;
-var LineCanvas$1 = core.withContainer(LineCanvas);
+var LineCanvasWithContainer = core.withContainer(LineCanvas);
+var LineCanvas$1 = React.forwardRef(function (props, ref) {
+  return React__default.createElement(LineCanvasWithContainer, Object.assign({}, props, {
+    canvasRef: ref
+  }));
+});
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
-var ResponsiveLineCanvas = function ResponsiveLineCanvas(props) {
+var ResponsiveLineCanvas = function ResponsiveLineCanvas(props, ref) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(LineCanvas$1, _extends$3({
+    return React__default.createElement(LineCanvas$1, Object.assign({
       width: width,
       height: height
-    }, props));
+    }, props, {
+      ref: ref
+    }));
   });
 };
+var ResponsiveLineCanvas$1 = React.forwardRef(ResponsiveLineCanvas);
 
 exports.Line = Line$1;
 exports.LineCanvas = LineCanvas$1;
@@ -1321,8 +1274,9 @@ exports.LineCanvasPropTypes = LineCanvasPropTypes;
 exports.LineDefaultProps = LineDefaultProps;
 exports.LinePropTypes = LinePropTypes;
 exports.ResponsiveLine = ResponsiveLine;
-exports.ResponsiveLineCanvas = ResponsiveLineCanvas;
+exports.ResponsiveLineCanvas = ResponsiveLineCanvas$1;
 exports.useAreaGenerator = useAreaGenerator;
 exports.useLine = useLine;
 exports.useLineGenerator = useLineGenerator;
 exports.useSlices = useSlices;
+//# sourceMappingURL=nivo-line.cjs.js.map

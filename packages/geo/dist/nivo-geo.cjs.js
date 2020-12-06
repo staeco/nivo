@@ -16,8 +16,49 @@ var d3Format = require('d3-format');
 var d3Geo = require('d3-geo');
 var legends = require('@nivo/legends');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var projectionById = {
   azimuthalEqualArea: d3Geo.geoAzimuthalEqualArea,
   azimuthalEquidistant: d3Geo.geoAzimuthalEquidistant,
@@ -121,7 +162,7 @@ var useChoropleth = function useChoropleth(_ref2) {
       });
       var datumValue = getValue(datum);
       if (datum) {
-        var featureWithData = _objectSpread({}, feature, {
+        var featureWithData = _objectSpread2(_objectSpread2({}, feature), {}, {
           data: datum,
           value: datumValue,
           formattedValue: valueFormatter(datumValue)
@@ -156,13 +197,8 @@ var ChoroplethTooltip = React.memo(function (_ref) {
     value: feature.formattedValue
   });
 });
-ChoroplethTooltip.propTypes = {
-  feature: PropTypes.object.isRequired
-};
 ChoroplethTooltip.displayName = 'ChoroplethTooltip';
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   features: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -188,8 +224,10 @@ var commonPropTypes = {
   tooltip: PropTypes.any,
   layers: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.oneOf(['graticule', 'features']), PropTypes.func])).isRequired
 };
-var GeoMapPropTypes = _objectSpread$1({}, commonPropTypes);
-var GeoMapCanvasPropTypes = _objectSpread$1({
+var GeoMapPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
+var GeoMapCanvasPropTypes = _objectSpread2({
   pixelRatio: PropTypes.number.isRequired
 }, commonPropTypes);
 var commonChoroplethPropTypes = {
@@ -203,8 +241,10 @@ var commonChoroplethPropTypes = {
   unknownColor: PropTypes.string.isRequired,
   layers: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.oneOf(['graticule', 'features', 'legends']), PropTypes.func])).isRequired
 };
-var ChoroplethPropTypes = _objectSpread$1({}, GeoMapPropTypes, commonChoroplethPropTypes);
-var ChoroplethCanvasPropTypes = _objectSpread$1({}, GeoMapCanvasPropTypes, commonChoroplethPropTypes);
+var ChoroplethPropTypes = _objectSpread2(_objectSpread2(_objectSpread2({}, GeoMapPropTypes), commonChoroplethPropTypes), {}, {
+  role: PropTypes.string.isRequired
+});
+var ChoroplethCanvasPropTypes = _objectSpread2(_objectSpread2({}, GeoMapCanvasPropTypes), commonChoroplethPropTypes);
 var commonDefaultProps = {
   projectionType: 'mercator',
   projectionScale: 100,
@@ -224,8 +264,10 @@ var commonDefaultProps = {
   layers: ['graticule', 'features'],
   legends: []
 };
-var GeoMapDefaultProps = _objectSpread$1({}, commonDefaultProps);
-var GeoMapCanvasDefaultProps = _objectSpread$1({}, commonDefaultProps, {
+var GeoMapDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
+  role: 'img'
+});
+var GeoMapCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 var commonChoroplethDefaultProps = {
@@ -237,8 +279,10 @@ var commonChoroplethDefaultProps = {
   tooltip: ChoroplethTooltip,
   layers: ['graticule', 'features', 'legends']
 };
-var ChoroplethDefaultProps = _objectSpread$1({}, GeoMapDefaultProps, commonChoroplethDefaultProps);
-var ChoroplethCanvasDefaultProps = _objectSpread$1({}, GeoMapCanvasDefaultProps, commonChoroplethDefaultProps);
+var ChoroplethDefaultProps = _objectSpread2(_objectSpread2(_objectSpread2({}, GeoMapDefaultProps), commonChoroplethDefaultProps), {}, {
+  role: 'img'
+});
+var ChoroplethCanvasDefaultProps = _objectSpread2(_objectSpread2({}, GeoMapCanvasDefaultProps), commonChoroplethDefaultProps);
 
 var GeoGraticule = React.memo(function (_ref) {
   var path = _ref.path,
@@ -252,12 +296,6 @@ var GeoGraticule = React.memo(function (_ref) {
     d: path(graticule())
   });
 });
-GeoGraticule.propTypes = {
-  path: PropTypes.func.isRequired,
-  graticule: PropTypes.func.isRequired,
-  lineWidth: PropTypes.number.isRequired,
-  lineColor: PropTypes.string.isRequired
-};
 GeoGraticule.displayName = 'GeoGraticule';
 
 var GeoMapFeature = React.memo(function (_ref) {
@@ -291,22 +329,6 @@ var GeoMapFeature = React.memo(function (_ref) {
     }
   });
 });
-GeoMapFeature.propTypes = {
-  feature: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(['Feature']).isRequired,
-    properties: PropTypes.object,
-    geometry: PropTypes.object.isRequired
-  }).isRequired,
-  path: PropTypes.func.isRequired,
-  fillColor: PropTypes.string.isRequired,
-  borderWidth: PropTypes.number.isRequired,
-  borderColor: PropTypes.string.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  onMouseMove: PropTypes.func.isRequired,
-  onMouseLeave: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired
-};
 GeoMapFeature.displayName = 'GeoMapFeature';
 
 var GeoMap = React.memo(function (props) {
@@ -327,7 +349,8 @@ var GeoMap = React.memo(function (props) {
       graticuleLineColor = props.graticuleLineColor,
       isInteractive = props.isInteractive,
       onClick = props.onClick,
-      Tooltip = props.tooltip;
+      Tooltip = props.tooltip,
+      role = props.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       outerWidth = _useDimensions.outerWidth,
@@ -372,7 +395,8 @@ var GeoMap = React.memo(function (props) {
     width: outerWidth,
     height: outerHeight,
     margin: margin,
-    theme: theme
+    theme: theme,
+    role: role
   }, layers.map(function (layer, i) {
     if (layer === 'graticule') {
       if (enableGraticule !== true) return null;
@@ -408,26 +432,73 @@ var GeoMap = React.memo(function (props) {
   }));
 });
 GeoMap.displayName = 'GeoMap';
-GeoMap.propTypes = GeoMapPropTypes;
 GeoMap.defaultProps = GeoMapDefaultProps;
 var GeoMap$1 = core.withContainer(GeoMap);
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 var ResponsiveGeoMap = function ResponsiveGeoMap(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(GeoMap$1, _extends({
+    return React__default.createElement(GeoMap$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+  return _arr;
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var getFeatureFromMouseEvent = function getFeatureFromMouseEvent(event, el, features, projection) {
   var _getRelativeCursor = core.getRelativeCursor(el, event),
       _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
@@ -521,7 +592,7 @@ var GeoMapCanvas = React.memo(function (props) {
   var _useTooltip = tooltip.useTooltip(),
       showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
       hideTooltip = _useTooltip.hideTooltip;
-  var handleMouseMove = React.useCallback(function () {
+  var handleMouseMove = React.useCallback(function (event) {
     if (!isInteractive || !Tooltip) return;
     var feature = getFeatureFromMouseEvent(event, canvasEl.current, features, projection);
     if (feature) {
@@ -536,7 +607,7 @@ var GeoMapCanvas = React.memo(function (props) {
   var handleMouseLeave = React.useCallback(function () {
     return isInteractive && hideTooltip();
   }, [isInteractive, hideTooltip]);
-  var handleClick = React.useCallback(function () {
+  var handleClick = React.useCallback(function (event) {
     if (!isInteractive || !onClick) return;
     var feature = getFeatureFromMouseEvent(event, canvasEl.current, features, projection);
     if (feature) {
@@ -558,23 +629,20 @@ var GeoMapCanvas = React.memo(function (props) {
   });
 });
 GeoMapCanvas.displatName = 'GeoMapCanvas';
-GeoMapCanvas.propTypes = GeoMapCanvasPropTypes;
 GeoMapCanvas.defaultProps = GeoMapCanvasDefaultProps;
 var GeoMapCanvas$1 = core.withContainer(GeoMapCanvas);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var ResponsiveGeoMapCanvas = function ResponsiveGeoMapCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(GeoMapCanvas$1, _extends$1({
+    return React__default.createElement(GeoMapCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
 var Choropleth = React.memo(function (_ref) {
   var width = _ref.width,
       height = _ref.height,
@@ -601,7 +669,8 @@ var Choropleth = React.memo(function (_ref) {
       legends$1 = _ref.legends,
       isInteractive = _ref.isInteractive,
       onClick = _ref.onClick,
-      Tooltip = _ref.tooltip;
+      Tooltip = _ref.tooltip,
+      role = _ref.role;
   var _useDimensions = core.useDimensions(width, height, partialMargin),
       margin = _useDimensions.margin,
       outerWidth = _useDimensions.outerWidth,
@@ -659,7 +728,8 @@ var Choropleth = React.memo(function (_ref) {
     width: outerWidth,
     height: outerHeight,
     margin: margin,
-    theme: theme
+    theme: theme,
+    role: role
   }, layers.map(function (layer, i) {
     if (layer === 'graticule') {
       if (enableGraticule !== true) return null;
@@ -691,7 +761,7 @@ var Choropleth = React.memo(function (_ref) {
     }
     if (layer === 'legends') {
       return legends$1.map(function (legend, i) {
-        return React__default.createElement(legends.BoxLegendSvg, _extends$2({
+        return React__default.createElement(legends.BoxLegendSvg, Object.assign({
           key: i,
           containerWidth: width,
           containerHeight: height,
@@ -705,31 +775,23 @@ var Choropleth = React.memo(function (_ref) {
   }));
 });
 Choropleth.displayName = 'Choropleth';
-Choropleth.propTypes = ChoroplethPropTypes;
 Choropleth.defaultProps = ChoroplethDefaultProps;
 var Choropleth$1 = core.withContainer(Choropleth);
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveChoropleth = function ResponsiveChoropleth(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(Choropleth$1, _extends$3({
+    return React__default.createElement(Choropleth$1, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _slicedToArray$1(arr, i) { return _arrayWithHoles$1(arr) || _iterableToArrayLimit$1(arr, i) || _nonIterableRest$1(); }
-function _nonIterableRest$1() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit$1(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles$1(arr) { if (Array.isArray(arr)) return arr; }
 var getFeatureFromMouseEvent$1 = function getFeatureFromMouseEvent(event, el, features, projection) {
   var _getRelativeCursor = core.getRelativeCursor(el, event),
-      _getRelativeCursor2 = _slicedToArray$1(_getRelativeCursor, 2),
+      _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
       x = _getRelativeCursor2[0],
       y = _getRelativeCursor2[1];
   return features.find(function (f) {
@@ -835,7 +897,7 @@ var ChoroplethCanvas = React.memo(function (_ref) {
         });
       } else if (layer === 'legends') {
         legends$1.forEach(function (legend) {
-          legends.renderLegendToCanvas(ctx, _objectSpread$2({}, legend, {
+          legends.renderLegendToCanvas(ctx, _objectSpread2(_objectSpread2({}, legend), {}, {
             data: legendData,
             containerWidth: width,
             containerHeight: height,
@@ -848,7 +910,7 @@ var ChoroplethCanvas = React.memo(function (_ref) {
   var _useTooltip = tooltip.useTooltip(),
       showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
       hideTooltip = _useTooltip.hideTooltip;
-  var handleMouseMove = React.useCallback(function () {
+  var handleMouseMove = React.useCallback(function (event) {
     if (!isInteractive || !Tooltip) return;
     var feature = getFeatureFromMouseEvent$1(event, canvasEl.current, boundFeatures, projection);
     if (feature) {
@@ -863,7 +925,7 @@ var ChoroplethCanvas = React.memo(function (_ref) {
   var handleMouseLeave = React.useCallback(function () {
     return isInteractive && hideTooltip();
   }, [isInteractive, hideTooltip]);
-  var handleClick = React.useCallback(function () {
+  var handleClick = React.useCallback(function (event) {
     if (!isInteractive || !onClick) return;
     var feature = getFeatureFromMouseEvent$1(event, canvasEl.current, boundFeatures, projection);
     if (feature) {
@@ -885,16 +947,14 @@ var ChoroplethCanvas = React.memo(function (_ref) {
   });
 });
 ChoroplethCanvas.displayName = 'ChoroplethCanvas';
-ChoroplethCanvas.propTypes = ChoroplethCanvasPropTypes;
 ChoroplethCanvas.defaultProps = ChoroplethCanvasDefaultProps;
 var ChoroplethCanvas$1 = core.withContainer(ChoroplethCanvas);
 
-function _extends$4() { _extends$4 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$4.apply(this, arguments); }
 var ResponsiveChoroplethCanvas = function ResponsiveChoroplethCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(ChoroplethCanvas$1, _extends$4({
+    return React__default.createElement(ChoroplethCanvas$1, Object.assign({
       width: width,
       height: height
     }, props));
@@ -920,3 +980,4 @@ exports.ResponsiveGeoMapCanvas = ResponsiveGeoMapCanvas;
 exports.projectionById = projectionById;
 exports.useChoropleth = useChoropleth;
 exports.useGeoMap = useGeoMap;
+//# sourceMappingURL=nivo-geo.cjs.js.map

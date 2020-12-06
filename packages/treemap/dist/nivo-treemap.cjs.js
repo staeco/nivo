@@ -6,123 +6,191 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var reactMotion = require('react-motion');
 var core = require('@nivo/core');
-var colors = require('@nivo/colors');
 var PropTypes = _interopDefault(require('prop-types'));
-var d3Hierarchy = require('d3-hierarchy');
+var colors = require('@nivo/colors');
+var reactSpring = require('react-spring');
+var get = _interopDefault(require('lodash/get'));
+var omit = _interopDefault(require('lodash/omit'));
 var cloneDeep = _interopDefault(require('lodash/cloneDeep'));
-var compose = _interopDefault(require('recompose/compose'));
-var defaultProps = _interopDefault(require('recompose/defaultProps'));
-var withPropsOnChange = _interopDefault(require('recompose/withPropsOnChange'));
-var pure = _interopDefault(require('recompose/pure'));
+var startCase = _interopDefault(require('lodash/startCase'));
+var d3Hierarchy = require('d3-hierarchy');
 var tooltip = require('@nivo/tooltip');
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+  return keys;
+}
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+  return target;
+}
+
 var TreeMapNode = function TreeMapNode(_ref) {
-  var style = _ref.style,
-      node = _ref.node,
-      handlers = _ref.handlers,
-      theme = _ref.theme;
-  if (style.width <= 0 || style.height <= 0) return null;
-  var rotate = node.label && style.orientLabel && style.height > style.width;
-  return React__default.createElement("g", {
-    transform: "translate(".concat(style.x, ",").concat(style.y, ")")
-  }, React__default.createElement("rect", _extends({
-    width: style.width,
-    height: style.height,
-    fill: style.fill ? style.fill : style.color,
-    strokeWidth: style.borderWidth,
-    stroke: style.borderColor
-  }, handlers)), node.label && React__default.createElement("text", {
+  var node = _ref.node,
+      animatedProps = _ref.animatedProps,
+      borderWidth = _ref.borderWidth,
+      enableLabel = _ref.enableLabel,
+      enableParentLabel = _ref.enableParentLabel,
+      labelSkipSize = _ref.labelSkipSize;
+  var theme = core.useTheme();
+  var showLabel = enableLabel && node.isLeaf && (labelSkipSize === 0 || Math.min(node.width, node.height) > labelSkipSize);
+  var showParentLabel = enableParentLabel && node.isParent;
+  return React__default.createElement(reactSpring.animated.g, {
+    transform: animatedProps.transform
+  }, React__default.createElement(reactSpring.animated.rect, {
+    width: reactSpring.to(animatedProps.width, function (v) {
+      return Math.max(v, 0);
+    }),
+    height: reactSpring.to(animatedProps.height, function (v) {
+      return Math.max(v, 0);
+    }),
+    fill: node.fill ? node.fill : animatedProps.color,
+    strokeWidth: borderWidth,
+    stroke: node.borderColor,
+    fillOpacity: node.opacity,
+    onMouseEnter: node.onMouseEnter,
+    onMouseMove: node.onMouseMove,
+    onMouseLeave: node.onMouseLeave,
+    onClick: node.onClick
+  }), showLabel && React__default.createElement(reactSpring.animated.text, {
     textAnchor: "middle",
     dominantBaseline: "central",
-    style: _objectSpread({}, theme.labels.text, {
-      fill: style.labelTextColor,
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      fill: node.labelTextColor,
       pointerEvents: 'none'
     }),
-    transform: "translate(".concat(style.width / 2, ",").concat(style.height / 2, ") rotate(").concat(rotate ? -90 : 0, ")")
-  }, node.label));
+    fillOpacity: animatedProps.labelOpacity,
+    transform: animatedProps.labelTransform
+  }, node.label), showParentLabel && React__default.createElement(reactSpring.animated.text, {
+    dominantBaseline: "central",
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      fill: node.parentLabelTextColor,
+      pointerEvents: 'none'
+    }),
+    fillOpacity: animatedProps.parentLabelOpacity,
+    transform: animatedProps.parentLabelTransform
+  }, node.parentLabel));
 };
-TreeMapNode.propTypes = {
-  node: PropTypes.object.isRequired,
-  style: PropTypes.shape({
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired,
-    fill: PropTypes.string,
-    borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.string.isRequired,
-    labelTextColor: PropTypes.string.isRequired,
-    orientLabel: PropTypes.bool.isRequired
-  }).isRequired,
-  handlers: PropTypes.object.isRequired,
-  theme: core.themePropType.isRequired
-};
+var TreeMapNode$1 = React.memo(TreeMapNode);
 
-function _extends$1() { _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$1.apply(this, arguments); }
 var TreeMapHtmlNode = function TreeMapHtmlNode(_ref) {
   var node = _ref.node,
-      style = _ref.style,
-      handlers = _ref.handlers;
-  if (style.width <= 0 || style.height <= 0) return null;
-  var rotate = node.label && style.orientLabel && style.height > style.width;
-  return React__default.createElement("div", _extends$1({
-    id: (node.data && node.data.id ? node.data.id :
-    node.id).replace(/[^\w]/gi, '-'),
+      animatedProps = _ref.animatedProps,
+      borderWidth = _ref.borderWidth,
+      enableLabel = _ref.enableLabel,
+      enableParentLabel = _ref.enableParentLabel,
+      labelSkipSize = _ref.labelSkipSize;
+  var theme = core.useTheme();
+  var showLabel = enableLabel && node.isLeaf && (labelSkipSize === 0 || Math.min(node.width, node.height) > labelSkipSize);
+  var showParentLabel = enableParentLabel && node.isParent;
+  return React__default.createElement(reactSpring.animated.div, {
+    id: node.path.replace(/[^\w]/gi, '-'),
     style: {
       boxSizing: 'border-box',
       position: 'absolute',
-      top: style.y,
-      left: style.x,
-      width: style.width,
-      height: style.height,
-      background: style.color,
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: style.borderWidth,
+      top: 0,
+      left: 0,
+      transform: animatedProps.htmlTransform,
+      width: animatedProps.width,
+      height: animatedProps.height,
+      borderWidth: borderWidth,
       borderStyle: 'solid',
-      borderColor: style.borderColor
+      borderColor: node.borderColor,
+      overflow: 'hidden'
     }
-  }, handlers), node.label !== false && React__default.createElement("span", {
+  }, React__default.createElement(reactSpring.animated.div, {
     style: {
-      color: style.labelTextColor,
-      transform: "rotate(".concat(rotate ? '-90' : '0', "deg)"),
-      WebkitUserSelect: 'none',
-      MozUserSelect: 'none',
-      MsUserSelect: 'none',
-      userSelect: 'none'
-    }
-  }, node.label));
+      boxSizing: 'border-box',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      opacity: node.opacity,
+      width: animatedProps.width,
+      height: animatedProps.height,
+      background: animatedProps.color
+    },
+    onMouseEnter: node.onMouseEnter,
+    onMouseMove: node.onMouseMove,
+    onMouseLeave: node.onMouseLeave,
+    onClick: node.onClick
+  }), showLabel && React__default.createElement(reactSpring.animated.span, {
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      position: 'absolute',
+      display: 'flex',
+      top: -5,
+      left: -5,
+      width: 10,
+      height: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+      whiteSpace: 'nowrap',
+      color: node.labelTextColor,
+      transformOrigin: 'center center',
+      transform: animatedProps.labelHtmlTransform,
+      opacity: animatedProps.labelOpacity,
+      pointerEvents: 'none'
+    })
+  }, node.label), showParentLabel && React__default.createElement(reactSpring.animated.span, {
+    style: _objectSpread2(_objectSpread2({}, theme.labels.text), {}, {
+      position: 'absolute',
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      whiteSpace: 'nowrap',
+      width: 10,
+      height: 10,
+      color: node.parentLabelTextColor,
+      transformOrigin: 'top left',
+      transform: animatedProps.parentLabelHtmlTransform,
+      opacity: animatedProps.parentLabelOpacity,
+      pointerEvents: 'none'
+    })
+  }, node.parentLabel));
 };
-TreeMapHtmlNode.propTypes = {
-  node: PropTypes.object.isRequired,
-  style: PropTypes.shape({
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired,
-    borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.string.isRequired,
-    labelTextColor: PropTypes.string.isRequired,
-    orientLabel: PropTypes.bool.isRequired
-  }).isRequired,
-  handlers: PropTypes.object.isRequired
-};
+var TreeMapHtmlNode$1 = React.memo(TreeMapHtmlNode);
 
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$1(target, key, source[key]); }); } return target; }
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var commonPropTypes = {
   identity: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+  valueFormat: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
   colors: colors.ordinalColorsPropType.isRequired,
   colorBy: colors.colorPropertyAccessorPropType.isRequired,
+  nodeOpacity: PropTypes.number.isRequired,
   leavesOnly: PropTypes.bool.isRequired,
   tile: core.treeMapTilePropType.isRequired,
   innerPadding: PropTypes.number.isRequired,
@@ -133,692 +201,831 @@ var commonPropTypes = {
   labelSkipSize: PropTypes.number.isRequired,
   labelTextColor: colors.inheritedColorPropType.isRequired,
   orientLabel: PropTypes.bool.isRequired,
+  enableParentLabel: PropTypes.bool.isRequired,
+  parentLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+  parentLabelSize: PropTypes.number.isRequired,
+  parentLabelPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left']).isRequired,
+  parentLabelPadding: PropTypes.number.isRequired,
+  parentLabelTextColor: colors.inheritedColorPropType.isRequired,
   borderWidth: PropTypes.number.isRequired,
   borderColor: colors.inheritedColorPropType.isRequired,
   isInteractive: PropTypes.bool.isRequired,
-  onClick: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onClick: PropTypes.func,
   tooltip: PropTypes.func
 };
-var TreeMapPropTypes = _objectSpread$1({}, commonPropTypes, {
-  nodeComponent: PropTypes.func.isRequired
+var TreeMapPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  nodeComponent: PropTypes.elementType.isRequired,
+  role: PropTypes.string.isRequired
 }, core.defsPropTypes);
-var TreeMapHtmlPropTypes = _objectSpread$1({}, commonPropTypes, {
-  nodeComponent: PropTypes.func.isRequired
+var TreeMapHtmlPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
+  nodeComponent: PropTypes.elementType.isRequired
 });
-var TreeMapCanvasPropTypes = _objectSpread$1({}, commonPropTypes, {
+var TreeMapCanvasPropTypes = _objectSpread2(_objectSpread2({}, commonPropTypes), {}, {
   pixelRatio: PropTypes.number.isRequired
 });
 var commonDefaultProps = {
   identity: 'id',
+  value: 'value',
   tile: 'squarify',
   leavesOnly: false,
+  innerPadding: 0,
+  outerPadding: 0,
   colors: {
     scheme: 'nivo'
   },
-  colorBy: 'depth',
+  colorBy: 'pathComponents.1',
+  nodeOpacity: 0.33,
   enableLabel: true,
-  label: 'id',
+  label: 'formattedValue',
   labelSkipSize: 0,
   labelTextColor: {
     from: 'color',
     modifiers: [['darker', 1]]
   },
   orientLabel: true,
-  innerPadding: 0,
-  outerPadding: 0,
-  borderWidth: 0,
+  enableParentLabel: true,
+  parentLabel: 'id',
+  parentLabelSize: 20,
+  parentLabelPosition: 'top',
+  parentLabelPadding: 6,
+  parentLabelTextColor: {
+    from: 'color',
+    modifiers: [['darker', 1]]
+  },
+  borderWidth: 1,
   borderColor: {
-    from: 'color'
+    from: 'color',
+    modifiers: [['darker', 1]]
   },
   isInteractive: true,
-  onClick: core.noop
+  animate: true,
+  motionConfig: 'gentle'
 };
-var TreeMapDefaultProps = _objectSpread$1({}, commonDefaultProps, {
-  nodeComponent: TreeMapNode,
+var TreeMapDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
+  nodeComponent: TreeMapNode$1,
+  role: 'img',
   defs: [],
   fill: []
 });
-var TreeMapHtmlDefaultProps = _objectSpread$1({}, commonDefaultProps, {
-  nodeComponent: TreeMapHtmlNode
+var TreeMapHtmlDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
+  nodeComponent: TreeMapHtmlNode$1
 });
-var TreeMapCanvasDefaultProps = _objectSpread$1({}, commonDefaultProps, {
+var TreeMapCanvasDefaultProps = _objectSpread2(_objectSpread2({}, commonDefaultProps), {}, {
   pixelRatio: global.window && global.window.devicePixelRatio ? global.window.devicePixelRatio : 1
 });
 
-var props = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    TreeMapPropTypes: TreeMapPropTypes,
-    TreeMapHtmlPropTypes: TreeMapHtmlPropTypes,
-    TreeMapCanvasPropTypes: TreeMapCanvasPropTypes,
-    TreeMapDefaultProps: TreeMapDefaultProps,
-    TreeMapHtmlDefaultProps: TreeMapHtmlDefaultProps,
-    TreeMapCanvasDefaultProps: TreeMapCanvasDefaultProps
-});
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
 
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } return target; }
-function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var computeNodePath = function computeNodePath(node, getIdentity) {
-  return node.ancestors().map(function (ancestor) {
-    return getIdentity(ancestor.data);
-  }).join('.');
-};
-var commonEnhancers = [core.withHierarchy(), core.withDimensions(), core.withTheme(), core.withMotion(), withPropsOnChange(['colors', 'colorBy'], function (_ref) {
-  var colors$1 = _ref.colors,
-      colorBy = _ref.colorBy;
-  return {
-    getColor: colors.getOrdinalColorScale(colors$1, colorBy)
-  };
-}), withPropsOnChange(['identity'], function (_ref2) {
-  var identity = _ref2.identity;
-  return {
-    getIdentity: core.getAccessorFor(identity)
-  };
-}), withPropsOnChange(['borderColor', 'theme'], function (_ref3) {
-  var borderColor = _ref3.borderColor,
-      theme = _ref3.theme;
-  return {
-    getBorderColor: colors.getInheritedColorGenerator(borderColor, theme)
-  };
-}), withPropsOnChange(['label', 'labelFormat'], function (_ref4) {
-  var label = _ref4.label,
-      labelFormat = _ref4.labelFormat;
-  return {
-    getLabel: core.getLabelGenerator(label, labelFormat)
-  };
-}), withPropsOnChange(['labelTextColor', 'theme'], function (_ref5) {
-  var labelTextColor = _ref5.labelTextColor,
-      theme = _ref5.theme;
-  return {
-    getLabelTextColor: colors.getInheritedColorGenerator(labelTextColor, theme)
-  };
-}), withPropsOnChange(['width', 'height', 'tile', 'innerPadding', 'outerPadding'], function (_ref6) {
-  var width = _ref6.width,
-      height = _ref6.height,
-      tile = _ref6.tile,
-      innerPadding = _ref6.innerPadding,
-      outerPadding = _ref6.outerPadding;
-  return {
-    treemap: d3Hierarchy.treemap().size([width, height]).tile(core.treeMapTileFromProp(tile)).round(true).paddingInner(innerPadding).paddingOuter(outerPadding)
-  };
-}), withPropsOnChange(['root', 'treemap', 'leavesOnly', 'getIdentity', 'getColor'], function (_ref7) {
-  var _root = _ref7.root,
-      treemap = _ref7.treemap,
-      leavesOnly = _ref7.leavesOnly,
-      getIdentity = _ref7.getIdentity,
-      getColor = _ref7.getColor;
-  var root = cloneDeep(_root);
-  treemap(root);
-  var nodes = leavesOnly ? root.leaves() : root.descendants();
-  nodes = nodes.map(function (d) {
-    d.path = computeNodePath(d, getIdentity);
-    d.nodeHeight = d.height;
-    d.x = d.x0;
-    d.y = d.y0;
-    d.width = d.x1 - d.x0;
-    d.height = d.y1 - d.y0;
-    d.data.color = d.color = getColor(_objectSpread$2({}, d.data, {
-      depth: d.depth
-    }));
-    d.data.id = d.id = getIdentity(d.data);
-    d.data.value = d.value;
-    return d;
-  });
-  return {
-    nodes: nodes
-  };
-}), withPropsOnChange(['enableLabel', 'nodes', 'getLabel', 'labelSkipSize'], function (_ref8) {
-  var enableLabel = _ref8.enableLabel,
-      nodes = _ref8.nodes,
-      getLabel = _ref8.getLabel,
-      labelSkipSize = _ref8.labelSkipSize;
-  if (!enableLabel) return;
-  var nodesWithLabel = nodes.map(function (node) {
-    if (node.nodeHeight > 0 || labelSkipSize !== 0 && Math.min(node.width, node.height) <= labelSkipSize) return node;
-    return _objectSpread$2({}, node, {
-      label: getLabel(node.data)
-    });
-  });
-  return {
-    nodes: nodesWithLabel
-  };
-})];
-var svgEnhancers = [withPropsOnChange(['nodes', 'defs', 'fill'], function (_ref9) {
-  var nodes = _ref9.nodes,
-      defs = _ref9.defs,
-      fill = _ref9.fill;
-  return {
-    defs: core.bindDefs(defs, nodes, fill, {
-      targetKey: 'fill'
-    })
-  };
-})];
-var enhance = (function (Component) {
-  var implDefaultProps = props["".concat(Component.displayName, "DefaultProps")];
-  switch (Component.displayName) {
-    case 'TreeMap':
-      return compose.apply(void 0, [defaultProps(implDefaultProps)].concat(commonEnhancers, svgEnhancers, [core.withMotion(), pure]))(Component);
-    case 'TreeMapHtml':
-      return compose.apply(void 0, [defaultProps(implDefaultProps)].concat(commonEnhancers, [core.withMotion(), pure]))(Component);
-    case 'TreeMapCanvas':
-      return compose.apply(void 0, [defaultProps(implDefaultProps)].concat(commonEnhancers, [pure]))(Component);
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
   }
-  return Component;
-});
+  return _arr;
+}
 
-function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$3(target, key, source[key]); }); } return target; }
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var nodeWillEnter = function nodeWillEnter(_ref) {
-  var node = _ref.data;
-  return _objectSpread$3({
-    x: node.x,
-    y: node.y,
-    width: node.width,
-    height: node.height
-  }, colors.interpolateColor(node.color));
-};
-var nodeWillLeave = function nodeWillLeave(springConfig) {
-  return function (_ref2) {
-    var node = _ref2.data;
-    return _objectSpread$3({
-      x: reactMotion.spring(node.x + node.width / 2, springConfig),
-      y: reactMotion.spring(node.y + node.height / 2, springConfig),
-      width: reactMotion.spring(0, springConfig),
-      height: reactMotion.spring(0, springConfig)
-    }, colors.interpolateColor(node.color, springConfig));
-  };
-};
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
 
-function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$4(target, key, source[key]); }); } return target; }
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
 var TreeMapNodeTooltip = function TreeMapNodeTooltip(_ref) {
   var node = _ref.node,
-      theme = _ref.theme,
       tooltip$1 = _ref.tooltip;
   return React__default.createElement(tooltip.BasicTooltip, {
     id: node.id,
-    value: node.value,
+    value: node.formattedValue,
     enableChip: true,
     color: node.color,
-    theme: theme,
-    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, _objectSpread$4({
+    renderContent: typeof tooltip$1 === 'function' ? tooltip$1.bind(null, {
       node: node
-    }, node)) : null
+    }) : null
   });
 };
-TreeMapNodeTooltip.propTypes = {
-  node: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    value: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired
-  }).isRequired,
-  theme: PropTypes.object.isRequired,
-  tooltip: PropTypes.func
-};
-var TreeMapNodeTooltip$1 = pure(TreeMapNodeTooltip);
+var TreeMapNodeTooltip$1 = React.memo(TreeMapNodeTooltip);
 
-var getNodeHandlers = function getNodeHandlers(node, _ref) {
-  var isInteractive = _ref.isInteractive,
-      _onClick = _ref.onClick,
-      showTooltip = _ref.showTooltip,
-      hideTooltip = _ref.hideTooltip,
-      theme = _ref.theme,
-      tooltip = _ref.tooltip;
-  if (!isInteractive) return {};
-  var handleTooltip = function handleTooltip(e) {
-    showTooltip(React__default.createElement(TreeMapNodeTooltip$1, {
-      node: node,
-      theme: theme,
-      tooltip: tooltip
-    }), e);
-  };
-  return {
-    onMouseEnter: handleTooltip,
-    onMouseMove: handleTooltip,
-    onMouseLeave: hideTooltip,
-    onClick: function onClick(event) {
-      return _onClick(node, event);
+var useTreeMapLayout = function useTreeMapLayout(_ref) {
+  var width = _ref.width,
+      height = _ref.height,
+      tile = _ref.tile,
+      innerPadding = _ref.innerPadding,
+      outerPadding = _ref.outerPadding,
+      enableParentLabel = _ref.enableParentLabel,
+      parentLabelSize = _ref.parentLabelSize,
+      parentLabelPosition = _ref.parentLabelPosition,
+      leavesOnly = _ref.leavesOnly;
+  return React.useMemo(function () {
+    var treemap = d3Hierarchy.treemap().size([width, height]).tile(core.treeMapTileFromProp(tile)).round(true).paddingInner(innerPadding).paddingOuter(outerPadding);
+    if (enableParentLabel && !leavesOnly) {
+      var parentLabelPadding = parentLabelSize + outerPadding * 2;
+      treemap["padding".concat(startCase(parentLabelPosition))](parentLabelPadding);
     }
+    return treemap;
+  }, [width, height, tile, innerPadding, outerPadding, enableParentLabel, parentLabelSize, parentLabelPosition, leavesOnly]);
+};
+var useHierarchy = function useHierarchy(_ref2) {
+  var root = _ref2.root,
+      getValue = _ref2.getValue;
+  return React.useMemo(function () {
+    return d3Hierarchy.hierarchy(root).sum(getValue);
+  }, [root, getValue]);
+};
+var useAccessor = function useAccessor(accessor) {
+  return React.useMemo(function () {
+    if (typeof accessor === 'function') return accessor;
+    return function (d) {
+      return get(d, accessor);
+    };
+  }, [accessor]);
+};
+var computeNodeIdAndPath = function computeNodeIdAndPath(node, getIdentity) {
+  var path = node.ancestors().map(function (ancestor) {
+    return getIdentity(ancestor.data);
+  }).reverse();
+  return [path.join('.'), path];
+};
+var useTreeMap = function useTreeMap(_ref3) {
+  var data = _ref3.data,
+      _ref3$identity = _ref3.identity,
+      identity = _ref3$identity === void 0 ? TreeMapDefaultProps.identity : _ref3$identity,
+      _ref3$value = _ref3.value,
+      value = _ref3$value === void 0 ? TreeMapDefaultProps.value : _ref3$value,
+      valueFormat = _ref3.valueFormat,
+      _ref3$leavesOnly = _ref3.leavesOnly,
+      leavesOnly = _ref3$leavesOnly === void 0 ? TreeMapDefaultProps.leavesOnly : _ref3$leavesOnly,
+      width = _ref3.width,
+      height = _ref3.height,
+      _ref3$tile = _ref3.tile,
+      tile = _ref3$tile === void 0 ? TreeMapDefaultProps.tile : _ref3$tile,
+      _ref3$innerPadding = _ref3.innerPadding,
+      innerPadding = _ref3$innerPadding === void 0 ? TreeMapDefaultProps.innerPadding : _ref3$innerPadding,
+      _ref3$outerPadding = _ref3.outerPadding,
+      outerPadding = _ref3$outerPadding === void 0 ? TreeMapDefaultProps.outerPadding : _ref3$outerPadding,
+      _ref3$label = _ref3.label,
+      label = _ref3$label === void 0 ? TreeMapDefaultProps.label : _ref3$label,
+      _ref3$orientLabel = _ref3.orientLabel,
+      orientLabel = _ref3$orientLabel === void 0 ? TreeMapDefaultProps.orientLabel : _ref3$orientLabel,
+      _ref3$enableParentLab = _ref3.enableParentLabel,
+      enableParentLabel = _ref3$enableParentLab === void 0 ? TreeMapDefaultProps.enableParentLabel : _ref3$enableParentLab,
+      _ref3$parentLabel = _ref3.parentLabel,
+      parentLabel = _ref3$parentLabel === void 0 ? TreeMapDefaultProps.parentLabel : _ref3$parentLabel,
+      _ref3$parentLabelSize = _ref3.parentLabelSize,
+      parentLabelSize = _ref3$parentLabelSize === void 0 ? TreeMapDefaultProps.parentLabelSize : _ref3$parentLabelSize,
+      _ref3$parentLabelPosi = _ref3.parentLabelPosition,
+      parentLabelPosition = _ref3$parentLabelPosi === void 0 ? TreeMapDefaultProps.parentLabelPosition : _ref3$parentLabelPosi,
+      _ref3$parentLabelPadd = _ref3.parentLabelPadding,
+      parentLabelPadding = _ref3$parentLabelPadd === void 0 ? TreeMapDefaultProps.parentLabelPadding : _ref3$parentLabelPadd,
+      _ref3$colors = _ref3.colors,
+      colors$1 = _ref3$colors === void 0 ? TreeMapDefaultProps.colors : _ref3$colors,
+      _ref3$colorBy = _ref3.colorBy,
+      colorBy = _ref3$colorBy === void 0 ? TreeMapDefaultProps.colorBy : _ref3$colorBy,
+      _ref3$nodeOpacity = _ref3.nodeOpacity,
+      nodeOpacity = _ref3$nodeOpacity === void 0 ? TreeMapDefaultProps.nodeOpacity : _ref3$nodeOpacity,
+      _ref3$borderColor = _ref3.borderColor,
+      borderColor = _ref3$borderColor === void 0 ? TreeMapDefaultProps.borderColor : _ref3$borderColor,
+      _ref3$labelTextColor = _ref3.labelTextColor,
+      labelTextColor = _ref3$labelTextColor === void 0 ? TreeMapDefaultProps.labelTextColor : _ref3$labelTextColor,
+      _ref3$parentLabelText = _ref3.parentLabelTextColor,
+      parentLabelTextColor = _ref3$parentLabelText === void 0 ? TreeMapDefaultProps.parentLabelTextColor : _ref3$parentLabelText;
+  var getIdentity = useAccessor(identity);
+  var getValue = useAccessor(value);
+  var formatValue = core.useValueFormatter(valueFormat);
+  var getLabel = useAccessor(label);
+  var getParentLabel = useAccessor(parentLabel);
+  var layout = useTreeMapLayout({
+    width: width,
+    height: height,
+    tile: tile,
+    innerPadding: innerPadding,
+    outerPadding: outerPadding,
+    enableParentLabel: enableParentLabel,
+    parentLabelSize: parentLabelSize,
+    parentLabelPosition: parentLabelPosition,
+    leavesOnly: leavesOnly
+  });
+  var hierarchy = useHierarchy({
+    root: data,
+    getValue: getValue
+  });
+  var rawNodes = React.useMemo(function () {
+    var root = cloneDeep(hierarchy);
+    layout(root);
+    return leavesOnly ? root.leaves() : root.descendants();
+  }, [hierarchy, layout, leavesOnly]);
+  var nodes = React.useMemo(function () {
+    return rawNodes.map(function (rawNode) {
+      var _computeNodeIdAndPath = computeNodeIdAndPath(rawNode, getIdentity),
+          _computeNodeIdAndPath2 = _slicedToArray(_computeNodeIdAndPath, 2),
+          path = _computeNodeIdAndPath2[0],
+          pathComponents = _computeNodeIdAndPath2[1];
+      var node = {
+        id: getIdentity(rawNode.data),
+        path: path,
+        pathComponents: pathComponents,
+        data: omit(rawNode.data, 'children'),
+        x: rawNode.x0,
+        y: rawNode.y0,
+        width: rawNode.x1 - rawNode.x0,
+        height: rawNode.y1 - rawNode.y0,
+        value: rawNode.value,
+        formattedValue: formatValue(rawNode.value),
+        treeDepth: rawNode.depth,
+        treeHeight: rawNode.height,
+        isParent: rawNode.height > 0,
+        isLeaf: rawNode.height === 0
+      };
+      node.label = getLabel(node);
+      node.parentLabel = getParentLabel(node);
+      node.parentLabelRotation = 0;
+      if (parentLabelPosition === 'top') {
+        node.parentLabelX = outerPadding + parentLabelPadding;
+        node.parentLabelY = outerPadding + parentLabelSize / 2;
+      }
+      if (parentLabelPosition === 'right') {
+        node.parentLabelX = node.width - outerPadding - parentLabelSize / 2;
+        node.parentLabelY = node.height - outerPadding - parentLabelPadding;
+        node.parentLabelRotation = -90;
+      }
+      if (parentLabelPosition === 'bottom') {
+        node.parentLabelX = outerPadding + parentLabelPadding;
+        node.parentLabelY = node.height - outerPadding - parentLabelSize / 2;
+      }
+      if (parentLabelPosition === 'left') {
+        node.parentLabelX = outerPadding + parentLabelSize / 2;
+        node.parentLabelY = node.height - outerPadding - parentLabelPadding;
+        node.parentLabelRotation = -90;
+      }
+      return node;
+    });
+  }, [rawNodes, leavesOnly, getIdentity, formatValue, getLabel, getParentLabel, parentLabelSize, parentLabelPosition, parentLabelPadding, outerPadding]);
+  var theme = core.useTheme();
+  var getColor = colors.useOrdinalColorScale(colors$1, colorBy);
+  var getBorderColor = colors.useInheritedColor(borderColor, theme);
+  var getLabelTextColor = colors.useInheritedColor(labelTextColor, theme);
+  var getParentLabelTextColor = colors.useInheritedColor(parentLabelTextColor, theme);
+  var enhancedNodes = React.useMemo(function () {
+    return nodes.map(function (node) {
+      node.opacity = nodeOpacity;
+      node.labelRotation = orientLabel && node.height > node.width ? -90 : 0;
+      node.color = getColor(node);
+      node.borderColor = getBorderColor(node);
+      node.labelTextColor = getLabelTextColor(node);
+      node.parentLabelTextColor = getParentLabelTextColor(node);
+      return node;
+    });
+  }, [nodes, getColor, nodeOpacity, getBorderColor, getLabelTextColor, getParentLabelTextColor, orientLabel]);
+  return {
+    hierarchy: hierarchy,
+    nodes: enhancedNodes,
+    layout: layout
   };
 };
+var useInteractiveTreeMapNodes = function useInteractiveTreeMapNodes(nodes, _ref4) {
+  var isInteractive = _ref4.isInteractive,
+      onMouseEnter = _ref4.onMouseEnter,
+      onMouseMove = _ref4.onMouseMove,
+      onMouseLeave = _ref4.onMouseLeave,
+      onClick = _ref4.onClick,
+      tooltip$1 = _ref4.tooltip;
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var showTooltip = React.useCallback(function (node, event) {
+    showTooltipFromEvent(React__default.createElement(TreeMapNodeTooltip$1, {
+      node: node,
+      tooltip: tooltip$1
+    }), event, 'left');
+  }, [showTooltipFromEvent, tooltip$1]);
+  var handleMouseEnter = React.useCallback(function (node, event) {
+    showTooltip(node, event);
+    onMouseEnter && onMouseEnter(node, event);
+  }, [onMouseEnter, showTooltip]);
+  var handleMouseMove = React.useCallback(function (node, event) {
+    showTooltip(node, event);
+    onMouseMove && onMouseMove(node, event);
+  }, [onMouseMove, showTooltip]);
+  var handleMouseLeave = React.useCallback(function (node, event) {
+    hideTooltip();
+    onMouseLeave && onMouseLeave(node, event);
+  }, [onMouseLeave, hideTooltip]);
+  var handleClick = React.useCallback(function (node, event) {
+    onClick && onClick(node, event);
+  }, [onClick]);
+  return React.useMemo(function () {
+    return nodes.map(function (node) {
+      if (!isInteractive) return node;
+      return _objectSpread2(_objectSpread2({}, node), {}, {
+        onMouseEnter: function onMouseEnter(event) {
+          return handleMouseEnter(node, event);
+        },
+        onMouseMove: function onMouseMove(event) {
+          return handleMouseMove(node, event);
+        },
+        onMouseLeave: function onMouseLeave(event) {
+          return handleMouseLeave(node, event);
+        },
+        onClick: function onClick(event) {
+          return handleClick(node, event);
+        }
+      });
+    });
+  }, [nodes, handleMouseEnter, handleMouseMove, handleMouseLeave, handleClick]);
+};
 
-function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$5(target, key, source[key]); }); } return target; }
-function _defineProperty$5(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-var TreeMap = function TreeMap(_ref) {
+var getAnimatedNodeProps = function getAnimatedNodeProps(node) {
+  return {
+    transform: "translate(".concat(node.x, ",").concat(node.y, ")"),
+    htmlTransform: "translate(".concat(node.x, "px,").concat(node.y, "px)"),
+    labelOpacity: 1,
+    labelTransform: "translate(".concat(node.width / 2, ",").concat(node.height / 2, ") rotate(").concat(node.labelRotation, ")"),
+    labelHtmlTransform: "translate(".concat(node.width / 2, "px,").concat(node.height / 2, "px) rotate(").concat(node.labelRotation, "deg)"),
+    parentLabelOpacity: 1,
+    parentLabelTransform: "translate(".concat(node.parentLabelX, ",").concat(node.parentLabelY, ") rotate(").concat(node.parentLabelRotation, ")"),
+    parentLabelHtmlTransform: "translate(".concat(node.parentLabelX - (node.parentLabelRotation === 0 ? 0 : 5), "px,").concat(node.parentLabelY - (node.parentLabelRotation === 0 ? 5 : 0), "px) rotate(").concat(node.parentLabelRotation, "deg)"),
+    width: node.width,
+    height: node.height,
+    color: node.color
+  };
+};
+var getEndingAnimatedNodeProps = function getEndingAnimatedNodeProps(node) {
+  var x = node.x + node.width / 2;
+  var y = node.y + node.height / 2;
+  return {
+    transform: "translate(".concat(x, ",").concat(y, ")"),
+    transformPixels: "translate(".concat(x, "px,").concat(y, "px)"),
+    labelOpacity: 0,
+    labelTransform: "translate(0,0) rotate(".concat(node.labelRotation, ")"),
+    parentLabelOpacity: 0,
+    parentLabelTransform: "translate(0,0) rotate(".concat(node.parentLabelRotation, ")"),
+    parentLabelHtmlTransform: "translate(0px,0px) rotate(".concat(node.parentLabelRotation, "deg)"),
+    width: 0,
+    height: 0,
+    color: node.color
+  };
+};
+var TreeMapNodes = function TreeMapNodes(_ref) {
   var nodes = _ref.nodes,
       nodeComponent = _ref.nodeComponent,
-      margin = _ref.margin,
-      outerWidth = _ref.outerWidth,
-      outerHeight = _ref.outerHeight,
-      theme = _ref.theme,
       borderWidth = _ref.borderWidth,
-      getBorderColor = _ref.getBorderColor,
-      defs = _ref.defs,
-      getLabelTextColor = _ref.getLabelTextColor,
-      orientLabel = _ref.orientLabel,
-      animate = _ref.animate,
-      motionStiffness = _ref.motionStiffness,
-      motionDamping = _ref.motionDamping,
+      enableLabel = _ref.enableLabel,
+      labelSkipSize = _ref.labelSkipSize,
+      enableParentLabel = _ref.enableParentLabel,
       isInteractive = _ref.isInteractive,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseMove = _ref.onMouseMove,
+      onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
-      tooltipFormat = _ref.tooltipFormat,
       tooltip = _ref.tooltip;
-  var springConfig = {
-    stiffness: motionStiffness,
-    damping: motionDamping
-  };
-  var getHandlers = function getHandlers(node, showTooltip, hideTooltip) {
-    return getNodeHandlers(node, {
-      isInteractive: isInteractive,
-      onClick: onClick,
-      showTooltip: showTooltip,
-      hideTooltip: hideTooltip,
-      theme: theme,
-      tooltipFormat: tooltipFormat,
-      tooltip: tooltip
-    });
-  };
-  return React__default.createElement(core.Container, {
+  var interactiveNodes = useInteractiveTreeMapNodes(nodes, {
     isInteractive: isInteractive,
-    theme: theme,
-    animate: animate,
-    motionDamping: motionDamping,
-    motionStiffness: motionStiffness
-  }, function (_ref2) {
-    var showTooltip = _ref2.showTooltip,
-        hideTooltip = _ref2.hideTooltip;
-    return React__default.createElement(core.SvgWrapper, {
-      width: outerWidth,
-      height: outerHeight,
-      margin: margin,
-      defs: defs,
-      theme: theme
-    }, !animate && React__default.createElement("g", null, nodes.map(function (node) {
-      return React__default.createElement(nodeComponent, {
-        key: node.path,
-        node: node,
-        style: {
-          fill: node.fill,
-          x: node.x0,
-          y: node.y0,
-          width: node.width,
-          height: node.height,
-          color: node.color,
-          borderWidth: borderWidth,
-          borderColor: getBorderColor(node),
-          labelTextColor: getLabelTextColor(node),
-          orientLabel: orientLabel
-        },
-        handlers: getHandlers(node, showTooltip, hideTooltip),
-        theme: theme
-      });
-    })), animate && React__default.createElement(reactMotion.TransitionMotion, {
-      willEnter: nodeWillEnter,
-      willLeave: nodeWillLeave(springConfig),
-      styles: nodes.map(function (node) {
-        return {
-          key: node.path,
-          data: node,
-          style: _objectSpread$5({
-            x: reactMotion.spring(node.x, springConfig),
-            y: reactMotion.spring(node.y, springConfig),
-            width: reactMotion.spring(node.width, springConfig),
-            height: reactMotion.spring(node.height, springConfig)
-          }, colors.interpolateColor(node.color, springConfig))
-        };
-      })
-    }, function (interpolatedStyles) {
-      return React__default.createElement("g", null, interpolatedStyles.map(function (_ref3) {
-        var style = _ref3.style,
-            node = _ref3.data;
-        style.color = colors.getInterpolatedColor(style);
-        return React__default.createElement(nodeComponent, {
-          key: node.path,
-          node: node,
-          style: _objectSpread$5({}, style, {
-            fill: node.fill,
-            borderWidth: borderWidth,
-            borderColor: getBorderColor(style),
-            labelTextColor: getLabelTextColor(style),
-            orientLabel: orientLabel
-          }),
-          handlers: getHandlers(node, showTooltip, hideTooltip),
-          theme: theme
-        });
-      }));
-    }));
+    onMouseEnter: onMouseEnter,
+    onMouseMove: onMouseMove,
+    onMouseLeave: onMouseLeave,
+    onClick: onClick,
+    tooltip: tooltip
+  });
+  var _useMotionConfig = core.useMotionConfig(),
+      animate = _useMotionConfig.animate,
+      springConfig = _useMotionConfig.config;
+  var transition = reactSpring.useTransition(interactiveNodes, {
+    key: function key(node) {
+      return node.path;
+    },
+    initial: function initial(node) {
+      return getAnimatedNodeProps(node);
+    },
+    from: function from(node) {
+      return getEndingAnimatedNodeProps(node);
+    },
+    enter: function enter(node) {
+      return getAnimatedNodeProps(node);
+    },
+    update: function update(node) {
+      return getAnimatedNodeProps(node);
+    },
+    leave: function leave(node) {
+      return getEndingAnimatedNodeProps(node);
+    },
+    config: springConfig,
+    immediate: !animate
+  });
+  return transition(function (animatedProps, node) {
+    return React__default.createElement(nodeComponent, {
+      key: node.path,
+      node: node,
+      animatedProps: animatedProps,
+      borderWidth: borderWidth,
+      enableLabel: enableLabel,
+      labelSkipSize: labelSkipSize,
+      enableParentLabel: enableParentLabel
+    });
   });
 };
-TreeMap.propTypes = TreeMapPropTypes;
-TreeMap.displayName = 'TreeMap';
-var enhancedTreeMap = enhance(TreeMap);
-enhancedTreeMap.displayName = 'TreeMap';
+var TreeMapNodes$1 = React.memo(TreeMapNodes);
 
-function _extends$2() { _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
+var TreeMap = function TreeMap(_ref) {
+  var data = _ref.data,
+      identity = _ref.identity,
+      value = _ref.value,
+      tile = _ref.tile,
+      nodeComponent = _ref.nodeComponent,
+      valueFormat = _ref.valueFormat,
+      innerPadding = _ref.innerPadding,
+      outerPadding = _ref.outerPadding,
+      leavesOnly = _ref.leavesOnly,
+      width = _ref.width,
+      height = _ref.height,
+      partialMargin = _ref.margin,
+      colors = _ref.colors,
+      colorBy = _ref.colorBy,
+      nodeOpacity = _ref.nodeOpacity,
+      borderWidth = _ref.borderWidth,
+      borderColor = _ref.borderColor,
+      defs = _ref.defs,
+      fill = _ref.fill,
+      enableLabel = _ref.enableLabel,
+      label = _ref.label,
+      labelTextColor = _ref.labelTextColor,
+      orientLabel = _ref.orientLabel,
+      labelSkipSize = _ref.labelSkipSize,
+      enableParentLabel = _ref.enableParentLabel,
+      parentLabel = _ref.parentLabel,
+      parentLabelSize = _ref.parentLabelSize,
+      parentLabelPosition = _ref.parentLabelPosition,
+      parentLabelPadding = _ref.parentLabelPadding,
+      parentLabelTextColor = _ref.parentLabelTextColor,
+      isInteractive = _ref.isInteractive,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseMove = _ref.onMouseMove,
+      onMouseLeave = _ref.onMouseLeave,
+      onClick = _ref.onClick,
+      tooltip = _ref.tooltip,
+      role = _ref.role;
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useTreeMap = useTreeMap({
+    data: data,
+    identity: identity,
+    value: value,
+    valueFormat: valueFormat,
+    leavesOnly: leavesOnly,
+    width: innerWidth,
+    height: innerHeight,
+    tile: tile,
+    innerPadding: innerPadding,
+    outerPadding: outerPadding,
+    colors: colors,
+    colorBy: colorBy,
+    nodeOpacity: nodeOpacity,
+    borderColor: borderColor,
+    label: label,
+    labelTextColor: labelTextColor,
+    orientLabel: orientLabel,
+    enableParentLabel: enableParentLabel,
+    parentLabel: parentLabel,
+    parentLabelSize: parentLabelSize,
+    parentLabelPosition: parentLabelPosition,
+    parentLabelPadding: parentLabelPadding,
+    parentLabelTextColor: parentLabelTextColor
+  }),
+      nodes = _useTreeMap.nodes;
+  var boundDefs = core.bindDefs(defs, nodes, fill);
+  return React__default.createElement(core.SvgWrapper, {
+    width: outerWidth,
+    height: outerHeight,
+    margin: margin,
+    defs: boundDefs,
+    role: role
+  }, React__default.createElement(TreeMapNodes$1, {
+    nodes: nodes,
+    nodeComponent: nodeComponent,
+    borderWidth: borderWidth,
+    enableLabel: enableLabel,
+    labelSkipSize: labelSkipSize,
+    enableParentLabel: enableParentLabel,
+    isInteractive: isInteractive,
+    onMouseEnter: onMouseEnter,
+    onMouseMove: onMouseMove,
+    onMouseLeave: onMouseLeave,
+    onClick: onClick,
+    tooltip: tooltip
+  }));
+};
+var WrappedTreeMap = core.withContainer(TreeMap);
+WrappedTreeMap.defaultProps = TreeMapDefaultProps;
+
 var ResponsiveTreeMap = function ResponsiveTreeMap(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedTreeMap, _extends$2({
+    return React__default.createElement(WrappedTreeMap, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(Object(source)); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty$6(target, key, source[key]); }); } return target; }
-function _defineProperty$6(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var TreeMapHtml = function TreeMapHtml(_ref) {
-  var nodes = _ref.nodes,
+  var data = _ref.data,
+      identity = _ref.identity,
+      value = _ref.value,
+      tile = _ref.tile,
       nodeComponent = _ref.nodeComponent,
-      margin = _ref.margin,
-      outerWidth = _ref.outerWidth,
-      outerHeight = _ref.outerHeight,
-      theme = _ref.theme,
+      valueFormat = _ref.valueFormat,
+      innerPadding = _ref.innerPadding,
+      outerPadding = _ref.outerPadding,
+      leavesOnly = _ref.leavesOnly,
+      width = _ref.width,
+      height = _ref.height,
+      partialMargin = _ref.margin,
+      colors = _ref.colors,
+      colorBy = _ref.colorBy,
+      nodeOpacity = _ref.nodeOpacity,
       borderWidth = _ref.borderWidth,
-      getBorderColor = _ref.getBorderColor,
-      getLabelTextColor = _ref.getLabelTextColor,
+      borderColor = _ref.borderColor,
+      enableLabel = _ref.enableLabel,
+      label = _ref.label,
+      labelTextColor = _ref.labelTextColor,
       orientLabel = _ref.orientLabel,
-      animate = _ref.animate,
-      motionStiffness = _ref.motionStiffness,
-      motionDamping = _ref.motionDamping,
+      labelSkipSize = _ref.labelSkipSize,
+      enableParentLabel = _ref.enableParentLabel,
+      parentLabel = _ref.parentLabel,
+      parentLabelSize = _ref.parentLabelSize,
+      parentLabelPosition = _ref.parentLabelPosition,
+      parentLabelPadding = _ref.parentLabelPadding,
+      parentLabelTextColor = _ref.parentLabelTextColor,
       isInteractive = _ref.isInteractive,
+      onMouseEnter = _ref.onMouseEnter,
+      onMouseMove = _ref.onMouseMove,
+      onMouseLeave = _ref.onMouseLeave,
       onClick = _ref.onClick,
-      tooltipFormat = _ref.tooltipFormat,
       tooltip = _ref.tooltip;
-  var springConfig = {
-    stiffness: motionStiffness,
-    damping: motionDamping
-  };
-  var getHandlers = function getHandlers(node, showTooltip, hideTooltip) {
-    return getNodeHandlers(node, {
-      isInteractive: isInteractive,
-      onClick: onClick,
-      showTooltip: showTooltip,
-      hideTooltip: hideTooltip,
-      theme: theme,
-      tooltipFormat: tooltipFormat,
-      tooltip: tooltip
-    });
-  };
-  return React__default.createElement(core.Container, {
-    theme: theme,
-    animate: animate,
-    motionDamping: motionDamping,
-    motionStiffness: motionStiffness
-  }, function (_ref2) {
-    var showTooltip = _ref2.showTooltip,
-        hideTooltip = _ref2.hideTooltip;
-    return React__default.createElement("div", {
-      style: {
-        position: 'relative',
-        width: outerWidth,
-        height: outerHeight
-      }
-    }, !animate && React__default.createElement("div", {
-      style: {
-        position: 'absolute',
-        top: margin.top,
-        left: margin.left
-      }
-    }, nodes.map(function (node) {
-      return React__default.createElement(nodeComponent, {
-        key: node.path,
-        node: node,
-        style: {
-          x: node.x,
-          y: node.y,
-          width: node.width,
-          height: node.height,
-          color: node.color,
-          borderWidth: borderWidth,
-          borderColor: getBorderColor(node),
-          labelTextColor: getLabelTextColor(node),
-          orientLabel: orientLabel
-        },
-        handlers: getHandlers(node, showTooltip, hideTooltip)
-      });
-    })), animate && React__default.createElement(reactMotion.TransitionMotion, {
-      willEnter: nodeWillEnter,
-      willLeave: nodeWillLeave(springConfig),
-      styles: nodes.map(function (node) {
-        return {
-          key: node.path,
-          data: node,
-          style: _objectSpread$6({
-            x: reactMotion.spring(node.x, springConfig),
-            y: reactMotion.spring(node.y, springConfig),
-            width: reactMotion.spring(node.width, springConfig),
-            height: reactMotion.spring(node.height, springConfig)
-          }, colors.interpolateColor(node.color, springConfig))
-        };
-      })
-    }, function (interpolatedStyles) {
-      return React__default.createElement("div", {
-        style: {
-          position: 'absolute',
-          top: margin.top,
-          left: margin.left
-        }
-      }, interpolatedStyles.map(function (_ref3) {
-        var style = _ref3.style,
-            node = _ref3.data;
-        style.color = colors.getInterpolatedColor(style);
-        return React__default.createElement(nodeComponent, {
-          key: node.path,
-          node: node,
-          style: _objectSpread$6({}, style, {
-            fill: node.fill,
-            borderWidth: borderWidth,
-            borderColor: getBorderColor(style),
-            labelTextColor: getLabelTextColor(style),
-            orientLabel: orientLabel
-          }),
-          handlers: getHandlers(node, showTooltip, hideTooltip)
-        });
-      }));
-    }));
-  });
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useTreeMap = useTreeMap({
+    data: data,
+    identity: identity,
+    value: value,
+    valueFormat: valueFormat,
+    leavesOnly: leavesOnly,
+    width: innerWidth,
+    height: innerHeight,
+    tile: tile,
+    innerPadding: innerPadding,
+    outerPadding: outerPadding,
+    colors: colors,
+    colorBy: colorBy,
+    nodeOpacity: nodeOpacity,
+    borderColor: borderColor,
+    label: label,
+    labelTextColor: labelTextColor,
+    orientLabel: orientLabel,
+    enableParentLabel: enableParentLabel,
+    parentLabel: parentLabel,
+    parentLabelSize: parentLabelSize,
+    parentLabelPosition: parentLabelPosition,
+    parentLabelPadding: parentLabelPadding,
+    parentLabelTextColor: parentLabelTextColor
+  }),
+      nodes = _useTreeMap.nodes;
+  return React__default.createElement("div", {
+    style: {
+      position: 'relative',
+      width: outerWidth,
+      height: outerHeight
+    }
+  }, React__default.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: margin.top,
+      left: margin.left
+    }
+  }, React__default.createElement(TreeMapNodes$1, {
+    nodes: nodes,
+    nodeComponent: nodeComponent,
+    borderWidth: borderWidth,
+    enableLabel: enableLabel,
+    labelSkipSize: labelSkipSize,
+    enableParentLabel: enableParentLabel,
+    isInteractive: isInteractive,
+    onMouseEnter: onMouseEnter,
+    onMouseMove: onMouseMove,
+    onMouseLeave: onMouseLeave,
+    onClick: onClick,
+    tooltip: tooltip
+  })));
 };
-TreeMapHtml.propTypes = TreeMapHtmlPropTypes;
-TreeMapHtml.displayName = 'TreeMapHtml';
-var enhancedTreeMapHtml = enhance(TreeMapHtml);
-enhancedTreeMapHtml.displayName = 'TreeMapHtml';
+var WrappedTreeMapHtml = core.withContainer(TreeMapHtml);
+WrappedTreeMapHtml.defaultProps = TreeMapHtmlDefaultProps;
 
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
 var ResponsiveTreeMapHtml = function ResponsiveTreeMapHtml(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedTreeMapHtml, _extends$3({
+    return React__default.createElement(WrappedTreeMapHtml, Object.assign({
       width: width,
       height: height
     }, props));
   });
 };
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _defineProperty$7(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 var findNodeUnderCursor = function findNodeUnderCursor(nodes, margin, x, y) {
   return nodes.find(function (node) {
     return core.isCursorInRect(node.x + margin.left, node.y + margin.top, node.width, node.height, x, y);
   });
 };
-var TreeMapCanvas =
-function (_Component) {
-  _inherits(TreeMapCanvas, _Component);
-  function TreeMapCanvas() {
-    var _getPrototypeOf2;
-    var _this;
-    _classCallCheck(this, TreeMapCanvas);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(TreeMapCanvas)).call.apply(_getPrototypeOf2, [this].concat(args)));
-    _defineProperty$7(_assertThisInitialized(_this), "handleMouseHover", function (showTooltip, hideTooltip) {
-      return function (event) {
-        var _this$props = _this.props,
-            isInteractive = _this$props.isInteractive,
-            nodes = _this$props.nodes,
-            margin = _this$props.margin,
-            theme = _this$props.theme;
-        if (!isInteractive) return;
-        var _getRelativeCursor = core.getRelativeCursor(_this.surface, event),
-            _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
-            x = _getRelativeCursor2[0],
-            y = _getRelativeCursor2[1];
-        var node = findNodeUnderCursor(nodes, margin, x, y);
-        if (node !== undefined) {
-          showTooltip(React__default.createElement(TreeMapNodeTooltip$1, {
-            node: node,
-            theme: theme
-          }), event);
-        } else {
-          hideTooltip();
-        }
-      };
-    });
-    _defineProperty$7(_assertThisInitialized(_this), "handleMouseLeave", function (hideTooltip) {
-      return function () {
-        hideTooltip();
-      };
-    });
-    _defineProperty$7(_assertThisInitialized(_this), "handleClick", function (event) {
-      var _this$props2 = _this.props,
-          isInteractive = _this$props2.isInteractive,
-          nodes = _this$props2.nodes,
-          margin = _this$props2.margin,
-          onClick = _this$props2.onClick;
-      if (!isInteractive) return;
-      var _getRelativeCursor3 = core.getRelativeCursor(_this.surface, event),
-          _getRelativeCursor4 = _slicedToArray(_getRelativeCursor3, 2),
-          x = _getRelativeCursor4[0],
-          y = _getRelativeCursor4[1];
-      var node = findNodeUnderCursor(nodes, margin, x, y);
-      if (node !== undefined) onClick(node, event);
-    });
-    return _this;
-  }
-  _createClass(TreeMapCanvas, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      this.ctx = this.surface.getContext('2d');
-      this.draw(this.props);
-    }
-  }, {
-    key: "draw",
-    value: function draw(props) {
-      var _this2 = this;
-      var nodes = props.nodes,
-          pixelRatio = props.pixelRatio,
-          margin = props.margin,
-          outerWidth = props.outerWidth,
-          outerHeight = props.outerHeight,
-          borderWidth = props.borderWidth,
-          getBorderColor = props.getBorderColor,
-          enableLabel = props.enableLabel,
-          getLabelTextColor = props.getLabelTextColor,
-          orientLabel = props.orientLabel,
-          theme = props.theme;
-      this.surface.width = outerWidth * pixelRatio;
-      this.surface.height = outerHeight * pixelRatio;
-      this.ctx.scale(pixelRatio, pixelRatio);
-      this.ctx.fillStyle = theme.background;
-      this.ctx.fillRect(0, 0, outerWidth, outerHeight);
-      this.ctx.translate(margin.left, margin.top);
-      nodes.forEach(function (node) {
-        _this2.ctx.fillStyle = node.color;
-        _this2.ctx.fillRect(node.x, node.y, node.width, node.height);
-        if (borderWidth > 0) {
-          _this2.ctx.strokeStyle = getBorderColor(node);
-          _this2.ctx.lineWidth = borderWidth;
-          _this2.ctx.strokeRect(node.x, node.y, node.width, node.height);
-        }
-      });
-      if (enableLabel) {
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.font = "".concat(theme.labels.text.fontSize, "px ").concat(theme.labels.text.fontFamily);
-        nodes.filter(function (_ref) {
-          var label = _ref.label;
-          return label !== undefined;
-        }).forEach(function (node) {
-          var labelTextColor = getLabelTextColor(node);
-          var rotate = orientLabel && node.height > node.width;
-          _this2.ctx.save();
-          _this2.ctx.translate(node.x + node.width / 2, node.y + node.height / 2);
-          _this2.ctx.rotate(core.degreesToRadians(rotate ? -90 : 0));
-          _this2.ctx.fillStyle = labelTextColor;
-          _this2.ctx.fillText(node.label, 0, 0);
-          _this2.ctx.restore();
-        });
+var TreeMapCanvas = function TreeMapCanvas(_ref) {
+  var data = _ref.data,
+      identity = _ref.identity,
+      value = _ref.value,
+      tile = _ref.tile,
+      valueFormat = _ref.valueFormat,
+      innerPadding = _ref.innerPadding,
+      outerPadding = _ref.outerPadding,
+      leavesOnly = _ref.leavesOnly,
+      width = _ref.width,
+      height = _ref.height,
+      partialMargin = _ref.margin,
+      colors = _ref.colors,
+      colorBy = _ref.colorBy,
+      nodeOpacity = _ref.nodeOpacity,
+      borderWidth = _ref.borderWidth,
+      borderColor = _ref.borderColor,
+      enableLabel = _ref.enableLabel,
+      label = _ref.label,
+      labelTextColor = _ref.labelTextColor,
+      orientLabel = _ref.orientLabel,
+      labelSkipSize = _ref.labelSkipSize,
+      isInteractive = _ref.isInteractive,
+      onMouseMove = _ref.onMouseMove,
+      onClick = _ref.onClick,
+      tooltip$1 = _ref.tooltip,
+      pixelRatio = _ref.pixelRatio;
+  var canvasEl = React.useRef(null);
+  var _useDimensions = core.useDimensions(width, height, partialMargin),
+      margin = _useDimensions.margin,
+      innerWidth = _useDimensions.innerWidth,
+      innerHeight = _useDimensions.innerHeight,
+      outerWidth = _useDimensions.outerWidth,
+      outerHeight = _useDimensions.outerHeight;
+  var _useTreeMap = useTreeMap({
+    data: data,
+    identity: identity,
+    value: value,
+    valueFormat: valueFormat,
+    leavesOnly: leavesOnly,
+    width: innerWidth,
+    height: innerHeight,
+    tile: tile,
+    innerPadding: innerPadding,
+    outerPadding: outerPadding,
+    colors: colors,
+    colorBy: colorBy,
+    nodeOpacity: nodeOpacity,
+    borderColor: borderColor,
+    label: label,
+    labelTextColor: labelTextColor,
+    orientLabel: orientLabel,
+    enableParentLabel: false
+  }),
+      nodes = _useTreeMap.nodes;
+  var theme = core.useTheme();
+  React.useEffect(function () {
+    canvasEl.current.width = outerWidth * pixelRatio;
+    canvasEl.current.height = outerHeight * pixelRatio;
+    var ctx = canvasEl.current.getContext('2d');
+    ctx.scale(pixelRatio, pixelRatio);
+    ctx.fillStyle = theme.background;
+    ctx.fillRect(0, 0, outerWidth, outerHeight);
+    ctx.translate(margin.left, margin.top);
+    nodes.forEach(function (node) {
+      ctx.fillStyle = node.color;
+      ctx.fillRect(node.x, node.y, node.width, node.height);
+      if (borderWidth > 0) {
+        ctx.strokeStyle = node.borderColor;
+        ctx.lineWidth = borderWidth;
+        ctx.strokeRect(node.x, node.y, node.width, node.height);
       }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this3 = this;
-      var _this$props3 = this.props,
-          outerWidth = _this$props3.outerWidth,
-          outerHeight = _this$props3.outerHeight,
-          pixelRatio = _this$props3.pixelRatio,
-          isInteractive = _this$props3.isInteractive,
-          theme = _this$props3.theme;
-      return React__default.createElement(core.Container, {
-        isInteractive: isInteractive,
-        theme: theme,
-        animate: false
-      }, function (_ref2) {
-        var showTooltip = _ref2.showTooltip,
-            hideTooltip = _ref2.hideTooltip;
-        return React__default.createElement("canvas", {
-          ref: function ref(surface) {
-            _this3.surface = surface;
-          },
-          width: outerWidth * pixelRatio,
-          height: outerHeight * pixelRatio,
-          style: {
-            width: outerWidth,
-            height: outerHeight
-          },
-          onMouseEnter: _this3.handleMouseHover(showTooltip, hideTooltip),
-          onMouseMove: _this3.handleMouseHover(showTooltip, hideTooltip),
-          onMouseLeave: _this3.handleMouseLeave(hideTooltip),
-          onClick: _this3.handleClick
-        });
+    });
+    if (enableLabel) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = "".concat(theme.labels.text.fontSize, "px ").concat(theme.labels.text.fontFamily);
+      nodes.forEach(function (node) {
+        var showLabel = node.isLeaf && (labelSkipSize === 0 || Math.min(node.width, node.height) > labelSkipSize);
+        if (!showLabel) return;
+        var rotate = orientLabel && node.height > node.width;
+        ctx.save();
+        ctx.translate(node.x + node.width / 2, node.y + node.height / 2);
+        ctx.rotate(core.degreesToRadians(rotate ? -90 : 0));
+        ctx.fillStyle = node.labelTextColor;
+        ctx.fillText(node.label, 0, 0);
+        ctx.restore();
       });
     }
-  }]);
-  return TreeMapCanvas;
-}(React.Component);
-TreeMapCanvas.propTypes = TreeMapCanvasPropTypes;
-TreeMapCanvas.displayName = 'TreeMapCanvas';
-var enhancedTreeMapCanvas = enhance(TreeMapCanvas);
-enhancedTreeMapCanvas.displayName = 'TreeMapCanvas';
+  }, [canvasEl, nodes, outerWidth, outerHeight, innerWidth, innerHeight, margin, borderWidth, enableLabel, orientLabel, labelSkipSize, theme, pixelRatio]);
+  var _useTooltip = tooltip.useTooltip(),
+      showTooltipFromEvent = _useTooltip.showTooltipFromEvent,
+      hideTooltip = _useTooltip.hideTooltip;
+  var handleMouseHover = React.useCallback(function (event) {
+    var _getRelativeCursor = core.getRelativeCursor(canvasEl.current, event),
+        _getRelativeCursor2 = _slicedToArray(_getRelativeCursor, 2),
+        x = _getRelativeCursor2[0],
+        y = _getRelativeCursor2[1];
+    var node = findNodeUnderCursor(nodes, margin, x, y);
+    if (node !== undefined) {
+      showTooltipFromEvent(React__default.createElement(TreeMapNodeTooltip$1, {
+        node: node,
+        tooltip: tooltip$1
+      }), event, 'left');
+      onMouseMove && onMouseMove(node, event);
+    } else {
+      hideTooltip();
+    }
+  }, [canvasEl, nodes, margin, showTooltipFromEvent, hideTooltip, tooltip$1, onMouseMove]);
+  var handleMouseLeave = React.useCallback(function () {
+    hideTooltip();
+  }, [hideTooltip]);
+  var handleClick = React.useCallback(function (event) {
+    var _getRelativeCursor3 = core.getRelativeCursor(canvasEl.current, event),
+        _getRelativeCursor4 = _slicedToArray(_getRelativeCursor3, 2),
+        x = _getRelativeCursor4[0],
+        y = _getRelativeCursor4[1];
+    var node = findNodeUnderCursor(nodes, margin, x, y);
+    if (node === undefined) return;
+    onClick && onClick(node, event);
+  }, [canvasEl, nodes, margin, onClick]);
+  return React__default.createElement("canvas", {
+    ref: canvasEl,
+    width: outerWidth * pixelRatio,
+    height: outerHeight * pixelRatio,
+    style: {
+      width: outerWidth,
+      height: outerHeight
+    },
+    onMouseEnter: isInteractive ? handleMouseHover : undefined,
+    onMouseMove: isInteractive ? handleMouseHover : undefined,
+    onMouseLeave: isInteractive ? handleMouseLeave : undefined,
+    onClick: isInteractive ? handleClick : undefined
+  });
+};
+var WrappedTreeMapCanvas = core.withContainer(TreeMapCanvas);
+WrappedTreeMapCanvas.defaultProps = TreeMapCanvasDefaultProps;
 
-function _extends$4() { _extends$4 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$4.apply(this, arguments); }
 var ResponsiveTreeMapCanvas = function ResponsiveTreeMapCanvas(props) {
   return React__default.createElement(core.ResponsiveWrapper, null, function (_ref) {
     var width = _ref.width,
         height = _ref.height;
-    return React__default.createElement(enhancedTreeMapCanvas, _extends$4({
+    return React__default.createElement(WrappedTreeMapCanvas, Object.assign({
       width: width,
       height: height
     }, props));
@@ -828,12 +1035,13 @@ var ResponsiveTreeMapCanvas = function ResponsiveTreeMapCanvas(props) {
 exports.ResponsiveTreeMap = ResponsiveTreeMap;
 exports.ResponsiveTreeMapCanvas = ResponsiveTreeMapCanvas;
 exports.ResponsiveTreeMapHtml = ResponsiveTreeMapHtml;
-exports.TreeMap = enhancedTreeMap;
-exports.TreeMapCanvas = enhancedTreeMapCanvas;
+exports.TreeMap = WrappedTreeMap;
+exports.TreeMapCanvas = WrappedTreeMapCanvas;
 exports.TreeMapCanvasDefaultProps = TreeMapCanvasDefaultProps;
 exports.TreeMapCanvasPropTypes = TreeMapCanvasPropTypes;
 exports.TreeMapDefaultProps = TreeMapDefaultProps;
-exports.TreeMapHtml = enhancedTreeMapHtml;
+exports.TreeMapHtml = WrappedTreeMapHtml;
 exports.TreeMapHtmlDefaultProps = TreeMapHtmlDefaultProps;
 exports.TreeMapHtmlPropTypes = TreeMapHtmlPropTypes;
 exports.TreeMapPropTypes = TreeMapPropTypes;
+//# sourceMappingURL=nivo-treemap.cjs.js.map
